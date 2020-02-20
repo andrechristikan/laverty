@@ -26,7 +26,7 @@
         <main.verticle>com.sama.carrental.MainVerticle</main.verticle>
     </properties>
     
-    <name>car.rental.new</name>
+    <name>car.rental</name>
     
     <dependencyManagement>
         <dependencies>
@@ -45,71 +45,58 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-proxy</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-contract</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-service</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-unit</artifactId>
-            <version>${vertx.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
             <classifier>processor</classifier>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-config</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-discovery</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <!-- DB/Reactive -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-pg-client</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <!-- Auth/Jwt -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-common</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-jwt</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <!-- Logging -->
         <dependency>
