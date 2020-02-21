@@ -1,0 +1,8 @@
+{
+    "main-verticle":{
+        "start": "[MainVerticle] start...",
+        "success":"[MainVertivle-Succeeded] successfuly running.",
+        "fail":"[MainVertivle-Failed] : ",
+        "otherwise":"[MainVertivle-Oterwise] : "
+    }
+}
