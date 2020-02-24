@@ -6,6 +6,7 @@
         "otherwise":"[MainVertivle-Oterwise] : "
     },
     "server":{
-        "ongoing":"Web server started on #IP_ADDRESS:#PORT"
+        "start":"[Server] Server trying to start..",
+        "ongoing":"[Server-Onging] Web server started on #IP_ADDRESS:#PORT"
     }
 }

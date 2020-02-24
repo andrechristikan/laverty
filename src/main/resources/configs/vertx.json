@@ -1,8 +1,52 @@
 {
     "core-dir": ".",
     "language":"en",
-    "http-server": {
-        "port": "8181",
-        "address": "localhost"
+    "environment":"local",
+    "local":{
+        "http-server": {
+            "port": "8181",
+            "address": "localhost"
+        },
+        "upload-files":{
+            "default":"files-uploaded",
+            "delete-on-end":"true",
+            "images":{
+                "default":"files-uploaded/defaults/general.jpg",
+                "vehicle":"vehicles",
+                "workshop":"workshops",
+                "user-customer":"users-customer",
+                "driver":"drivers",
+                "invoice":"invoices",
+                "service-detail":"service-details"
+            },
+            "files":{
+                "contract":""
+            }
+        }
+    },
+    "production":{
+        
+    },
+    "cors":{
+        "allow-origin":"*",
+        "header":[
+            "Content-Type",
+            "X-Token",
+            "X-User",
+            "Authorization"
+        ],
+        "method":[
+            "GET", 
+            "POST", 
+            "PUT", 
+            "DELETE"
+        ]
+    },
+    "response":{
+        "Access-Control-Allow-Origin":"*",
+        "Access-Control-Allow-Methods":"GET, POST, PUT, DELETE, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers":"Origin, Accept, Authorization, Content-Type, X-Token, X-User",
+        "Cache-Control":"no-cache",
+        "Content-Type":"application/json"
     }
 }

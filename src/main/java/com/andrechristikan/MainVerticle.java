@@ -46,9 +46,10 @@ public class MainVerticle extends AbstractVerticle{
                 JsonObject systemMessage = this.systemMessages.getJsonObject("main-verticle");
                 this.logger.info(systemMessage.getString("start"));
                 
+                // DEPLOY VERTICLE
                 start.future().compose(st -> {
                      
-                    //------------- Server
+                    // -- SERVER
                     Promise <String> promise = Promise.promise();
                     this.vertx.deployVerticle(
                         new Server(), 

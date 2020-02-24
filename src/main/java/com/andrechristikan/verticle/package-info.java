@@ -1,4 +1,4 @@
 @ModuleGen(name = "com-andrechristikan", groupPackage = "com.andrechristikan")
-package com.andrechristikan.persistance;
+package com.andrechristikan.verticle;
 
 import io.vertx.codegen.annotations.ModuleGen;
