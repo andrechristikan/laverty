@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sama.carrental;
+package com.andrechristikan;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;

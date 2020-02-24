@@ -5,7 +5,7 @@
     
     <modelVersion>4.0.0</modelVersion>
     
-    <groupId>com.sama</groupId>
+    <groupId>com.andrechristikan</groupId>
     <artifactId>car.rental</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -20,12 +20,12 @@
         <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         
-        <vertx.version>3.8.0</vertx.version>
+        <vertx.version>3.8.5</vertx.version>
         <junit-jupiter.version>5.1.0</junit-jupiter.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <log.version>1.2.3</log.version>
         
-        <main.verticle>com.sama.carrental.MainVerticle</main.verticle>
+        <main.verticle>com.andrechristikan.MainVerticle</main.verticle>
     </properties>
     
     <name>car.rental</name>
@@ -53,14 +53,14 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-proxy</artifactId>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-contract</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-service</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
@@ -87,7 +87,6 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-discovery</artifactId>
         </dependency>
-        
         
         <!-- DB/Reactive -->
         <dependency>
@@ -188,7 +187,7 @@
         
         <plugins>
             
-            <plugin>
+<!--            <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>
                 <executions>
@@ -215,7 +214,7 @@
                         <phase>package</phase>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

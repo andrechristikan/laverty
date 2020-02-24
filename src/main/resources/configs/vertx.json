@@ -1,0 +1,8 @@
+{
+    "core-dir": ".",
+    "language":"en",
+    "http-server": {
+        "port": "8181",
+        "address": "localhost"
+    }
+}

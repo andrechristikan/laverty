@@ -4,5 +4,8 @@
         "success":"[MainVertivle-Succeeded] successfuly running.",
         "fail":"[MainVertivle-Failed] : ",
         "otherwise":"[MainVertivle-Oterwise] : "
+    },
+    "server":{
+        "ongoing":"Web server started on #IP_ADDRESS:#PORT"
     }
 }
