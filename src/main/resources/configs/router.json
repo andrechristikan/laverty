@@ -1,1 +1,30 @@
-{}
+[
+    {
+        "api/v1/":[
+            {
+                "method":"post",
+                "param":[
+                    "id"
+                ],
+                "url":"login",
+                "accessable":"super_admin",
+                "controller":"LoginController@login",
+                "catch":"LoginExecption"
+            }
+        ]
+    },
+    {
+        "api/v2":[
+            {
+                "method":"post",
+                "param":[
+                    "id"
+                ],
+                "url":"login",
+                "accessable":"super_admin",
+                "controller":"LoginController@login",
+                "catch":"LoginExecption"
+            }
+        ]
+    }
+]

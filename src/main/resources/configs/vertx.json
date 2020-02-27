@@ -8,25 +8,53 @@
             "address": "localhost"
         },
         "upload-files":{
-            "default":"files-uploaded",
             "delete-on-end":"true",
-            "images":{
-                "default":"files-uploaded/defaults/general.jpg",
-                "vehicle":"vehicles",
-                "workshop":"workshops",
-                "user-customer":"users-customer",
-                "driver":"drivers",
-                "invoice":"invoices",
-                "service-detail":"service-details"
-            },
-            "files":{
-                "contract":""
+            "folder":{
+                "default":"files-uploaded",
+                "images":{
+                    "default":"files-uploaded/defaults/general.jpg",
+                    "vehicle":"vehicles",
+                    "workshop":"workshops",
+                    "user-customer":"users-customer",
+                    "driver":"drivers",
+                    "invoice":"invoices",
+                    "service-detail":"service-details"
+                },
+                "pdf":{
+                    "contract":""
+                }
             }
         }
     },
     "production":{
+        "http-server": {
+            "port": "8181",
+            "address": "0.0.0.0"
+        },
         
+        "upload-files":{
+            "delete-on-end":"true",
+            "folder":{
+                "default":"files-uploaded",
+                "images":{
+                    "default":"files-uploaded/defaults/general.jpg",
+                    "vehicle":"vehicles",
+                    "workshop":"workshops",
+                    "user-customer":"users-customer",
+                    "driver":"drivers",
+                    "invoice":"invoices",
+                    "service-detail":"service-details"
+                },
+                "pdf":{
+                    "contract":""
+                }
+            }
+        }
     },
+    "role":[
+        "admin",
+        "super_admin"
+    ],
     "cors":{
         "allow-origin":"*",
         "header":[
@@ -39,7 +67,13 @@
             "GET", 
             "POST", 
             "PUT", 
-            "DELETE"
+            "DELETE",
+            "CONNECT",
+            "HEAD",
+            "OPTIONS",
+            "OTHER",
+            "PATCH",
+            "TRACE"
         ]
     },
     "response":{

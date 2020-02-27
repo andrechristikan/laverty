@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.andrechristikan</groupId>
-    <artifactId>car.rental</artifactId>
+    <artifactId>com.andrechristikan</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     
@@ -28,7 +28,7 @@
         <main.verticle>com.andrechristikan.MainVerticle</main.verticle>
     </properties>
     
-    <name>car.rental</name>
+    <name>com.andrechristikan</name>
     
     <dependencyManagement>
         <dependencies>

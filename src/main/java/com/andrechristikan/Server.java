@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Server extends AbstractVerticle {
     
-    final Logger logger;
+    Logger logger;
     HttpServer server;
     JsonObject systemMessages;
     JsonObject responseMessages;
@@ -61,7 +61,7 @@ public class Server extends AbstractVerticle {
         
         
         // -- START
-        this.logger.info(this.systemMessages.getJsonObject("server").getString("start"));
+        this.logger.info(systemMessage.getString("start"));
         
         // Create Security
         Router router = Router.router(this.vertx);
@@ -100,6 +100,26 @@ public class Server extends AbstractVerticle {
                 
                 if(action.toString().toUpperCase().equals("HEAD")){
                     cors.allowedMethod(HttpMethod.HEAD);
+                }
+                
+                if(action.toString().toUpperCase().equals("CONNECT")){
+                    cors.allowedMethod(HttpMethod.CONNECT);
+                }
+                
+                if(action.toString().toUpperCase().equals("HEAD")){
+                    cors.allowedMethod(HttpMethod.HEAD);
+                }
+                
+                if(action.toString().toUpperCase().equals("OPTIONS")){
+                    cors.allowedMethod(HttpMethod.OPTIONS);
+                }
+                
+                if(action.toString().toUpperCase().equals("OTHER")){
+                    cors.allowedMethod(HttpMethod.OTHER);
+                }
+                
+                if(action.toString().toUpperCase().equals("PATCH")){
+                    cors.allowedMethod(HttpMethod.PATCH);
                 }
             });
         }
