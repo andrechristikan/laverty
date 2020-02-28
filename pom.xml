@@ -148,7 +148,14 @@
     </dependencies>
     
     <build>
-        
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>target/generated-sources</directory>
+            </resource>
+        </resources>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -162,7 +169,7 @@
                         <annotationProcessors>
                             <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
                         </annotationProcessors>
-                        <generatedSourcesDirectory>${project.basedir}/generated</generatedSourcesDirectory>
+                        <!--<generatedSourcesDirectory>${project.basedir}/generated-sources</generatedSourcesDirectory>-->
                         <compilerArgs>
                             <arg>-Acodegen.output=${project.basedir}</arg>
                         </compilerArgs>
@@ -170,17 +177,17 @@
                     </configuration>
                 </plugin>
                 
-                <plugin>
+<!--                <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>3.1.0</version>
                     <configuration>
                         <filesets>
                             <fileset>
-                                <directory>${project.basedir}/generated</directory>
+                                <directory>${project.basedir}/generated-sources</directory>
                             </fileset>
                         </filesets>
                     </configuration>
-                </plugin>
+                </plugin>-->
                 
             </plugins>
         </pluginManagement>

@@ -5,6 +5,7 @@
  */
 package com.andrechristikan;
 
+import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -13,6 +14,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -29,8 +31,8 @@ public class MainVerticle extends AbstractVerticle{
     
     JsonObject systemMessages;
     JsonObject responseMessages;
-    JsonObject routerConfigs;
     JsonObject mainConfigs;
+    JsonObject eventBusServiceConfigs;
 
     @Override
     public void start(Promise<Void> start) throws Exception {
@@ -40,9 +42,8 @@ public class MainVerticle extends AbstractVerticle{
                 
                 this.logger.info("System Messages : "+ this.systemMessages.toString());
                 this.logger.info("Response Messages : "+ this.responseMessages.toString());
-                this.logger.info("Reouter Configs : "+ this.routerConfigs.toString());
                 this.logger.info("Main Configs : "+ this.mainConfigs.toString());
-                
+                this.logger.info("EventBus Service Configs : "+ this.eventBusServiceConfigs.toString());
                 JsonObject systemMessage = this.systemMessages.getJsonObject("main-verticle");
                 this.logger.info(systemMessage.getString("start"));
                 
@@ -55,13 +56,29 @@ public class MainVerticle extends AbstractVerticle{
                         new Server(), 
                         new DeploymentOptions().setConfig(
                             new JsonObject()
-                                .put("main",this.mainConfigs)
-                                .put("router",this.routerConfigs)
+                                .put("main", this.mainConfigs)
+                                .put("eventbusservice", this.eventBusServiceConfigs)
                         ),
                         promise
                     );
                     return promise.future();
-                 }).setHandler(prom -> {
+                })
+//                .compose(st -> {
+//                     
+//                    // -- Login
+//                    Promise <String> promise = Promise.promise();
+//                    this.vertx.deployVerticle(
+//                        new LoginVerticle(), 
+//                        new DeploymentOptions().setConfig(
+//                            new JsonObject()
+//                                .put("main", this.mainConfigs)
+//                                .put("eventbusservice", this.eventBusServiceConfigs)
+//                        ),
+//                        promise
+//                    );
+//                    return promise.future();
+//                })
+                .setHandler(prom -> {
                     if (prom.succeeded()) {
                         this.logger.info(systemMessage.getString("success"));
                     }else{
@@ -94,27 +111,27 @@ public class MainVerticle extends AbstractVerticle{
         
         Promise <Void> promise = Promise.promise();
         SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> mapData = sharedData.getLocalMap("vertx");
+        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
 
 
         this.getMainConfig().setHandler(ar -> {
             if(ar.succeeded()){
                 JsonObject config = ar.result();
                 this.mainConfigs = config;
-                mapData.put("configs.main", config);
+                jMapData.put("configs.main", config);
                 
                 this.getResponseMessage(config.getString("language")).compose( messages -> {
                     this.responseMessages = messages;
-                    mapData.put("messages.response", messages);
+                    jMapData.put("messages.response", messages);
                     return this.getSystemMessage(config.getString("language"));
                 }).compose( messages -> {
                     this.systemMessages = messages;
-                    mapData.put("messages.system", messages);
-                    return this.getRouterConfig();
-                }).setHandler(messages -> {
+                    jMapData.put("messages.system", messages);
+                    return this.getEventBusServiceConfig();
+                }).setHandler( messages -> {
                     if(messages.succeeded()){
-                        this.routerConfigs = messages.result();
-                        mapData.put("configs.router", messages.result());
+                        this.eventBusServiceConfigs = messages.result();
+                        jMapData.put("configs.eventbusservice", messages.result());
                         promise.complete(null);
                     }else{
                         promise.fail(messages.cause().getMessage());
@@ -162,12 +179,12 @@ public class MainVerticle extends AbstractVerticle{
 
     }
     
-    private Future <JsonObject> getRouterConfig(){
+    private Future <JsonObject> getEventBusServiceConfig(){
         
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("resources/configs/router.json", readFile -> {
+        vertxFileSystem.readFile("resources/configs/eventbus-service.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{

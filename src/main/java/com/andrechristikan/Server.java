@@ -11,7 +11,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
@@ -29,14 +28,15 @@ import org.slf4j.LoggerFactory;
  */
 public class Server extends AbstractVerticle {
     
-    Logger logger;
-    HttpServer server;
-    JsonObject systemMessages;
-    JsonObject responseMessages;
-    JsonObject mainConfigs;
-    JsonObject routerConfigs;
+    private final Logger logger;
+    private final ParserHelper parser;
     
-    ParserHelper parser;
+    protected HttpServer server;
+    protected JsonObject systemMessages;
+    protected JsonObject responseMessages;
+    protected JsonObject mainConfigs;
+    protected JsonObject eventBusServiceConfigs;
+    
     
     Server(){
         this.logger = LoggerFactory.getLogger(Server.class);
@@ -48,13 +48,13 @@ public class Server extends AbstractVerticle {
         
         // Config
         this.mainConfigs = config().getJsonObject("main");
-        this.routerConfigs = config().getJsonObject("router");
+        this.eventBusServiceConfigs = config().getJsonObject("eventbusservice");
         
         // Message
         SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> mapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = mapData.get("messages.system");
-        this.responseMessages = mapData.get("messages.response");
+        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
+        this.systemMessages = jMapData.get("messages.system");
+        this.responseMessages = jMapData.get("messages.response");
         JsonObject systemMessage = this.systemMessages.getJsonObject("server");
 
         
@@ -65,6 +65,7 @@ public class Server extends AbstractVerticle {
         
         // Create Security
         Router router = Router.router(this.vertx);
+        Route route = new Route(this.vertx, router);
         JsonArray requestConfigHeader = this.mainConfigs.getJsonObject("cors").getJsonArray("header");
         JsonArray requestConfigMethod = this.mainConfigs.getJsonObject("cors").getJsonArray("method");
         CorsHandler cors = CorsHandler.create(this.mainConfigs.getJsonObject("cors").getString("allow-origin"));
@@ -138,12 +139,7 @@ public class Server extends AbstractVerticle {
         
         
         // Router
-        
-        
-        
-        
-        
-        
+        route.create();
         
         
         // No SSL requested, start a non-SSL HTTP server.

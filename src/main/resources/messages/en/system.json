@@ -8,5 +8,17 @@
     "server":{
         "start":"[Server] Server trying to start..",
         "ongoing":"[Server-Onging] Web server started on #IP_ADDRESS:#PORT"
+    },
+    "login":{
+        "start":"Start service #eventBusServiceName...",
+        "end":"End service #eventBusServiceName.",
+        "controller":{
+            "create":"Controller #eventBusServiceName created.",
+        
+            "login":{
+                "start":"Login ongoing...",
+                "end":"Login ended."
+            }
+        }
     }
 }
