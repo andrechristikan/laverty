@@ -6,8 +6,10 @@
 package com.andrechristikan.services;
 
 import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import com.andrechristikan.services.impl.LoginServiceImpl;
+import com.andrechristikan.services.implement.LoginServiceImplement;
 
 /**
  *
@@ -17,12 +19,14 @@ import com.andrechristikan.services.impl.LoginServiceImpl;
 public interface LoginService {
     
     static LoginService create(Vertx vertx) {
-        return new LoginServiceImpl();
+        return new LoginServiceImplement(vertx);
     }
 
     static LoginService createProxy(Vertx vertx, String address) {
         return new LoginServiceVertxEBProxy(vertx, address);
     }
-    
+
+    void login(Handler<AsyncResult<String>> resultHandler);
+
 
 }

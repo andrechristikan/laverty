@@ -1,3 +1,9 @@
 {
-    "name": "Syn-User"
+    "login": {
+        "success": "Login Success."
+    },
+    "exception": {
+        "default": "Internal Server Error.",
+        "not-found": "Endpoint not found."
+    }
 }

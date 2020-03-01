@@ -7,6 +7,19 @@
             "port": "8181",
             "address": "localhost"
         },
+        "db":{
+            "core":{
+                "isActive": true,
+                "driverName": "org.postgresql.Driver",
+                "host": "carrental.cmq71qvry6td.ap-southeast-1.rds.amazonaws.com",
+                "port": "5432",
+                "name": "car_rental",
+                "user": "dbaccess",
+                "password": "Sba2zeLFne3vEUCc",
+                "poolMinSize": 1,
+                "poolMaxSize": 10
+            }
+        },
         "upload-files":{
             "delete-on-end":"true",
             "folder":{
@@ -31,7 +44,19 @@
             "port": "8181",
             "address": "0.0.0.0"
         },
-        
+        "db":{
+            "core":{
+                "isActive": true,
+                "driverName": "org.postgresql.Driver",
+                "host": "carrental.cmq71qvry6td.ap-southeast-1.rds.amazonaws.com",
+                "port": "5432",
+                "name": "car_rental",
+                "user": "dbaccess",
+                "password": "Sba2zeLFne3vEUCc",
+                "poolMinSize": 1,
+                "poolMaxSize": 10
+            }
+        },
         "upload-files":{
             "delete-on-end":"true",
             "folder":{

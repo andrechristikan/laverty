@@ -5,9 +5,12 @@
  */
 package com.andrechristikan.controller;
 
+import com.andrechristikan.Response;
 import com.andrechristikan.helper.ParserHelper;
+import com.andrechristikan.services.LoginService;
 import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -23,37 +26,73 @@ public class LoginController {
     
     private final Logger logger;
     private final ParserHelper parser;
-    private final String eventBusService = "login";
+    private final String service;
     private final Vertx vertx;
-    
+    private final Response response;
+
+    private LoginService loginService;
+
     protected JsonObject systemMessages;
     protected JsonObject responseMessages;
     protected JsonObject mainConfigs;
-    protected JsonObject eventBusServiceConfigs;
+    protected JsonObject serviceConfigs;
     
     public LoginController(Vertx vertx){
-        this.vertx = vertx;
-        this.logger = LoggerFactory.getLogger(LoginVerticle.class);
+        // init
+        this.logger = LoggerFactory.getLogger(LoginController.class);
         this.parser = new ParserHelper();
+        this.service = "login";
+        this.vertx = vertx;
+        this.response = new Response(this.vertx);
         
-        // Message
+        // Message & Config
+        this.setConfigs();
+        this.setMessages();
+
+        // Proxy
+        this.setProxy();
+    }
+
+    private void setConfigs(){
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.eventBusService);
-        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.eventBusService);
         this.mainConfigs = jMapData.get("configs.main");
-        this.eventBusServiceConfigs = jMapData.get("configs.eventbusservice");
-        
-        this.logger.info(this.systemMessages.getJsonObject("controller").getString("create"));
+        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
+    }
+
+    private void setMessages(){
+        SharedData sharedData = this.vertx.sharedData();
+        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
+        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
+        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.service);
+    }
+
+    private void setProxy(){
+        String eventBusServiceName = this.serviceConfigs.getString("address");
+        this.loginService = LoginService.createProxy(this.vertx,eventBusServiceName);
+
+        this.logger.info(this.systemMessages.getJsonObject("controller").getString("create").replace("#eventBusServiceName", eventBusServiceName));
+
     }
     
     public void login(RoutingContext ctx) {
-        this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject("login").getString("start"));
-        
-        ctx.response().setStatusCode(200);
-        
-        this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject("login").getString("end"));
-        ctx.response().end("abcd");
+        this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject(this.service).getString("start"));
+
+        HttpServerResponse response = this.response.create(ctx);
+
+        this.loginService.login(funct -> {
+            if(funct.succeeded()){
+                response.setStatusCode(200);
+                response.end(funct.result());
+                this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject(this.service).getString("end"));
+            }else{
+                String message = funct.cause().getMessage();
+                this.logger.error(message);
+                response.setStatusCode(500);
+                response.end(message);
+            }
+        });
+
 }
     
 }

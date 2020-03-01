@@ -6,9 +6,8 @@
 package com.andrechristikan;
 
 import com.andrechristikan.controller.LoginController;
-import com.andrechristikan.services.LoginService;
+import com.andrechristikan.exception.DefaultException;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
 /**
@@ -17,31 +16,38 @@ import io.vertx.ext.web.Router;
  */
 public class Route {
  
-    final Router router;
-    final Vertx vertx;
-    
+    private final Router router;
+    private final Vertx vertx;
+
     // Controller Init
     LoginController loginController;
+    DefaultException defaultException;
     
     Route(Vertx vertx, Router router){
         this.router = router;
         this.vertx = vertx;
-        
-        this.createController();
+
+        // Init
+        this.initController();
+        this.initException();
     }
-    
+
+    // Router
     protected Router create(){
-        
-        this.router.get("/api/v1/login").handler(this.loginController::login);
+
+        this.router.get("/api/v1/login").handler(this.loginController::login).failureHandler(this.defaultException::Handler);
         
         return this.router;
     }
     
-    // Create proxy
-    private void createController(){
-        
+    // Init Controller
+    private void initController(){
         this.loginController = new LoginController(this.vertx);
-        
+
     }
-    
+
+    // Init Exception
+    private void initException(){
+        this.defaultException = new DefaultException(this.vertx);
+    }
 }

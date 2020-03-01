@@ -5,10 +5,9 @@
  */
 package com.andrechristikan.verticle;
 
-import com.andrechristikan.Server;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
-import com.andrechristikan.services.impl.LoginServiceImpl;
+import com.andrechristikan.services.implement.LoginServiceImplement;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -25,39 +24,33 @@ import org.slf4j.LoggerFactory;
 public class LoginVerticle extends AbstractVerticle{
     
     private final Logger logger;
-    private final ParserHelper parser;
-    private final String eventBusService = "login";
+    private final String service;
     
     protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
-    protected JsonObject mainConfigs;
-    protected JsonObject eventBusServiceConfigs;
+    protected JsonObject serviceConfigs;
     
     public LoginVerticle(){
         this.logger = LoggerFactory.getLogger(LoginVerticle.class);
-        this.parser = new ParserHelper();
+        this.service = "login";
     }
     
     @Override
     public void start(Promise<Void> promise) throws Exception {
         
         //Config
-        this.mainConfigs = config().getJsonObject("main");
-        this.eventBusServiceConfigs = config().getJsonObject("eventbusservice").getJsonObject(this.eventBusService);
-        String eventBusServiceName = this.eventBusServiceConfigs.getString("address");
+        this.serviceConfigs = config().getJsonObject("service").getJsonObject(this.service);
+        String eventBusServiceName = this.serviceConfigs.getString("address");
         
         // Message
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.eventBusService);
-        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.eventBusService);
-  
+        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
      
         this.logger.info(this.systemMessages.getString("start").replace("#eventBusServiceName", eventBusServiceName));
         ServiceBinder binder = new ServiceBinder(this.vertx);
-        binder.setAddress(eventBusServiceName).register(LoginService.class, new LoginServiceImpl());
+        binder.setAddress(eventBusServiceName).register(LoginService.class, new LoginServiceImplement(this.vertx));
         this.logger.info(this.systemMessages.getString("end").replace("#eventBusServiceName", eventBusServiceName));
-        
-        
+
+        promise.complete();
     }
 }

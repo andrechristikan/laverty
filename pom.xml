@@ -170,6 +170,7 @@
                             <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
                         </annotationProcessors>
                         <!--<generatedSourcesDirectory>${project.basedir}/generated-sources</generatedSourcesDirectory>-->
+
                         <compilerArgs>
                             <arg>-Acodegen.output=${project.basedir}</arg>
                         </compilerArgs>

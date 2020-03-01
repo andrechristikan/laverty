@@ -1,0 +1,6 @@
+{
+    "login": {
+        "address":"login-proxy-service",
+        "database-usage": "core"
+    }
+}

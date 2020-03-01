@@ -5,6 +5,8 @@
  */
 package com.andrechristikan;
 
+import com.andrechristikan.exception.DefaultException;
+import com.andrechristikan.exception.NotFoundException;
 import com.andrechristikan.helper.ParserHelper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -35,8 +37,6 @@ public class Server extends AbstractVerticle {
     protected JsonObject systemMessages;
     protected JsonObject responseMessages;
     protected JsonObject mainConfigs;
-    protected JsonObject eventBusServiceConfigs;
-    
     
     Server(){
         this.logger = LoggerFactory.getLogger(Server.class);
@@ -48,7 +48,6 @@ public class Server extends AbstractVerticle {
         
         // Config
         this.mainConfigs = config().getJsonObject("main");
-        this.eventBusServiceConfigs = config().getJsonObject("eventbusservice");
         
         // Message
         SharedData sharedData = this.vertx.sharedData();
@@ -66,6 +65,8 @@ public class Server extends AbstractVerticle {
         // Create Security
         Router router = Router.router(this.vertx);
         Route route = new Route(this.vertx, router);
+        NotFoundException notFoundException = new NotFoundException(this.vertx);
+        DefaultException defaultException = new DefaultException(this.vertx);
         JsonArray requestConfigHeader = this.mainConfigs.getJsonObject("cors").getJsonArray("header");
         JsonArray requestConfigMethod = this.mainConfigs.getJsonObject("cors").getJsonArray("method");
         CorsHandler cors = CorsHandler.create(this.mainConfigs.getJsonObject("cors").getString("allow-origin"));
@@ -126,6 +127,9 @@ public class Server extends AbstractVerticle {
         }
         
         // Put setting into router
+        router.route()
+            .consumes("application/json")
+            .produces("application/json");
         router.route().handler(cors);
         
         // Upload Setting
@@ -136,11 +140,12 @@ public class Server extends AbstractVerticle {
         );
         router.route().handler(StaticHandler.create());
         
-        
-        
         // Router
         route.create();
-        
+
+        // Exception
+        router.route().failureHandler(defaultException::Handler);
+        router.route().handler(notFoundException::Handler);
         
         // No SSL requested, start a non-SSL HTTP server.
         this.server = this.vertx.createHttpServer(
