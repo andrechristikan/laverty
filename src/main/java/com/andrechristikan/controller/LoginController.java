@@ -28,7 +28,7 @@ public class LoginController {
     private final ParserHelper parser;
     private final String service;
     private final Vertx vertx;
-    private final Response response;
+    private final Response settingResponse;
 
     private LoginService loginService;
 
@@ -43,7 +43,7 @@ public class LoginController {
         this.parser = new ParserHelper();
         this.service = "login";
         this.vertx = vertx;
-        this.response = new Response(this.vertx);
+        this.settingResponse = new Response(this.vertx);
         
         // Message & Config
         this.setConfigs();
@@ -78,7 +78,7 @@ public class LoginController {
     public void login(RoutingContext ctx) {
         this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject(this.service).getString("start"));
 
-        HttpServerResponse response = this.response.create(ctx);
+        HttpServerResponse response = this.settingResponse.create(ctx);
 
         this.loginService.login(funct -> {
             if(funct.succeeded()){

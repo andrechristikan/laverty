@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class NotFoundException {
 
     private final Vertx vertx;
-    private final Response response;
+    private final Response settingResponse;
     private final Logger logger;
     private final String service;
 
@@ -22,7 +22,7 @@ public class NotFoundException {
 
     public NotFoundException(Vertx vertx){
         this.vertx = vertx;
-        this.response = new Response(vertx);
+        this.settingResponse = new Response(vertx);
         this.logger = LoggerFactory.getLogger(NotFoundException.class);
         this.service = "exception";
 
@@ -40,7 +40,7 @@ public class NotFoundException {
     public final void Handler(RoutingContext ctx){
         this.logger.info(this.systemMessages.getJsonObject("not-found").getString("start"));
 
-        HttpServerResponse response = this.response.create(ctx);
+        HttpServerResponse response = this.settingResponse.create(ctx);
         String responseData = Response.DataStructure(1, this.responseMessages.getString("not-found"));
 
         this.logger.info(this.systemMessages.getJsonObject("not-found").getString("end"));

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class DefaultException {
 
     private final Vertx vertx;
-    private final Response response;
+    private final Response settingResponse;
     private final Logger logger;
     private final String service;
 
@@ -22,7 +22,7 @@ public class DefaultException {
 
     public DefaultException(Vertx vertx){
         this.vertx = vertx;
-        this.response = new Response(vertx);
+        this.settingResponse = new Response(vertx);
         this.logger = LoggerFactory.getLogger(DefaultException.class);
         this.service = "exception";
 
@@ -39,7 +39,7 @@ public class DefaultException {
     public final void Handler(RoutingContext ctx){
         this.logger.info(this.systemMessages.getJsonObject("default").getString("start"));
 
-        HttpServerResponse response = this.response.create(ctx);
+        HttpServerResponse response = this.settingResponse.create(ctx);
         String responseData = Response.DataStructure(1, ctx.failure().getMessage());
 
         this.logger.info(this.systemMessages.getJsonObject("default").getString("end"));
