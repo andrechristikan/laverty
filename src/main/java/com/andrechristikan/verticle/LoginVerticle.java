@@ -44,7 +44,7 @@ public class LoginVerticle extends AbstractVerticle{
         // Message
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
+        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service);
      
         this.logger.info(this.systemMessages.getString("start").replace("#eventBusServiceName", eventBusServiceName));
         ServiceBinder binder = new ServiceBinder(this.vertx);

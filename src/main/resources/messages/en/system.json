@@ -1,28 +1,33 @@
 {
-    "main-verticle":{
-        "start": "[MainVerticle] start...",
-        "success":"[MainVerticle-Succeeded] successfully running.",
-        "fail":"[MainVerticle-Failed] : ",
-        "otherwise":"[MainVerticle-Oterwise] : "
-    },
-    "server":{
-        "start":"[Server] Server trying to start..",
-        "ongoing":"[ServerOngoing] Web server started on #IP_ADDRESS:#PORT"
-    },
-    "login":{
-        "start":"[LoginProxyServiceStart] Start service #eventBusServiceName...",
-        "end":"[LoginProxyServiceOngoing]End service #eventBusServiceName.",
-        "controller":{
-            "create":"[LoginControllerCreated] Controller #eventBusServiceName created.",
-        
-            "login":{
-                "start":"[LoginControllerStart] Login ongoing...",
-                "end":"[LoginControllerEnd] Login ended."
-            }
+    "service":{
+        "main":{
+            "start": "[MainVerticleStarting] start...",
+            "success":"[MainVerticleSucceeded] successfully running.",
+            "fail":"[MainVerticleFailed] : ",
+            "otherwise":"[MainVerticleOterwise] : "
         },
-        "exception": {
-            "start": "[LoginException] Enter the LoginException.",
-            "end": "[LoginException] LoginException End."
+        "server":{
+            "start":"[ServerStarting] Server trying to start..",
+            "ongoing":"[ServerOngoing] Web server started on #IP_ADDRESS:#PORT"
+        },
+        "login":{
+            "start":"[LoginProxyServiceStarting] Start service #eventBusServiceName...",
+            "end":"[LoginProxyServiceOngoing]End service #eventBusServiceName.",
+            "controller":{
+                "create":"[LoginControllerCreated] Controller #eventBusServiceName created.",
+
+                "login":{
+                    "start":"[LoginControllerStarting] Login ongoing...",
+                    "end":"[LoginControllerEnded] Login ended."
+                }
+            },
+            "implement":{
+                "databae-connection":"Database connection pool for #serviceAddress Service created."
+            },
+            "exception": {
+                "start": "[LoginException] Enter the LoginException.",
+                "end": "[LoginException] LoginException End."
+            }
         }
     },
     "exception": {
@@ -33,6 +38,30 @@
         "not-found": {
             "start": "[NotFoundException] Enter the NotFoundException.",
             "end": "[NotFoundException] NotFoundException End."
+        },
+        "login":{
+            "start": "[LoginException] Enter the LoginException.",
+            "end": "[LoginException] LoginException End."
+        }
+    },
+    "authorization":{
+        "success":"Welcome majesty"
+    },
+    "authentication":{
+        "success":"Let's roll"
+    },
+    "database":{
+        "create-pool":{
+            "success":""
+        },
+        "destroy-pool":{
+            "success":""
+        },
+        "open-connection":{
+            "success":""
+        },
+        "close-connection":{
+            "sucecss":""
         }
     }
 }

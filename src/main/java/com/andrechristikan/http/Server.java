@@ -32,15 +32,16 @@ public class Server extends AbstractVerticle {
     
     private final Logger logger;
     private final ParserHelper parser;
+    private final String service;
     
     protected HttpServer server;
     protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
     protected JsonObject mainConfigs;
     
     protected Server(){
         this.logger = LoggerFactory.getLogger(Server.class);
         this.parser = new ParserHelper();
+        this.service = "server";
     }
     
     @Override
@@ -53,11 +54,7 @@ public class Server extends AbstractVerticle {
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
         this.systemMessages = jMapData.get("messages.system");
-        this.responseMessages = jMapData.get("messages.response");
-        JsonObject systemMessage = this.systemMessages.getJsonObject("server");
-
-        
-        
+        JsonObject systemMessage = this.systemMessages.getJsonObject("service").getJsonObject(this.service);
         
         // -- START
         this.logger.info(systemMessage.getString("start"));
@@ -65,8 +62,8 @@ public class Server extends AbstractVerticle {
         // Create Security
         Router router = Router.router(this.vertx);
         Route route = new Route(this.vertx, router);
-        NotFoundException notFoundException = new NotFoundException(this.vertx);
         DefaultException defaultException = new DefaultException(this.vertx);
+        NotFoundException notFoundException = new NotFoundException(this.vertx);
         JsonArray requestConfigHeader = this.mainConfigs.getJsonObject("cors").getJsonArray("header");
         JsonArray requestConfigMethod = this.mainConfigs.getJsonObject("cors").getJsonArray("method");
         CorsHandler cors = CorsHandler.create(this.mainConfigs.getJsonObject("cors").getString("allow-origin"));
@@ -144,8 +141,9 @@ public class Server extends AbstractVerticle {
         route.create();
 
         // Exception
-        router.route().failureHandler(defaultException::Handler);
-        router.route().handler(notFoundException::Handler);
+        router.route().failureHandler(defaultException::handler);
+        router.route().handler(notFoundException::handler);
+        
         
         // No SSL requested, start a non-SSL HTTP server.
         this.server = this.vertx.createHttpServer(

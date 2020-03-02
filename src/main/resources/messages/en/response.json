@@ -1,9 +1,23 @@
 {
-    "login": {
-        "success": "Login Success."
+    "service":{
+        "login": {
+            "controller":{},
+            "implement":{
+                "success": "Login Success."
+            }
+        }
+    },
+    "authorization":{
+        "failed":"Invalid token, your don't have Super Admin access.",
+        "forbidden":"User does not have the authority"
+    },
+    "authentication":{
+        "failed":"Invalid token",
+        "token-required":"Token required, don't forget to put the token into body of request."
     },
     "exception": {
         "default": "Internal Server Error.",
-        "not-found": "Endpoint not found."
+        "not-found": "Endpoint not found.",
+        "login":"Authorization needed."
     }
 }

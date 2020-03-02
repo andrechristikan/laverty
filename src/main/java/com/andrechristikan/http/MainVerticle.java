@@ -7,6 +7,7 @@ package com.andrechristikan.http;
 
 import com.andrechristikan.Runner;
 import com.andrechristikan.Version;
+import com.andrechristikan.helper.JwtHelper;
 import com.andrechristikan.http.Server;
 import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.config.ConfigRetriever;
@@ -20,6 +21,7 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +31,9 @@ import org.slf4j.LoggerFactory;
  */
 public class MainVerticle extends AbstractVerticle{
     
-    final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
-    
+    private final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+    private final String service = "main";
+        
     JsonObject systemMessages;
     JsonObject responseMessages;
     JsonObject mainConfigs;
@@ -46,18 +49,12 @@ public class MainVerticle extends AbstractVerticle{
                 this.logger.info("Response Messages : "+ this.responseMessages.toString());
                 this.logger.info("Main Configs : "+ this.mainConfigs.toString());
                 this.logger.info("Service Configs : "+ this.serviceConfigs.toString());
-                JsonObject systemMessage = this.systemMessages.getJsonObject("main-verticle");
+                
+                JsonObject systemMessage = this.systemMessages.getJsonObject("service").getJsonObject(this.service);
                 this.logger.info(systemMessage.getString("start"));
 
                 // DEPLOY VERTICLE
                 start.future().compose(st -> {
-
-                    // -- Database
-                    Promise <String> promise = Promise.promise();
-                    promise.complete();
-                    return promise.future();
-
-                }).compose(st -> {
 
                     // -- Login
                     Promise <String> promise = Promise.promise();
@@ -70,6 +67,13 @@ public class MainVerticle extends AbstractVerticle{
                         ),
                         promise
                     );
+                    return promise.future();
+
+                }).compose(st -> {
+
+                    // -- User
+                    Promise <String> promise = Promise.promise();
+                    promise.complete();
                     return promise.future();
                 }).compose(st -> {
 
@@ -117,7 +121,6 @@ public class MainVerticle extends AbstractVerticle{
         Promise <Void> promise = Promise.promise();
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-
 
         this.getMainConfig().setHandler(ar -> {
             if(ar.succeeded()){

@@ -5,8 +5,9 @@
  */
 package com.andrechristikan.http;
 
+import com.andrechristikan.http.auth.LoginAuthorization;
 import com.andrechristikan.http.controller.LoginController;
-import com.andrechristikan.http.exception.DefaultException;
+import com.andrechristikan.http.exception.LoginException;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 
@@ -21,7 +22,12 @@ public class Route {
 
     // Controller Init
     LoginController loginController;
-    DefaultException defaultException;
+    
+    // Exception Init
+    LoginException loginException;
+    
+    // Authorization Init
+    LoginAuthorization loginAuthorization;
     
     protected Route(Vertx vertx, Router router){
         this.router = router;
@@ -30,12 +36,19 @@ public class Route {
         // Init
         this.initController();
         this.initException();
+        this.initAuthorization();
     }
 
     // Router
     protected Router create(){
-
-        this.router.get("/api/v1/login").handler(this.loginController::login).failureHandler(this.defaultException::Handler);
+        
+        // Before Auth
+        this.router.get("/api/v1/login").handler(this.loginController::login);
+        
+        // Auth
+        this.router.route("/api/v1/*").handler(this.loginAuthorization::handler).failureHandler(this.loginException::handler);
+        
+        // After Auth
         
         return this.router;
     }
@@ -48,6 +61,11 @@ public class Route {
 
     // Init Exception
     private void initException(){
-        this.defaultException = new DefaultException(this.vertx);
+        this.loginException = new LoginException(this.vertx);
+    }
+    
+    // Init Authorization
+    private void initAuthorization(){
+        this.loginAuthorization = new LoginAuthorization(this.vertx);
     }
 }

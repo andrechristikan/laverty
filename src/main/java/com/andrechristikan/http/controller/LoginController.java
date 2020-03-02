@@ -8,7 +8,6 @@ package com.andrechristikan.http.controller;
 import com.andrechristikan.http.Response;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
-import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -63,20 +62,20 @@ public class LoginController {
     private void setMessages(){
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
-        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.service);
+        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service).getJsonObject("controller");
+        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("controller");
     }
 
     private void setProxy(){
         String eventBusServiceName = this.serviceConfigs.getString("address");
         this.loginService = LoginService.createProxy(this.vertx,eventBusServiceName);
 
-        this.logger.info(this.systemMessages.getJsonObject("controller").getString("create").replace("#eventBusServiceName", eventBusServiceName));
+        this.logger.info(this.systemMessages.getString("create").replace("#eventBusServiceName", eventBusServiceName));
 
     }
     
     public void login(RoutingContext ctx) {
-        this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject(this.service).getString("start"));
+        this.logger.info(this.systemMessages.getJsonObject(this.service).getString("start"));
 
         HttpServerResponse response = this.settingResponse.create(ctx);
 
@@ -84,7 +83,7 @@ public class LoginController {
             if(funct.succeeded()){
                 response.setStatusCode(200);
                 response.end(funct.result());
-                this.logger.info(this.systemMessages.getJsonObject("controller").getJsonObject(this.service).getString("end"));
+                this.logger.info(this.systemMessages.getJsonObject(this.service).getString("end"));
             }else{
                 String message = funct.cause().getMessage();
                 this.logger.error(message);

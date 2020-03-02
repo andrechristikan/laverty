@@ -19,12 +19,13 @@ public class DefaultException {
     private final String service;
 
     protected JsonObject systemMessages;
+    protected JsonObject responseMessages;
 
     public DefaultException(Vertx vertx){
         this.vertx = vertx;
         this.settingResponse = new Response(vertx);
         this.logger = LoggerFactory.getLogger(DefaultException.class);
-        this.service = "exception";
+        this.service = "default";
 
         // Set Message
         this.setMessages();
@@ -33,16 +34,17 @@ public class DefaultException {
     private void setMessages(){
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
+        this.systemMessages = jMapData.get("messages.system").getJsonObject("exception").getJsonObject(this.service);
+        this.responseMessages = jMapData.get("messages.response").getJsonObject("exception");
     }
 
-    public final void Handler(RoutingContext ctx){
-        this.logger.info(this.systemMessages.getJsonObject("default").getString("start"));
+    public final void handler(RoutingContext ctx){
+        this.logger.info(this.systemMessages.getString("start"));
 
         HttpServerResponse response = this.settingResponse.create(ctx);
-        String responseData = Response.DataStructure(1, ctx.failure().getMessage());
+        String responseData = Response.DataStructure(1, this.responseMessages.getString("default"));
 
-        this.logger.info(this.systemMessages.getJsonObject("default").getString("end"));
+        this.logger.info(this.systemMessages.getString("end"));
 
         response.setStatusCode(ctx.response().getStatusCode());
         response.end(responseData);

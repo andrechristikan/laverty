@@ -15,39 +15,41 @@ public class DatabaseHelper {
 
     private final Logger logger;
     private final Vertx vertx;
-    private final String eventBusService;
+    private final String service;
 
     protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
     protected JsonObject mainConfigs;
-    protected JsonObject eventBusServiceConfigs;
+    protected JsonObject serviceConfigs;
     protected JsonObject dbConfig;
 
-    public DatabaseHelper(Vertx vertx, String eventBusServiceName){
+    public DatabaseHelper(Vertx vertx, String serviceName){
         this.logger = LoggerFactory.getLogger(DatabaseHelper.class);
         this.vertx = vertx;
-        this.eventBusService = "database";
+        this.service = "database";
 
         // Message
-        this.setConfigs();
+        this.setConfigs(serviceName);
         this.setMessages();
-
+  
         // Db Config
-        this.dbConfig = this.mainConfigs.getJsonObject(this.eventBusServiceConfigs.getJsonObject(eventBusServiceName).getString("database-usage"));
+        this.dbConfig = this.mainConfigs.getJsonObject(
+            this.mainConfigs.getString("environment")
+        ).getJsonObject(this.service).getJsonObject(
+            this.serviceConfigs.getString("database-usage")
+        );
     }
 
-    private void setConfigs(){
+    private void setConfigs(String serviceName){
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
         this.mainConfigs = jMapData.get("configs.main");
-        this.eventBusServiceConfigs = jMapData.get("configs.service").getJsonObject(this.eventBusService);
+        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(serviceName);
     }
 
     private void setMessages(){
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.eventBusService);
-        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.eventBusService);
+        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.service);
     }
 
     public PgPool createPool(){
@@ -62,7 +64,7 @@ public class DatabaseHelper {
                 .setMaxSize(this.dbConfig.getInteger("poolMaxSize", 10));
         PgPool dbClient = PgPool.pool(this.vertx, dbOptions, poolOptions);
 
-        this.logger.info(this.systemMessages.getJsonObject("service").getJsonObject("create-pool").getString("success"));
+        this.logger.info(this.systemMessages.getJsonObject("create-pool").getString("success"));
 
         return dbClient;
 
@@ -70,7 +72,7 @@ public class DatabaseHelper {
 
     public void destroyPool(PgPool pool){
         pool.close();
-        this.logger.info(this.systemMessages.getJsonObject("service").getJsonObject("destroy-pool").getString("success"));
+        this.logger.info(this.systemMessages.getJsonObject("destroy-pool").getString("success"));
     }
 
     public Future<SqlConnection> openConnection(PgPool pool){
@@ -78,12 +80,11 @@ public class DatabaseHelper {
         Promise <SqlConnection> promise = Promise.promise();
         pool.getConnection(ar -> {
             if (ar.succeeded()){
-                this.logger.info(this.systemMessages.getJsonObject("service").getJsonObject("open-connection").getString("success"));
+                this.logger.info(this.systemMessages.getJsonObject("open-connection").getString("success"));
                 promise.complete(ar.result());
             }else{
-                String message = this.systemMessages.getJsonObject("service").getJsonObject("open-connection").getString("fail");
-                this.logger.info(message);
-                promise.fail(message);
+                this.logger.info(ar.cause().getMessage());
+                promise.fail(ar.cause().getMessage());
             }
         });
 
@@ -92,6 +93,6 @@ public class DatabaseHelper {
 
     public void closeConnection(SqlConnection conn){
         conn.close();
-        this.logger.info(this.systemMessages.getJsonObject("service").getJsonObject("close-connection").getString("success"));
+        this.logger.info(this.systemMessages.getJsonObject("close-connection").getString("success"));
     };
 }
