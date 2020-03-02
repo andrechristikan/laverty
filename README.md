@@ -1,4 +1,4 @@
-# Vert.x-Proxy
+# Vert.x-Proxy - Minimal
 Best practice vert.x sync with all futures (without CompletableFuture, i still don't know how to use that).
 
 Futures :
@@ -13,6 +13,7 @@ Futures :
 - Vert.x-Proxy
 
 Ongoing :
-- Creating model
+- Creating user model
+- Creating authorization login
 
 VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL.
