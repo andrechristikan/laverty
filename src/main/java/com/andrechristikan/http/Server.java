@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan;
+package com.andrechristikan.http;
 
-import com.andrechristikan.exception.DefaultException;
-import com.andrechristikan.exception.NotFoundException;
+import com.andrechristikan.http.exception.DefaultException;
+import com.andrechristikan.http.exception.NotFoundException;
 import com.andrechristikan.helper.ParserHelper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -38,7 +38,7 @@ public class Server extends AbstractVerticle {
     protected JsonObject responseMessages;
     protected JsonObject mainConfigs;
     
-    Server(){
+    protected Server(){
         this.logger = LoggerFactory.getLogger(Server.class);
         this.parser = new ParserHelper();
     }

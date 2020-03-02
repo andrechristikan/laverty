@@ -1,4 +1,4 @@
-package com.andrechristikan;
+package com.andrechristikan.http;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;

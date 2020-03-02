@@ -25,7 +25,7 @@
         <assertj-core.version>3.8.0</assertj-core.version>
         <log.version>1.2.3</log.version>
         
-        <main.verticle>com.andrechristikan.MainVerticle</main.verticle>
+        <main.verticle>com.andrechristikan.http.MainVerticle</main.verticle>
     </properties>
     
     <name>com.andrechristikan</name>

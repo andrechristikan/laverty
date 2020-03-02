@@ -5,7 +5,7 @@
  */
 package com.andrechristikan.services.implement;
 
-import com.andrechristikan.Response;
+import com.andrechristikan.http.Response;
 import com.andrechristikan.services.LoginService;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

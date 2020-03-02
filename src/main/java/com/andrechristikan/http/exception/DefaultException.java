@@ -1,6 +1,6 @@
-package com.andrechristikan.exception;
+package com.andrechristikan.http.exception;
 
-import com.andrechristikan.Response;
+import com.andrechristikan.http.Response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;

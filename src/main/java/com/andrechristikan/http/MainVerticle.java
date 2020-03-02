@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan;
+package com.andrechristikan.http;
 
+import com.andrechristikan.Runner;
+import com.andrechristikan.Version;
+import com.andrechristikan.http.Server;
 import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;

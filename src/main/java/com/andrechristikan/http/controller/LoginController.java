@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan.controller;
+package com.andrechristikan.http.controller;
 
-import com.andrechristikan.Response;
+import com.andrechristikan.http.Response;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
 import com.andrechristikan.verticle.LoginVerticle;

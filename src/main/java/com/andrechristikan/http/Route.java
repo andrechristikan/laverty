@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan;
+package com.andrechristikan.http;
 
-import com.andrechristikan.controller.LoginController;
-import com.andrechristikan.exception.DefaultException;
+import com.andrechristikan.http.controller.LoginController;
+import com.andrechristikan.http.exception.DefaultException;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 
@@ -23,7 +23,7 @@ public class Route {
     LoginController loginController;
     DefaultException defaultException;
     
-    Route(Vertx vertx, Router router){
+    protected Route(Vertx vertx, Router router){
         this.router = router;
         this.vertx = vertx;
 
