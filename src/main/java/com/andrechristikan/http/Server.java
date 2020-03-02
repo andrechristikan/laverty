@@ -162,7 +162,7 @@ public class Server extends AbstractVerticle {
                         );
                         promise.complete();
                     }else{
-                        this.logger.error(ar.cause().getMessage());
+                        this.logger.error(systemMessage.getString("fail")+" "+ar.cause().getMessage());
                         promise.fail(ar.cause().getMessage());
                     }
             });

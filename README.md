@@ -1,7 +1,7 @@
 # Vert.x-Proxy - Minimal
 Best practice vert.x sync with all futures (without CompletableFuture, i still don't know how to use that).
 
-Futures :
+*Futures :*
 - Controller
 - Service and Implement
 - Exception
@@ -12,8 +12,14 @@ Futures :
 - Promise and Future
 - Vert.x-Proxy
 
-Ongoing :
+
+*Ongoing :*
 - Creating user model
 - Creating authorization login
+- Rule in request api
 
-VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL.
+*User*
+1. username : admin, password : 123456
+2. username : user, password : 123456
+
+####VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL.

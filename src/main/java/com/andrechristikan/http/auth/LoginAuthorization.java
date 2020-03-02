@@ -90,7 +90,7 @@ public class LoginAuthorization{
                     ctx.next();  
                 }else{
                     String message = this.responseMessages.getString("failed");
-                    this.logger.info(checked.cause().getMessage());
+                    this.logger.info(this.systemMessages.getString("fail")+" "+checked.cause().getMessage());
                     String messageResponse = Response.DataStructure(1,message);
                     response.setStatusCode(401);
                     response.end(messageResponse);
@@ -98,7 +98,7 @@ public class LoginAuthorization{
             });
         }else{
             String message = this.responseMessages.getString("token-required");
-            this.logger.info(message);
+            this.logger.info(this.systemMessages.getString("fail")+" "+message);
             String messageResponse = Response.DataStructure(1,message);
             response.setStatusCode(403);
             response.end(messageResponse);

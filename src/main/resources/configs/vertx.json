@@ -11,11 +11,11 @@
             "core":{
                 "isActive": true,
                 "driverName": "org.postgresql.Driver",
-                "host": "carrental.cmq71qvry6td.ap-southeast-1.rds.amazonaws.com",
+                "host": "localhost",
                 "port": "5432",
-                "name": "car_rental",
-                "user": "dbaccess",
-                "password": "Sba2zeLFne3vEUCc",
+                "name": "andrechristikan_vertx",
+                "user": "andrechristikan",
+                "password": "",
                 "poolMinSize": 1,
                 "poolMaxSize": 10
             }

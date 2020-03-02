@@ -56,6 +56,8 @@ public class LoginException {
             HttpServerResponse response = this.settingResponse.create(ctx);
             String responseData = Response.DataStructure(1, this.responseMessages.getString("login"));
 
+            this.logger.info(this.systemMessages.getString("fail") + " " +this.responseMessages.getString("login"));
+
             response.setStatusCode(ctx.response().getStatusCode());
             response.end(responseData);
         }else{

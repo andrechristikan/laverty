@@ -5,6 +5,13 @@
             "implement":{
                 "success": "Login Success."
             }
+        },
+        "user": {
+            "model": {
+                "find-one": {
+                    "not-found": "User not found."
+                }
+            }
         }
     },
     "authorization":{

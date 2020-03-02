@@ -10,6 +10,7 @@ import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -37,6 +38,7 @@ public class LoginController {
     protected JsonObject serviceConfigs;
     
     public LoginController(Vertx vertx){
+
         // init
         this.logger = LoggerFactory.getLogger(LoginController.class);
         this.parser = new ParserHelper();
@@ -83,14 +85,13 @@ public class LoginController {
             if(funct.succeeded()){
                 response.setStatusCode(200);
                 response.end(funct.result());
-                this.logger.info(this.systemMessages.getJsonObject(this.service).getString("end"));
             }else{
-                String message = funct.cause().getMessage();
-                this.logger.error(message);
                 response.setStatusCode(500);
-                response.end(message);
+                response.end(funct.cause().getMessage());
             }
         });
+
+        this.logger.info(this.systemMessages.getJsonObject(this.service).getString("end"));
 
 }
     

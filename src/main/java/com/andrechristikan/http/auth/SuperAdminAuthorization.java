@@ -92,20 +92,20 @@ public class SuperAdminAuthorization{
                                 ctx.next();
                             } else {
                                 String message = this.responseMessages.getJsonObject("authorization").getString("failed");
-                                this.logger.info(message);
+                                this.logger.info(this.systemMessages.getJsonObject("authorization").getString("fail")+" "+message);
                                 String messageResponse = Response.DataStructure(1,message);
                                 response.end(messageResponse);
                             }
                         }else{
                             String message = this.responseMessages.getJsonObject("authorization").getString("forbidden");
-                            this.logger.info(message);
+                            this.logger.info(this.systemMessages.getJsonObject("authorization").getString("fail")+" "+message);
                             String messageResponse = Response.DataStructure(1,message);
                             response.end(messageResponse);
                         }
                     });
                 }else{
                     String message = this.responseMessages.getJsonObject("authentication").getString("failed");
-                    this.logger.info(checked.cause().getMessage());
+                    this.logger.info(this.systemMessages.getJsonObject("authentication").getString("fail")+" "+checked.cause().getMessage());
                     String messageResponse = Response.DataStructure(1,message);
                     response.setStatusCode(401);
                     response.end(messageResponse);
@@ -113,7 +113,7 @@ public class SuperAdminAuthorization{
             });
         }else{
             String message = this.responseMessages.getJsonObject("authentication").getString("token-required");
-            this.logger.info(message);
+            this.logger.info(this.systemMessages.getJsonObject("authentication").getString("fail")+" "+message);
             String messageResponse = Response.DataStructure(1,message);
             response.setStatusCode(403);
             response.end(messageResponse);

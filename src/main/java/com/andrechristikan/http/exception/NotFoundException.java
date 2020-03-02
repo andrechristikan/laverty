@@ -42,7 +42,6 @@ public class NotFoundException {
 
         HttpServerResponse response = this.settingResponse.create(ctx);
         String responseData = Response.DataStructure(1, this.responseMessages.getString("not-found"));
-        this.logger.info(responseData);
 
         this.logger.info(this.systemMessages.getString("end"));
 

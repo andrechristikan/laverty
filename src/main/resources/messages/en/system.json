@@ -8,6 +8,7 @@
         },
         "server":{
             "start":"[ServerStarting] Server trying to start..",
+            "fail": "[ServerFailed] : ",
             "ongoing":"[ServerOngoing] Web server started on #IP_ADDRESS:#PORT"
         },
         "login":{
@@ -22,7 +23,9 @@
                 }
             },
             "implement":{
-                "databae-connection":"Database connection pool for #serviceAddress Service created."
+                "database-connection":"[LoginImplementDatabaseConnection] Database connection pool for #serviceAddress Service created.",
+                "success":"[LoginImplementSuccess] Success to login",
+                "fail":"[LoginImplementFailed] : "
             },
             "exception": {
                 "start": "[LoginException] Enter the LoginException.",
@@ -32,36 +35,39 @@
     },
     "exception": {
         "default": {
-            "start": "[DefaultException] Enter the DefaultException.",
-            "end": "[DefaultException] DefaultException End."
+            "start": "[DefaultExceptionStarting] Enter the DefaultException.",
+            "end": "[DefaultExceptionEnded] DefaultException End."
         },
         "not-found": {
-            "start": "[NotFoundException] Enter the NotFoundException.",
-            "end": "[NotFoundException] NotFoundException End."
+            "start": "[NotFoundExceptionStarting] Enter the NotFoundException.",
+            "end": "[NotFoundExceptionEnded] NotFoundException End."
         },
         "login":{
-            "start": "[LoginException] Enter the LoginException.",
-            "end": "[LoginException] LoginException End."
+            "start": "[LoginExceptionStarting] Enter the LoginException.",
+            "fail": "[LoginExceptionFailed] : ",
+            "end": "[LoginExceptionEnded] LoginException End."
         }
     },
     "authorization":{
-        "success":"Welcome majesty"
+        "success":"[AuthorizationSuccess] Welcome majesty",
+        "fail":"[AuthorizationFailed] : "
     },
     "authentication":{
-        "success":"Let's roll"
+        "success":"[AuthenticationSuccess] Let's roll",
+        "fail": "[AuthenticationFailed] : "
     },
     "database":{
         "create-pool":{
-            "success":""
+            "success":"[DatabaseHelper] Success to create pool connection."
         },
         "destroy-pool":{
-            "success":""
+            "success":"[DatabaseHelper] Success to destroy pool connection."
         },
         "open-connection":{
-            "success":""
+            "success":"[DatabaseHelper] Success to open connection."
         },
         "close-connection":{
-            "sucecss":""
+            "success":"[DatabaseHelper] Success to close connection."
         }
     }
 }
