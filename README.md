@@ -1,5 +1,5 @@
 # Vert.x-Proxy
-Best practice vert.x sync with all futures without CompletableFuture, i still dont know how to use that.
+Best practice vert.x sync with all futures (without CompletableFuture, i still don't know how to use that).
 
 Futures :
 - Controller
@@ -13,6 +13,6 @@ Futures :
 - Vert.x-Proxy
 
 Ongoing :
-- Created model
+- Creating model
 
 VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL.

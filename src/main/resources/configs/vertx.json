@@ -48,7 +48,7 @@
             "core":{
                 "isActive": true,
                 "driverName": "org.postgresql.Driver",
-                "host": "carrental.cmq71qvry6td.ap-southeast-1.rds.amazonaws.com",
+                "host": "18.136.207.143",
                 "port": "5432",
                 "name": "car_rental",
                 "user": "dbaccess",
@@ -86,7 +86,7 @@
         "tokenTimeout": 1000
     },
     "role":[
-        "admin",
+        "user",
         "super_admin"
     ],
     "cors":{
