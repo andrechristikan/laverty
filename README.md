@@ -29,7 +29,7 @@ Inspired from laravel framework. ~~This will save your time while develop apps.~
 5. Set the messages `src/main/resources/messages`
    - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
-6. **Run initial.sql** in folder project into Postgres
+6. Run `initial.sql` in folder project into Postgres
 7. Build your project `mvn clean install`, **if error --....**
 8. Run project `java -jar target/FileName.jar`
 
@@ -62,7 +62,7 @@ Inspired from laravel framework. ~~This will save your time while develop apps.~
 5. Set the messages `src/main/resources/messages`
    - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
-6. **Run initial.sql** in folder project into Postgres
+6. Run `initial.sql` in folder project into Postgres
 7. Run project, if you using MAC klik `Control + R`
    
 > Development - With Netbeans - TESTED ON WINDOWS 10
@@ -92,26 +92,26 @@ Still on developing, i will finish this project as soon as possible.
 
 
 > Todo :
--[x] Created Http Server (setting from vertx.json)
--[x] Created Default Exception
--[x] Created Not Found Exception
--[x] Created Login Exception
--[x] Created Database Helper (setting from vertx.json)
--[x] Created Parser Helper
--[x] Created Jwt Helper (setting from vertx.json)
--[x] Created Auth For User Login
--[x] Created Auth For User Admin
--[x] Folder Structure
--[x] Route (Very simple route class)
--[x] Setting App From vertx.json File
--[x] All messages from files
--[x] Created Login controller
--[ ] Model Class (Ongoing)
--[ ] User model (Ongoing)
--[ ] User Service Implementation (Ongoing)
--[ ] Password Helper
--[ ] Flow login
--[ ] Create Middleware Request
+- [x] Created Http Server (setting from vertx.json)
+- [x] Created Default Exception
+- [x] Created Not Found Exception
+- [x] Created Login Exception
+- [x] Created Database Helper (setting from vertx.json)
+- [x] Created Parser Helper
+- [x] Created Jwt Helper (setting from vertx.json)
+- [x] Created Auth For User Login
+- [x] Created Auth For User Admin
+- [x] Folder Structure
+- [x] Route (Very simple route class)
+- [x] Setting App From vertx.json File
+- [x] All messages from files
+- [x] Created Login controller
+- [ ] Model Class (Ongoing)
+- [ ] User model (Ongoing)
+- [ ] User Service Implementation (Ongoing)
+- [ ] Password Helper
+- [ ] Flow login
+- [ ] Create Middleware Request
 
 ### Authors
 > [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](instagram andrechristikan) | andrechrisikan@gmail.com
@@ -124,4 +124,4 @@ Still on developing, i will finish this project as soon as possible.
 ## License
 This is totaly free ! :+1: :+1:
 
-#VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL. ~~MAYBE MY PROJECT CAN BE A FRAMEWORK :XD~~
+# VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL. ~~MAYBE MY PROJECT CAN BE A FRAMEWORK :XD~~
