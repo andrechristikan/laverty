@@ -14,11 +14,9 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
 import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.data.Numeric;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -32,17 +30,17 @@ import org.slf4j.Logger;
  *
  * @author Syn-User
  */
-public abstract class Model {
+public class Model {
     
-    public ArrayList<String> columns = new ArrayList<>();
-    public String tableName;
-    public String service;
-    public Vertx vertx;
-    public Logger logger;
-    public Transaction trans;
-    public SqlConnection conn;
-    public Map<String, String> columnsName = new HashMap<>();
-    public Map<String, String> columnsType = new HashMap<>();
+    protected ArrayList<String> columns = new ArrayList<>();
+    protected String tableName;
+    protected String service;
+    protected Vertx vertx;
+    protected Logger logger;
+    protected Transaction trans;
+    protected Map<String, String> columnsName = new HashMap<>();
+    protected Map<String, String> columnsType = new HashMap<>();
+    public Map<String, String> columnsValue = new HashMap<>();
 
     private JsonObject responseMessages;
     private JsonObject value = new JsonObject();
@@ -55,15 +53,9 @@ public abstract class Model {
     private int index = 1;
     private ArrayList <String> selectQueryArray = new ArrayList<>();
     
-    public Model(Vertx vertx, Transaction trans){
+    protected Model(Vertx vertx, Transaction trans){
         this.vertx = vertx;
         this.trans = trans;
-        this.init();
-    }
-
-    public Model(Vertx vertx, SqlConnection conn){
-        this.vertx = vertx;
-        this.conn = conn;
         this.init();
     }
     
@@ -80,7 +72,7 @@ public abstract class Model {
         Customizable
         This count type must same with count of column
     */ 
-    public void setColumnsName(){
+    protected void setColumnsName(){
         this.columnsName.put("column1","columnName1");
         this.columnsName.put("column2","columnName2");
     }
@@ -99,7 +91,7 @@ public abstract class Model {
         - Number
         - Boolean
     */ 
-    public void setColumnsType(){
+    protected void setColumnsType(){
         this.columnsType.put("column1","string");
         this.columnsType.put("column2","integer");
     }
@@ -107,7 +99,7 @@ public abstract class Model {
     /* 
         Set column from this function
     */ 
-    public void setColumns(){
+    protected void setColumns(){
         this.columns.add("column1");
         this.columns.add("column2");
     }
@@ -115,14 +107,14 @@ public abstract class Model {
     /* 
         Table name in database
     */ 
-    public void setTableName(){
+    protected void setTableName(){
         this.tableName = "tableName";
     }
     
     /* 
         Reference from response.json in resources/messages folder
     */ 
-    public void setService(){
+    protected void setService(){
         this.service = "service";
     }
 
@@ -140,12 +132,78 @@ public abstract class Model {
         this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("model");
 
     }
+    
+    public Future<Void> save(){
+    
+        Promise<Void> promise = Promise.promise();
+        
+        StringBuilder query = new StringBuilder();
+        StringBuilder queryValue = new StringBuilder();
+        Tuple args = Tuple.tuple();
+        String id = UUID.randomUUID().toString();
+        this.index = 1;
+        
+        if(this.columnsValue.get("id") == null || this.columnsValue.get("id").trim().equalsIgnoreCase("")){
+            this.columnsValue.put("id", id);
+        }
+        
+        query.append("INSERT INTO ")
+            .append(this.tableName)
+            .append(" ( ");
+        
+        for (int i = 0 ; i < this.columns.size() ; i++){
+            if(this.columnsValue.get(this.columns.get(i)) != null){
+                query.append(" ")
+                    .append(this.columns.get(i));
+                
+                queryValue.append(" $")
+                    .append(this.index++);
+                
+                if(i != (this.columnsValue.size()-1) ){
+                    query.append(", ");
+                    queryValue.append(", ");
+                }
+                
+                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                
+                query.append(" ");
+                queryValue.append(" ");
+            }
+        }
+            
+        
+        query.append(" ) VALUES ( ").append(queryValue.toString()).append(" ) ;");
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+args.toString());
+        
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
+            if (fetch.succeeded()) {
+                this.findOne(id).setHandler(select -> {
+                    if(select.succeeded()){
+                        promise.complete();
+                    }else{
+                        promise.fail(select.cause().getMessage());
+                    }
+                });
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+        
+                
+        
+        
+        
+        return promise.future();
+    }
 
     public Future<Void> findOne(String id){
 
         StringBuilder addWhere = new StringBuilder();
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
+        this.index = 1;
         
         if(this.selectQuery == null){
             this.selectQuery = this.select();
@@ -159,7 +217,7 @@ public abstract class Model {
             .append(this.index++);
         this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
         
-        this.addArgs("id", id);
+        this.whereArgsQuery = this.addArgs("id", id, this.whereArgsQuery);
         query.append(this.selectQuery)
             .append(" FROM ")
             .append(this.tableName)
@@ -171,7 +229,7 @@ public abstract class Model {
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
 
-        this.conn.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
                 RowSet <Row> rs = fetch.result();
 
@@ -201,6 +259,7 @@ public abstract class Model {
 
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
+        this.index = 1;
         
         if(this.selectQuery == null){
             this.selectQuery = this.select();
@@ -217,7 +276,7 @@ public abstract class Model {
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
 
-        this.conn.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
                 RowSet <Row> rs = fetch.result();
 
@@ -251,6 +310,7 @@ public abstract class Model {
         
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
+        this.index = 1;
         query.append(this.selectQuery)
             .append(" FROM ")
             .append(this.tableName)
@@ -264,7 +324,7 @@ public abstract class Model {
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
 
-        this.conn.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
                 for (Row row : fetch.result()) {
                     JsonObject data = new JsonObject();
@@ -275,6 +335,35 @@ public abstract class Model {
                 }
                 
                 promise.complete();
+            }else {
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+    
+    public Future<String> count(){
+        
+        Promise<String> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        this.index = 1;
+        query.append("SELECT count(")
+            .append(this.tableName)
+            .append(".id)")
+            .append(" FROM ")
+            .append(this.tableName)
+            .append(" ")
+            .append(this.whereQuery == null ? "" : this.whereQuery);
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+            if (fetch.succeeded()) {
+                RowSet <Row> rs = fetch.result();
+                Row row = rs.iterator().next();
+                promise.complete(row.getInteger(0).toString());
             }else {
                 promise.fail(fetch.cause().getMessage());
             }
@@ -320,7 +409,7 @@ public abstract class Model {
                 .append(" ");
         }
         
-        this.addArgs(column, value);
+        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -351,7 +440,7 @@ public abstract class Model {
                 .append(" ");
         }
         
-        this.addArgs(column, value);
+        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -422,6 +511,10 @@ public abstract class Model {
     public String get(){
         return this.value.toString();
     }
+    
+    public String getArray(){
+        return this.valueArray.toString();
+    }
 
     private String result(Row row, String column){
         String result;
@@ -453,32 +546,33 @@ public abstract class Model {
         return result;
     }
     
-    private void addArgs(String column, String value){
+    private Tuple addArgs(String column, String value, Tuple args){
 
         if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
-            this.whereArgsQuery.addUUID(UUID.fromString(value));
+            args.addUUID(UUID.fromString(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("timestamptz")){
-            this.whereArgsQuery.addOffsetDateTime(OffsetDateTime.parse(value));
+            args.addOffsetDateTime(OffsetDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("integer")){
-            this.whereArgsQuery.addInteger(Integer.parseInt(value));
+            args.addInteger(Integer.parseInt(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("date")){
-            this.whereArgsQuery.addLocalDate(LocalDate.parse(value));
+            args.addLocalDate(LocalDate.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("timestamp")){
-            this.whereArgsQuery.addLocalDateTime(LocalDateTime.parse(value));
+            args.addLocalDateTime(LocalDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("datetime")){
-            this.whereArgsQuery.addLocalDateTime(LocalDateTime.parse(value));
+            args.addLocalDateTime(LocalDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("double")){
-            this.whereArgsQuery.addDouble(Double.parseDouble(value));
+            args.addDouble(Double.parseDouble(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("float")){
-            this.whereArgsQuery.addFloat(Float.parseFloat(value));
+            args.addFloat(Float.parseFloat(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("number")){
-            this.whereArgsQuery.addValue(Numeric.parse(value));
+            args.addValue(Numeric.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("boolean")){
-            this.whereArgsQuery.addBoolean(Boolean.parseBoolean(value));
+            args.addBoolean(Boolean.parseBoolean(value));
         }else{
-            this.whereArgsQuery.addString(String.valueOf(value));
+            args.addString(String.valueOf(value));
         }
-
+        
+        return args;
     }
 
     

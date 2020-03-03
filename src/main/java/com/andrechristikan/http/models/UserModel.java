@@ -20,11 +20,6 @@ public class UserModel extends Model {
         super(vertx, trans);
         this.logger = LoggerFactory.getLogger(UserModel.class);
     }
-
-    public UserModel(Vertx vertx, SqlConnection conn){
-        super(vertx, conn);
-        this.logger = LoggerFactory.getLogger(UserModel.class);
-    }
     
     /* 
         Set column from this function

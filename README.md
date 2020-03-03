@@ -22,4 +22,8 @@ Best practice vert.x sync with all futures (without CompletableFuture, i still d
 1. username : admin, password : 123456
 2. username : user, password : 123456
 
+*Model*
+1. If select use SQLConnection
+2. If delete inset and update use Transaction
+
 ####VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL.

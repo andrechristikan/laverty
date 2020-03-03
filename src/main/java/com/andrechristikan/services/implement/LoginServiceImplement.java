@@ -19,6 +19,7 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlConnection;
+import io.vertx.sqlclient.Transaction;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,22 +80,54 @@ public class LoginServiceImplement implements LoginService {
         this.databaseHelper.openConnection(this.poolConnection).setHandler(open -> {
             if(open.succeeded()){
                 SqlConnection conn = open.result();
-                UserModel user = new UserModel(this.vertx, conn);
+                Transaction trans = conn.begin();
+                UserModel user = new UserModel(this.vertx, trans);
                 
-                user.where("password", "=", "123").find().setHandler(select -> {
+//                user.columnsValue.put("role_id", "user");
+//                user.columnsValue.put("username", "andre");
+//                user.columnsValue.put("password", "12345");
+//                user.columnsValue.put("email", "andre@gmail.com");
+//                
+//                user.save().setHandler(select -> {
+//                    if(select.succeeded()){
+//                        String message = this.responseMessages.getString("success");
+//
+//                        trans.commit();
+//                        this.logger.info(this.systemMessages.getString("success"));
+//                        this.databaseHelper.closeConnection(conn);
+//                        String response = Response.DataStructure(0, message, user.getJson());
+//                        resultHandler.handle(Future.succeededFuture(response));
+//                    }else{
+//                        trans.rollback();
+//                        String response = Response.DataStructure(1, select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        resultHandler.handle(Future.failedFuture(response));
+//                    }
+//                    trans.close();
+//                    conn.close();
+//                });
+
+                ArrayList <String> columns = new ArrayList<>();
+                columns.add("role_id");
+                columns.add("username");
+                columns.add("email");
+                user.select("id").select(columns).select("password").findOne("9a057751-3624-4216-a2ce-66b8fb64b2e6").setHandler(select -> {
                     if(select.succeeded()){
-                        JsonArray data = user.getJsonArray();
                         String message = this.responseMessages.getString("success");
 
+                        trans.commit();
                         this.logger.info(this.systemMessages.getString("success"));
                         this.databaseHelper.closeConnection(conn);
-                        String response = Response.DataStructure(0, message, data);
+                        String response = Response.DataStructure(0, message, user.getJson());
                         resultHandler.handle(Future.succeededFuture(response));
                     }else{
+                        trans.rollback();
                         String response = Response.DataStructure(1, select.cause().getMessage());
                         this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
                         resultHandler.handle(Future.failedFuture(response));
                     }
+                    trans.close();
+                    conn.close();
                 });
             }else{
                 String response = Response.DataStructure(1, open.cause().getMessage());
