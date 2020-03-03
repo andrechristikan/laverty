@@ -8,6 +8,7 @@ package com.andrechristikan;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -45,6 +46,7 @@ public abstract class Model {
 
     private JsonObject responseMessages;
     private JsonObject value = new JsonObject();
+    private JsonArray valueArray = new JsonArray();
     private String selectQuery;
     private String whereQuery;
     private Tuple whereArgsQuery = Tuple.tuple();
@@ -74,30 +76,52 @@ public abstract class Model {
         this.setMessages();
     }
 
-    // Customizable
+    /* 
+        Customizable
+        This count type must same with count of column
+    */ 
     public void setColumnsName(){
         this.columnsName.put("column1","columnName1");
         this.columnsName.put("column2","columnName2");
     }
 
-    // Customizable
+    /* 
+        This count type must same with count of column
+        Support for Type
+        - UUID
+        - Timestamptz
+        - Integer
+        - Date
+        - Datetime
+        - Timestamp
+        - Double
+        - Float
+        - Number
+        - Boolean
+    */ 
     public void setColumnsType(){
         this.columnsType.put("column1","string");
         this.columnsType.put("column2","integer");
     }
     
-    // Customizable
+    /* 
+        Set column from this function
+    */ 
     public void setColumns(){
         this.columns.add("column1");
         this.columns.add("column2");
     }
     
-    // Customizable
+    /* 
+        Table name in database
+    */ 
     public void setTableName(){
         this.tableName = "tableName";
     }
     
-    // Customizable
+    /* 
+        Reference from response.json in resources/messages folder
+    */ 
     public void setService(){
         this.service = "service";
     }
@@ -173,6 +197,52 @@ public abstract class Model {
         return promise.future();
     }
     
+    public Future<Void> findOne(){
+
+        Promise<Void> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        
+        if(this.selectQuery == null){
+            this.selectQuery = this.select();
+        }
+        
+        query.append(this.selectQuery)
+            .append(" FROM ")
+            .append(this.tableName)
+            .append(" ")
+            .append(this.whereQuery == null ? "" : this.whereQuery)
+            .append(" ")
+            .append(" LIMIT 1 ");
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+
+        this.conn.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+            if (fetch.succeeded()) {
+                RowSet <Row> rs = fetch.result();
+
+                if (rs.rowCount() == 0) {
+                    String message = this.responseMessages.getJsonObject("find-one").getString("not-found");
+                    promise.fail(message);
+                } else {
+                    Row row = rs.iterator().next();
+                    JsonObject data = new JsonObject();
+
+                    this.selectQueryArray.forEach( column -> {
+                        data.put(this.columnsName.get(column),this.result(row, column));
+                    });
+                    this.value = data;
+
+                    promise.complete();
+                }
+            }else {
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+    
     public Future<Void> find(){
 
         if(this.selectQuery == null){
@@ -196,22 +266,15 @@ public abstract class Model {
 
         this.conn.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
-                RowSet <Row> rs = fetch.result();
-
-                if (rs.rowCount() == 0) {
-                    String message = this.responseMessages.getJsonObject("find-one").getString("not-found");
-                    promise.fail(message);
-                } else {
-                    Row row = rs.iterator().next();
+                for (Row row : fetch.result()) {
                     JsonObject data = new JsonObject();
-
                     this.selectQueryArray.forEach( i -> {
                         data.put(this.columnsName.get(i),this.result(row, i));
                     });
-                    this.value = data;
-
-                    promise.complete();
+                   this.valueArray.add(data);
                 }
+                
+                promise.complete();
             }else {
                 promise.fail(fetch.cause().getMessage());
             }
@@ -348,8 +411,12 @@ public abstract class Model {
         return this;
     }
 
-    public JsonObject toJson(){
+    public JsonObject getJson(){
         return this.value;
+    }
+    
+    public JsonArray getJsonArray(){
+        return this.valueArray;
     }
 
     public String get(){

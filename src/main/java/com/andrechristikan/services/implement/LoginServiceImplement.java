@@ -13,6 +13,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -80,9 +81,9 @@ public class LoginServiceImplement implements LoginService {
                 SqlConnection conn = open.result();
                 UserModel user = new UserModel(this.vertx, conn);
                 
-                user.where("email", "=", "user@mail.com").orWhere("email", "=", "mail.com").where("username","=","user").find().setHandler(select -> {
+                user.where("password", "=", "123").find().setHandler(select -> {
                     if(select.succeeded()){
-                        JsonObject data = new JsonObject(user.get());
+                        JsonArray data = user.getJsonArray();
                         String message = this.responseMessages.getString("success");
 
                         this.logger.info(this.systemMessages.getString("success"));
