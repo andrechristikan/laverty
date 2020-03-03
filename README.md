@@ -114,7 +114,7 @@ Still on developing, i will finish this project as soon as possible.
 - [ ] Create Middleware Request
 
 ### Authors
-> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](instagram andrechristikan) | andrechrisikan@gmail.com
+> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | andrechrisikan@gmail.com
 
 ## Other
 > Users Access App
