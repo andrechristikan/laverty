@@ -119,7 +119,7 @@ public class Model {
     }
 
     private void setColumnsArray(ArrayList<String> columns){
-        this.selectQueryArray = columns;
+        this.selectQueryArray.addAll(columns);
     }
 
     private void setColumnArray(String columns){
@@ -170,7 +170,6 @@ public class Model {
                 queryValue.append(" ");
             }
         }
-            
         
         query.append(" ) VALUES ( ").append(queryValue.toString()).append(" ) ;");
 
@@ -190,11 +189,133 @@ public class Model {
                 promise.fail(fetch.cause().getMessage());
             }
         });
-        
-                
-        
-        
-        
+
+        return promise.future();
+    }
+
+    public Future<Void> insert(Map<String, String> columnsValue){
+
+        Promise<Void> promise = Promise.promise();
+
+        StringBuilder query = new StringBuilder();
+        StringBuilder queryValue = new StringBuilder();
+        Tuple args = Tuple.tuple();
+        String id = UUID.randomUUID().toString();
+        this.index = 1;
+
+        if(columnsValue.get("id") == null || columnsValue.get("id").trim().equalsIgnoreCase("")){
+            columnsValue.put("id", id);
+        }
+
+        query.append("INSERT INTO ")
+                .append(this.tableName)
+                .append(" ( ");
+
+        for (int i = 0 ; i < this.columns.size() ; i++){
+            if(columnsValue.get(this.columns.get(i)) != null){
+                query.append(" ")
+                        .append(this.columns.get(i));
+
+                queryValue.append(" $")
+                        .append(this.index++);
+
+                if(i != (columnsValue.size()-1) ){
+                    query.append(", ");
+                    queryValue.append(", ");
+                }
+
+                args = this.addArgs(this.columns.get(i), columnsValue.get(this.columns.get(i)), args);
+
+                query.append(" ");
+                queryValue.append(" ");
+            }
+        }
+
+        query.append(" ) VALUES ( ").append(queryValue.toString()).append(" ) ;");
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+args.toString());
+
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
+            if (fetch.succeeded()) {
+                this.findOne(id).setHandler(select -> {
+                    if(select.succeeded()){
+                        promise.complete();
+                    }else{
+                        promise.fail(select.cause().getMessage());
+                    }
+                });
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+
+    public Future<Void> delete(){
+
+        Promise <Void> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        this.index = 1;
+
+        if(this.whereQuery == null){
+            promise.fail(this.responseMessages.getJsonObject("delete").getString("where-is-empty"));
+        }
+
+        query.append("DELETE FROM ")
+            .append(this.tableName)
+            .append(" ")
+            .append(this.whereQuery)
+            .append(";");
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+            if (fetch.succeeded()) {
+                promise.complete();
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+
+    public Future<Void> delete(String id){
+
+        Promise <Void> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        StringBuilder addWhere = new StringBuilder();
+        this.index = 1;
+
+        addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
+                .append(this.tableName)
+                .append(".")
+                .append("id")
+                .append(" = $")
+                .append(this.index++);
+        this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
+
+        this.whereArgsQuery = this.addArgs("id", id, this.whereArgsQuery);
+        query.append("DELETE FROM ")
+                .append(this.tableName)
+                .append(" ")
+                .append(this.whereQuery)
+                .append(";");
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+            if (fetch.succeeded()) {
+                promise.complete();
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
         return promise.future();
     }
 
@@ -222,9 +343,9 @@ public class Model {
             .append(" FROM ")
             .append(this.tableName)
             .append(" ")
-            .append(this.whereQuery == null ? "" : this.whereQuery)
+            .append(this.whereQuery)
             .append(" ")
-            .append(" LIMIT 1 ");
+            .append(" LIMIT 1 ;");
 
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
@@ -271,7 +392,7 @@ public class Model {
             .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
-            .append(" LIMIT 1 ");
+            .append(" LIMIT 1 ;");
 
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
@@ -302,7 +423,7 @@ public class Model {
         return promise.future();
     }
     
-    public Future<Void> find(){
+    public Future<Void> findAll(){
 
         if(this.selectQuery == null){
             this.selectQuery = this.select();
@@ -319,7 +440,8 @@ public class Model {
             .append(" ")
             .append(this.limitQuery == null ? "" : this.limitQuery)
             .append(" ")
-            .append(this.orderQuery == null ? "" : this.orderQuery);
+            .append(this.orderQuery == null ? "" : this.orderQuery)
+            .append(";");
 
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
@@ -354,7 +476,8 @@ public class Model {
             .append(" FROM ")
             .append(this.tableName)
             .append(" ")
-            .append(this.whereQuery == null ? "" : this.whereQuery);
+            .append(this.whereQuery == null ? "" : this.whereQuery)
+            .append(";");
 
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+this.whereArgsQuery.toString());
@@ -500,11 +623,11 @@ public class Model {
         return this;
     }
 
-    public JsonObject getJson(){
+    public JsonObject toJson(){
         return this.value;
     }
     
-    public JsonArray getJsonArray(){
+    public JsonArray toJsonArray(){
         return this.valueArray;
     }
 
@@ -512,7 +635,7 @@ public class Model {
         return this.value.toString();
     }
     
-    public String getArray(){
+    public String all(){
         return this.valueArray.toString();
     }
 

@@ -87,7 +87,7 @@ public class LoginServiceImplement implements LoginService {
 //                user.columnsValue.put("username", "andre");
 //                user.columnsValue.put("password", "12345");
 //                user.columnsValue.put("email", "andre@gmail.com");
-//                
+//
 //                user.save().setHandler(select -> {
 //                    if(select.succeeded()){
 //                        String message = this.responseMessages.getString("success");
@@ -95,7 +95,7 @@ public class LoginServiceImplement implements LoginService {
 //                        trans.commit();
 //                        this.logger.info(this.systemMessages.getString("success"));
 //                        this.databaseHelper.closeConnection(conn);
-//                        String response = Response.DataStructure(0, message, user.getJson());
+//                        String response = Response.DataStructure(0, message, user.toJson());
 //                        resultHandler.handle(Future.succeededFuture(response));
 //                    }else{
 //                        trans.rollback();
@@ -107,18 +107,38 @@ public class LoginServiceImplement implements LoginService {
 //                    conn.close();
 //                });
 
-                ArrayList <String> columns = new ArrayList<>();
-                columns.add("role_id");
-                columns.add("username");
-                columns.add("email");
-                user.select("id").select(columns).select("password").findOne("9a057751-3624-4216-a2ce-66b8fb64b2e6").setHandler(select -> {
+//                ArrayList <String> columns = new ArrayList<>();
+//                columns.add("role_id");
+//                columns.add("username");
+//                columns.add("email");
+//                user.select("id").select(columns).select("password").findOne("9a057751-3624-4216-a2ce-66b8fb64b2e6").setHandler(select -> {
+//                    if(select.succeeded()){
+//                        String message = this.responseMessages.getString("success");
+//
+//                        trans.commit();
+//                        this.logger.info(this.systemMessages.getString("success"));
+//                        this.databaseHelper.closeConnection(conn);
+//                        String response = Response.DataStructure(0, message, user.toJson());
+//                        resultHandler.handle(Future.succeededFuture(response));
+//                    }else{
+//                        trans.rollback();
+//                        String response = Response.DataStructure(1, select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        resultHandler.handle(Future.failedFuture(response));
+//                    }
+//                    trans.close();
+//                    conn.close();
+//                });
+
+
+                user.delete("9bb5e295-1627-4fad-b4b8-46755c50c2aa").setHandler(select -> {
                     if(select.succeeded()){
                         String message = this.responseMessages.getString("success");
 
                         trans.commit();
                         this.logger.info(this.systemMessages.getString("success"));
                         this.databaseHelper.closeConnection(conn);
-                        String response = Response.DataStructure(0, message, user.getJson());
+                        String response = Response.DataStructure(0, message);
                         resultHandler.handle(Future.succeededFuture(response));
                     }else{
                         trans.rollback();
