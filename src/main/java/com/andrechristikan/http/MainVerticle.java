@@ -158,7 +158,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("resources/messages/"+language+"/response.json", readFile -> {
+        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/messages/"+language+"/response.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -175,7 +175,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("resources/messages/"+language+"/system.json", readFile -> {
+        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/messages/"+language+"/system.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -192,7 +192,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("resources/configs/services.json", readFile -> {
+        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/configs/services.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -209,7 +209,7 @@ public class MainVerticle extends AbstractVerticle{
         ConfigStoreOptions fileStore = new ConfigStoreOptions()
             .setType("file")
             .setConfig(
-                    new JsonObject().put("path", "./configs/vertx.json")
+                    new JsonObject().put("path", "configs/vertx.json")
             );
         ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
 
@@ -219,9 +219,7 @@ public class MainVerticle extends AbstractVerticle{
 
         ConfigRetriever retriever = ConfigRetriever.create(this.vertx, options);
 
-        Future<JsonObject> future = ConfigRetriever.getConfigAsFuture(retriever);
-        
-        return future;
+        return ConfigRetriever.getConfigAsFuture(retriever);
     }
 
     public static void main(String[] args) throws Exception {
