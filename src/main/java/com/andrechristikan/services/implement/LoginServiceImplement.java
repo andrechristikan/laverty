@@ -18,6 +18,7 @@ import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlConnection;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -78,7 +79,8 @@ public class LoginServiceImplement implements LoginService {
             if(open.succeeded()){
                 SqlConnection conn = open.result();
                 UserModel user = new UserModel(this.vertx, conn);
-                user.findOne("9a057751-3624-4216-a2ce-66b8fb64b2e6").setHandler(select -> {
+                
+                user.where("email", "=", "user@mail.com").orWhere("email", "=", "mail.com").where("username","=","user").find().setHandler(select -> {
                     if(select.succeeded()){
                         JsonObject data = new JsonObject(user.get());
                         String message = this.responseMessages.getString("success");

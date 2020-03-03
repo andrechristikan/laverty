@@ -1,7 +1,7 @@
 {
     "core-dir": ".",
     "language":"en",
-    "environment":"local",
+    "environment":"production",
     "local":{
         "http-server": {
             "port": "8181",
@@ -42,17 +42,17 @@
     "production":{
         "http-server": {
             "port": "8181",
-            "address": "0.0.0.0"
+            "address": "localhost"
         },
         "database":{
             "core":{
                 "isActive": true,
                 "driverName": "org.postgresql.Driver",
-                "host": "18.136.207.143",
+                "host": "localhost",
                 "port": "5432",
-                "name": "car_rental",
-                "user": "dbaccess",
-                "password": "Sba2zeLFne3vEUCc",
+                "name": "andrechristikan_vertx",
+                "user": "postgres",
+                "password": "123456",
                 "poolMinSize": 1,
                 "poolMaxSize": 10
             }
