@@ -1,5 +1,4 @@
 {
-    "core-dir": ".",
     "language":"en",
     "environment":"local",
     "local":{
@@ -9,7 +8,6 @@
         },
         "database":{
             "core":{
-                "isActive": true,
                 "driverName": "org.postgresql.Driver",
                 "host": "localhost",
                 "port": "5432",
@@ -20,6 +18,7 @@
                 "poolMaxSize": 10
             }
         },
+        "resources-directory": "resources",
         "upload-files":{
             "delete-on-end":"true",
             "folder":{
@@ -46,7 +45,6 @@
         },
         "database":{
             "core":{
-                "isActive": true,
                 "driverName": "org.postgresql.Driver",
                 "host": "localhost",
                 "port": "5432",
@@ -57,6 +55,7 @@
                 "poolMaxSize": 10
             }
         },
+        "resources-directory": "resources",
         "upload-files":{
             "delete-on-end":"true",
             "folder":{

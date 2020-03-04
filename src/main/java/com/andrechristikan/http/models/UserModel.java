@@ -5,7 +5,7 @@
  */
 package com.andrechristikan.http.models;
 
-import com.andrechristikan.Model;
+import com.andrechristikan.AbstractModel;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Transaction;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-UserModel
  */
-public class UserModel extends Model {
+public class UserModel extends AbstractModel {
     
     public UserModel(Vertx vertx, Transaction trans){
         super(vertx, trans);

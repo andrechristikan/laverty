@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  *
  * @author Syn-User
  */
-public abstract class Model {
+public abstract class AbstractModel {
     
     protected ArrayList<String> columns = new ArrayList<>();
     protected String tableName;
@@ -51,10 +51,11 @@ public abstract class Model {
     private Tuple whereArgsQuery = Tuple.tuple();
     private String limitQuery;
     private String orderQuery;
+    private String primaryKeyValue;
     private int index = 1;
     private ArrayList <String> selectQueryArray = new ArrayList<>();
     
-    protected Model(Vertx vertx, Transaction trans){
+    protected AbstractModel(Vertx vertx, Transaction trans){
         this.vertx = vertx;
         this.trans = trans;
         this.init();
@@ -67,6 +68,7 @@ public abstract class Model {
         this.setTableName();
         this.setService();
         this.setMessages();
+        this.setPrimaryKey();
     }
 
     /* 
@@ -141,13 +143,15 @@ public abstract class Model {
 
     }
     
-    public Future<Void> update(){
+    public Future<Void> saveUpdate(){
     
         Promise<Void> promise = Promise.promise();
-        
         StringBuilder query = new StringBuilder();
         Tuple args = Tuple.tuple();
-        this.index = 1;
+
+        if(this.value == null || this.value.size() == 0 ){
+            promise.fail(this.responseMessages.getJsonObject("update").getString("need-select-before-update"));
+        }
         
         query.append("UPDATE ")
             .append(this.tableName)
@@ -175,7 +179,7 @@ public abstract class Model {
             .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", this.primaryKeyName, this.index) : this.whereQuery)
             .append(";");
         
-        args = this.addArgs(this.primaryKeyName, this.columnsValue.get(this.primaryKeyName), args);
+        args = this.addArgs(this.primaryKeyName, this.primaryKeyValue, args);
         
         this.logger.info("Query : "+query.toString());
         this.logger.info("Parameter : "+args.toString());
@@ -183,9 +187,63 @@ public abstract class Model {
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
                 this.stop();
-                this.findOne(this.columnsValue.get(this.primaryKeyName)).setHandler(select -> {
+                this.findOne(this.primaryKeyValue).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
+                        promise.complete();
+                    }else{
+                        promise.fail(select.cause().getMessage());
+                    }
+                });
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+
+    public Future<Void> update(Map<String, String> columnsValue, String id){
+
+        Promise<Void> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        Tuple args = Tuple.tuple();
+
+        query.append("UPDATE ")
+                .append(this.tableName)
+                .append(" SET ");
+
+        for (int i = 0 ; i < this.columns.size() ; i++){
+            if(! this.columns.get(i).equalsIgnoreCase(this.primaryKeyName) && columnsValue.get(this.columns.get(i)) != null){
+                query.append(" ")
+                        .append(this.columns.get(i))
+                        .append(" = $")
+                        .append(this.index++)
+                        .append(" ");
+
+                if(i != (columnsValue.size()-1) ){
+                    query.append(", ");
+                }
+
+                args = this.addArgs(this.columns.get(i), columnsValue.get(this.columns.get(i)), args);
+
+                query.append(" ");
+            }
+        }
+
+        query.append(" ")
+                .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", this.primaryKeyName, this.index) : this.whereQuery)
+                .append(";");
+
+        args = this.addArgs(this.primaryKeyName, id, args);
+
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+args.toString());
+
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
+            if (fetch.succeeded()) {
+                this.stop();
+                this.findOne(id).setHandler(select -> {
+                    if(select.succeeded()){
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -246,7 +304,6 @@ public abstract class Model {
                 this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -307,7 +364,6 @@ public abstract class Model {
                 this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -326,8 +382,8 @@ public abstract class Model {
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
 
-        if(this.whereQuery == null){
-            promise.fail(this.responseMessages.getJsonObject("delete").getString("where-is-empty"));
+        if(this.value == null || this.value.size() == 0 ){
+            promise.fail(this.responseMessages.getJsonObject("delete").getString("need-select-before-update"));
         }
 
         query.append("DELETE FROM ")
@@ -341,6 +397,8 @@ public abstract class Model {
 
         this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
+                this.stop();
+                this.setNullPrimaryKeyValue();
                 promise.complete();
             }else{
                 promise.fail(fetch.cause().getMessage());
@@ -355,7 +413,6 @@ public abstract class Model {
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
         StringBuilder addWhere = new StringBuilder();
-        this.index = 1;
 
         addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
                 .append(this.tableName)
@@ -378,6 +435,7 @@ public abstract class Model {
         this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
                 this.stop();
+                this.setNullPrimaryKeyValue();
                 promise.complete();
             }else{
                 promise.fail(fetch.cause().getMessage());
@@ -429,6 +487,11 @@ public abstract class Model {
                     JsonObject data = new JsonObject();
 
                     this.selectQueryArray.forEach( column -> {
+
+                        if(column.equalsIgnoreCase(this.primaryKeyName)){
+                            this.primaryKeyValue = this.result(row, column);
+                        }
+
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
@@ -449,7 +512,11 @@ public abstract class Model {
 
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        
+
+        if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
+            promise.fail(this.responseMessages.getJsonObject("find-one").getString("need-where-statement"));
+        }
+
         if(this.selectQuery == null){
             this.selectQuery = this.select();
         }
@@ -477,6 +544,11 @@ public abstract class Model {
                     JsonObject data = new JsonObject();
 
                     this.selectQueryArray.forEach( column -> {
+
+                        if(column.equalsIgnoreCase(this.primaryKeyName)){
+                            this.primaryKeyValue = this.result(row, column);
+                        }
+
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
@@ -540,46 +612,59 @@ public abstract class Model {
         
         Promise<String> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        
-        query.append("SELECT count(")
-            .append(this.tableName)
-            .append(".")
-            .append(this.primaryKeyName)
-            .append(" FROM ")
-            .append(this.tableName)
-            .append(" ")
-            .append(this.whereQuery == null ? "" : this.whereQuery)
-            .append(";");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        if(this.value != null && this.value.size() > 0 ){
+            this.stop();
+            promise.complete("1");
+        }else if(this.valueArray != null && this.valueArray.size() > 0){
+            this.stop();
+            promise.complete(String.valueOf(this.valueArray.size()));
+        }else{
 
-        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
-            if (fetch.succeeded()) {
-                RowSet <Row> rs = fetch.result();
-                Row row = rs.iterator().next();
-                
-                this.stop();
-                promise.complete(row.getInteger(0).toString());
-            }else {
-                promise.fail(fetch.cause().getMessage());
+            if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
+                promise.fail(this.responseMessages.getJsonObject("count").getString("need-where-statement"));
             }
-        });
+
+            query.append("SELECT count(")
+                    .append(this.tableName)
+                    .append(".")
+                    .append(this.primaryKeyName)
+                    .append(" FROM ")
+                    .append(this.tableName)
+                    .append(" ")
+                    .append(this.whereQuery == null ? "" : this.whereQuery)
+                    .append(";");
+
+            this.logger.info("Query : "+query.toString());
+            this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+
+            this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+                if (fetch.succeeded()) {
+                    RowSet <Row> rs = fetch.result();
+                    Row row = rs.iterator().next();
+
+                    this.stop();
+                    promise.complete(row.getInteger(0).toString());
+                }else {
+                    promise.fail(fetch.cause().getMessage());
+                }
+            });
+        }
 
         return promise.future();
     }
     
-    public Model limit(String limit){
+    public AbstractModel limit(String limit){
         this.limitQuery = String.format(" LIMIT %s ",limit);
         return this;
     }
     
-    public Model orderBy(String column, String orderType){
+    public AbstractModel orderBy(String column, String orderType){
         this.orderQuery = String.format(" ORDER BY %s $s ",column,orderType);
         return this;
     }
 
-    public Model where(String column, String operator, String value){
+    public AbstractModel where(String column, String operator, String value){
         
         StringBuilder where = new StringBuilder();
         
@@ -611,7 +696,7 @@ public abstract class Model {
         return this;
     }
     
-    public Model orWhere(String column, String operator, String value){
+    public AbstractModel orWhere(String column, String operator, String value){
         
         StringBuilder where = new StringBuilder();
         
@@ -657,7 +742,7 @@ public abstract class Model {
         return query.toString();
     }
 
-    public Model select(ArrayList<String> columns){
+    public AbstractModel select(ArrayList<String> columns){
         StringBuilder query = new StringBuilder();
         query.append(" SELECT ");
         for (int i = 0; i < columns.size() ; i++) {
@@ -673,7 +758,7 @@ public abstract class Model {
         return this;
     }
 
-    public Model select(String column){
+    public AbstractModel select(String column){
 
         StringBuilder query = new StringBuilder();
 
@@ -781,6 +866,9 @@ public abstract class Model {
         this.selectQueryArray = new ArrayList<>();
         this.index = 1;
     }
-    
+
+    private void setNullPrimaryKeyValue(){
+        this.primaryKeyValue = null;
+    }
     
 }

@@ -13,16 +13,12 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -91,8 +87,8 @@ public class LoginServiceImplement implements LoginService {
 //                user.columnsValue.put("username", "andre");
 //                user.columnsValue.put("password", "12345");
 //                user.columnsValue.put("email", "andre@gmail.com");
-//                
-//                
+//
+//
 //                Map<String, String> value = new HashMap<>();
 //                value.put("role_id", "user");
 //                value.put("username", "andre");
@@ -166,39 +162,39 @@ public class LoginServiceImplement implements LoginService {
 //                });
 
                 // --- UPDATE
-                user.findOne("5fe32a18-f53a-4ed8-a023-379698a55e54").setHandler(select -> {
-                    if(select.succeeded()){
-                        String message = this.responseMessages.getString("success");
-                        
-                        this.logger.info(user.columnsValue.toString());
-                        user.columnsValue.replace("role_id", "user");
-                        user.columnsValue.replace("username", "andreck");
-                        user.columnsValue.replace("password", "123456");
-                        user.columnsValue.replace("email", "andreck@gmail.com");
-                        user.update().setHandler(update -> {
-                            if(update.succeeded()){
-                                trans.commit();
-                                this.logger.info(this.systemMessages.getString("success"));
-                                this.databaseHelper.closeConnection(conn);
-                                String response = Response.DataStructure(0, message, user.toJson());
-                                resultHandler.handle(Future.succeededFuture(response));
-                            }else{
-                                trans.rollback();
-                                String response = Response.DataStructure(1, update.cause().getMessage());
-                                this.logger.error(this.systemMessages.getString("fail") +" "+update.cause().getMessage());
-                                resultHandler.handle(Future.failedFuture(response));
-                            }
-                            
-                            trans.close();
-                            conn.close();
-                        });
-                    }else{
-                        trans.rollback();
-                        String response = Response.DataStructure(1, select.cause().getMessage());
-                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
-                        resultHandler.handle(Future.failedFuture(response));
-                    }
-                });
+//                user.findOne("5fe32a18-f53a-4ed8-a023-379698a55e54").setHandler(select -> {
+//                    if(select.succeeded()){
+//                        String message = this.responseMessages.getString("success");
+//
+//                        this.logger.info(user.columnsValue.toString());
+//                        user.columnsValue.replace("role_id", "user");
+//                        user.columnsValue.replace("username", "andreck");
+//                        user.columnsValue.replace("password", "123456");
+//                        user.columnsValue.replace("email", "andreck@gmail.com");
+//                        user.saveUpdate().setHandler(update -> {
+//                            if(update.succeeded()){
+//                                trans.commit();
+//                                this.logger.info(this.systemMessages.getString("success"));
+//                                this.databaseHelper.closeConnection(conn);
+//                                String response = Response.DataStructure(0, message, user.toJson());
+//                                resultHandler.handle(Future.succeededFuture(response));
+//                            }else{
+//                                trans.rollback();
+//                                String response = Response.DataStructure(1, update.cause().getMessage());
+//                                this.logger.error(this.systemMessages.getString("fail") +" "+update.cause().getMessage());
+//                                resultHandler.handle(Future.failedFuture(response));
+//                            }
+//
+//                            trans.close();
+//                            conn.close();
+//                        });
+//                    }else{
+//                        trans.rollback();
+//                        String response = Response.DataStructure(1, select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        resultHandler.handle(Future.failedFuture(response));
+//                    }
+//                });
 
             }else{
                 String response = Response.DataStructure(1, open.cause().getMessage());

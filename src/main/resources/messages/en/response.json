@@ -9,10 +9,17 @@
         "user": {
             "model": {
                 "find-one": {
+                    "need-where-statement": "Need where statement",
                     "not-found": "User not found."
                 },
                 "delete": {
-                    "where-is-empty": "Where must filled before delete at lease one where statement."
+                    "need-select-before-update": "Delete statement can't run, need select before delete."
+                },
+                "update": {
+                    "need-select-before-update": "Update statement can't run, need select before update."
+                },
+                "count": {
+                    "need-where-statement": "Need where statement"
                 }
             }
         }
