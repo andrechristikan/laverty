@@ -2,21 +2,21 @@
 I was tired using primitive vert.x with so many random resources.
 
 ## Getting Started
-Inspired from laravel framework. ~~This will save your time while developing an apps.~~
+Inspired from laravel framework. This project wanna be like mini-laravel framework. ~~This will save your time while developing apps.~~
 
 > Minimum requirement: 
-1. Understand Java Language (Beginner)
-2. Understand Asynchronous Programming
+1. Understand Java Language (Beginner - Intermediate)
+2. Understand Asynchronous Programming (Intermediate)
 3. [Know what vert.x is](https://vertx.io)
 4. [Vert.x Proxy](https://vertx.io/docs/vertx-service-proxy/java/)
 
 > Tech stack
-1. Java 11..0.6
+1. Java 11.0.6
 2. Postgresql 12.2
 3. Maven 10.14.6
 
 ### Instalation
-> Production - Normal Installing / Linux env - NEED TO TEST
+> Production - Normal Installing / Linux env *NEED TO TEST*
 1. Open terminal, and pull this project
 2. Goto into project
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `classes/configs/vertx.json`
@@ -33,7 +33,7 @@ Inspired from laravel framework. ~~This will save your time while developing an 
 7. Build your project `mvn clean install`, **if error --....**
 8. Run project `java -jar target/FileName.jar`
 
-> Development - With Intellij IDE - TESTED ON MAC MOJAVE
+> Development - With Intellij IDE *TESTED ON MAC MOJAVE*
 1. Set the Project Structure
     - Root : Directory of this project
     - Source : 
@@ -65,7 +65,7 @@ Inspired from laravel framework. ~~This will save your time while developing an 
 6. Run `initial.sql` in project folder to inject data into Postgres
 7. Run project, if you using MAC press `Control + R` on the keyboard
    
-> Development - With Netbeans - TESTED ON WINDOWS 10
+> Development - With Netbeans *TESTED ON WINDOWS 10*
 1. Open project with Netbeans
 2. Setting the project
     - Right click -> properties at the project name in side bar
@@ -194,6 +194,9 @@ Some example from this project
     columns.add("username");
     columns.add("email");
 
+
+
+
     // Select columns that you want
     user.select("id")
         .select(columns)
@@ -203,17 +206,25 @@ Some example from this project
         ...
     });
 
+
+
+
     // This will get all columns base on the model that you created
     user.findOne("primary-key").setHandler(select -> {
         ...
    });
 
     
+
+
     // If you to select more than one, do this
     // This will get all columns base on the model that you created
     user.findAll().setHandler(select -> {
         ...
      });
+
+
+
 
     // Also you can use where, limit, and order by in the select statement
     user.select(columns)
@@ -240,6 +251,9 @@ Some example from this project
         ...
     });
     
+
+
+
     // More example
     Map<String, String> columnsValue = new HashMap<>();
     columnsValue.put("role_id", "user");
@@ -270,6 +284,9 @@ Some example from this project
         });
     });
 
+
+
+
     // More example for update
     Map<String, String> columnsValue = new HashMap<>();
     columnsValue.put("role_id", "user");
@@ -299,6 +316,9 @@ Some example from this project
         });
     });
 
+
+
+
     // More example for delete
     user.where("username","=","user")
         .delete("primary-key")
@@ -317,6 +337,9 @@ Some example from this project
         });
     });
     
+
+
+
     // Count of findAll
     user.findAll().setHandler(select -> {
         user.count().setHandler(count -> {
@@ -324,6 +347,9 @@ Some example from this project
             ...
         });
     });
+
+
+
 
     // Count with where statement
     user.where("username","=","user")
@@ -334,14 +360,41 @@ Some example from this project
      });
 ```
 
-#### How to get the result
+#### How to get the result of model
 ```java
     user.first(); // this will return the String of JsonObject
     user.toJson(); // this will return JsonObject
     user.get(); // This will return the String of JsonArray
     user.toJsonArray(); // this will return JsonArray
 ```
+### Route
+```java
 
+```
+
+### Controller
+```java
+
+```
+
+### Exception
+```java
+
+```
+### Middleware Request
+```java
+
+```
+
+### Authorization with JWT
+```java
+
+```
+
+### Control Env
+```java
+
+```
 ## Development
 Still on development. I will finish this project as soon as possible.
 
@@ -389,6 +442,8 @@ Still on development. I will finish this project as soon as possible.
 - [ ] Flow login (Ongoing)
 - [ ] Password Helper
 - [ ] Create Middleware Request
+- [ ] Model Join
+- [ ] Database Migration
 
 ### Authors
 > [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | andrechrisikan@gmail.com
