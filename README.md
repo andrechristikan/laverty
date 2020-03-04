@@ -15,8 +15,9 @@ Inspired from laravel framework. This project wanna be like mini-laravel framewo
 2. Postgresql 12.2
 3. Maven 10.14.6
 
-### Instalation
-> Production - Normal Installing / Linux env *NEED TO TEST*
+## Instalation
+Guide for install this project
+### Production - Normal Installing / Linux env (NEED TO TEST)
 1. Open terminal, and pull this project
 2. Goto into project
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `classes/configs/vertx.json`
@@ -33,7 +34,7 @@ Inspired from laravel framework. This project wanna be like mini-laravel framewo
 7. Build your project `mvn clean install`, **if error --....**
 8. Run project `java -jar target/FileName.jar`
 
-> Development - With Intellij IDE *TESTED ON MAC MOJAVE*
+### Development - With Intellij IDE (TESTED ON MAC MOJAVE)
 1. Set the Project Structure
     - Root : Directory of this project
     - Source : 
@@ -65,7 +66,7 @@ Inspired from laravel framework. This project wanna be like mini-laravel framewo
 6. Run `initial.sql` in project folder to inject data into Postgres
 7. Run project, if you using MAC press `Control + R` on the keyboard
    
-> Development - With Netbeans *TESTED ON WINDOWS 10*
+### Development - With Netbeans (TESTED ON WINDOWS 10)
 1. Open project with Netbeans
 2. Setting the project
     - Right click -> properties at the project name in side bar
