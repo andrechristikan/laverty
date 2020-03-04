@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  *
  * @author Syn-User
  */
-public class Model {
+public abstract class Model {
     
     protected ArrayList<String> columns = new ArrayList<>();
     protected String tableName;
