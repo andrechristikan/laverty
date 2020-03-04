@@ -40,6 +40,7 @@ public class Model {
     protected Transaction trans;
     protected Map<String, String> columnsName = new HashMap<>();
     protected Map<String, String> columnsType = new HashMap<>();
+    protected String primaryKeyName;
     public Map<String, String> columnsValue = new HashMap<>();
 
     private JsonObject responseMessages;
@@ -117,6 +118,13 @@ public class Model {
     protected void setService(){
         this.service = "service";
     }
+    
+    /* 
+        If you want to change primary key
+    */ 
+    protected void setPrimaryKey(){
+        this.primaryKeyName = "id";
+    }
 
     private void setColumnsArray(ArrayList<String> columns){
         this.selectQueryArray.addAll(columns);
@@ -133,6 +141,64 @@ public class Model {
 
     }
     
+    public Future<Void> update(){
+    
+        Promise<Void> promise = Promise.promise();
+        
+        StringBuilder query = new StringBuilder();
+        Tuple args = Tuple.tuple();
+        this.index = 1;
+        
+        query.append("UPDATE ")
+            .append(this.tableName)
+            .append(" SET ");
+        
+        for (int i = 0 ; i < this.columns.size() ; i++){
+            if(! this.columns.get(i).equalsIgnoreCase(this.primaryKeyName) && this.columnsValue.get(this.columns.get(i)) != null){
+                query.append(" ")
+                    .append(this.columns.get(i))
+                    .append(" = $")
+                    .append(this.index++)
+                    .append(" ");
+                
+                if(i != (this.columnsValue.size()-1) ){
+                    query.append(", ");
+                }
+                
+                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                
+                query.append(" ");
+            }
+        }
+        
+        query.append(" ")
+            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", this.primaryKeyName, this.index) : this.whereQuery)
+            .append(";");
+        
+        args = this.addArgs(this.primaryKeyName, this.columnsValue.get(this.primaryKeyName), args);
+        
+        this.logger.info("Query : "+query.toString());
+        this.logger.info("Parameter : "+args.toString());
+        
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
+            if (fetch.succeeded()) {
+                this.stop();
+                this.findOne(this.columnsValue.get(this.primaryKeyName)).setHandler(select -> {
+                    if(select.succeeded()){
+                        this.stop();
+                        promise.complete();
+                    }else{
+                        promise.fail(select.cause().getMessage());
+                    }
+                });
+            }else{
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+
+        return promise.future();
+    }
+    
     public Future<Void> save(){
     
         Promise<Void> promise = Promise.promise();
@@ -141,10 +207,9 @@ public class Model {
         StringBuilder queryValue = new StringBuilder();
         Tuple args = Tuple.tuple();
         String id = UUID.randomUUID().toString();
-        this.index = 1;
         
-        if(this.columnsValue.get("id") == null || this.columnsValue.get("id").trim().equalsIgnoreCase("")){
-            this.columnsValue.put("id", id);
+        if(this.columnsValue.get(this.primaryKeyName) == null || this.columnsValue.get(this.primaryKeyName).trim().equalsIgnoreCase("")){
+            this.columnsValue.put(this.primaryKeyName, id);
         }
         
         query.append("INSERT INTO ")
@@ -178,8 +243,10 @@ public class Model {
         
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
+                this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
+                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -201,10 +268,9 @@ public class Model {
         StringBuilder queryValue = new StringBuilder();
         Tuple args = Tuple.tuple();
         String id = UUID.randomUUID().toString();
-        this.index = 1;
 
-        if(columnsValue.get("id") == null || columnsValue.get("id").trim().equalsIgnoreCase("")){
-            columnsValue.put("id", id);
+        if(columnsValue.get(this.primaryKeyName) == null || columnsValue.get(this.primaryKeyName).trim().equalsIgnoreCase("")){
+            columnsValue.put(this.primaryKeyName, id);
         }
 
         query.append("INSERT INTO ")
@@ -238,8 +304,10 @@ public class Model {
 
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
+                this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
+                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -257,7 +325,6 @@ public class Model {
 
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        this.index = 1;
 
         if(this.whereQuery == null){
             promise.fail(this.responseMessages.getJsonObject("delete").getString("where-is-empty"));
@@ -293,12 +360,12 @@ public class Model {
         addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
                 .append(this.tableName)
                 .append(".")
-                .append("id")
+                .append(this.primaryKeyName)
                 .append(" = $")
                 .append(this.index++);
         this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
 
-        this.whereArgsQuery = this.addArgs("id", id, this.whereArgsQuery);
+        this.whereArgsQuery = this.addArgs(this.primaryKeyName, id, this.whereArgsQuery);
         query.append("DELETE FROM ")
                 .append(this.tableName)
                 .append(" ")
@@ -310,6 +377,7 @@ public class Model {
 
         this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
+                this.stop();
                 promise.complete();
             }else{
                 promise.fail(fetch.cause().getMessage());
@@ -324,7 +392,6 @@ public class Model {
         StringBuilder addWhere = new StringBuilder();
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        this.index = 1;
         
         if(this.selectQuery == null){
             this.selectQuery = this.select();
@@ -333,12 +400,12 @@ public class Model {
         addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
             .append(this.tableName)
             .append(".")
-            .append("id")
+            .append(this.primaryKeyName)
             .append(" = $")
             .append(this.index++);
         this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
         
-        this.whereArgsQuery = this.addArgs("id", id, this.whereArgsQuery);
+        this.whereArgsQuery = this.addArgs(this.primaryKeyName, id, this.whereArgsQuery);
         query.append(this.selectQuery)
             .append(" FROM ")
             .append(this.tableName)
@@ -363,9 +430,11 @@ public class Model {
 
                     this.selectQueryArray.forEach( column -> {
                         data.put(this.columnsName.get(column),this.result(row, column));
+                        this.columnsValue.put(column, this.result(row, column));
                     });
                     this.value = data;
 
+                    this.stop();
                     promise.complete();
                 }
             }else {
@@ -380,7 +449,6 @@ public class Model {
 
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        this.index = 1;
         
         if(this.selectQuery == null){
             this.selectQuery = this.select();
@@ -410,9 +478,11 @@ public class Model {
 
                     this.selectQueryArray.forEach( column -> {
                         data.put(this.columnsName.get(column),this.result(row, column));
+                        this.columnsValue.put(column, this.result(row, column));
                     });
                     this.value = data;
 
+                    this.stop();
                     promise.complete();
                 }
             }else {
@@ -431,7 +501,7 @@ public class Model {
         
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        this.index = 1;
+        
         query.append(this.selectQuery)
             .append(" FROM ")
             .append(this.tableName)
@@ -456,6 +526,7 @@ public class Model {
                    this.valueArray.add(data);
                 }
                 
+                this.stop();
                 promise.complete();
             }else {
                 promise.fail(fetch.cause().getMessage());
@@ -469,10 +540,11 @@ public class Model {
         
         Promise<String> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        this.index = 1;
+        
         query.append("SELECT count(")
             .append(this.tableName)
-            .append(".id)")
+            .append(".")
+            .append(this.primaryKeyName)
             .append(" FROM ")
             .append(this.tableName)
             .append(" ")
@@ -486,6 +558,8 @@ public class Model {
             if (fetch.succeeded()) {
                 RowSet <Row> rs = fetch.result();
                 Row row = rs.iterator().next();
+                
+                this.stop();
                 promise.complete(row.getInteger(0).toString());
             }else {
                 promise.fail(fetch.cause().getMessage());
@@ -631,11 +705,11 @@ public class Model {
         return this.valueArray;
     }
 
-    public String get(){
+    public String first(){
         return this.value.toString();
     }
     
-    public String all(){
+    public String get(){
         return this.valueArray.toString();
     }
 
@@ -670,34 +744,43 @@ public class Model {
     }
     
     private Tuple addArgs(String column, String value, Tuple args){
-
+        
         if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
-            args.addUUID(UUID.fromString(value));
+            args.addUUID(value == null || value.trim().equals("") ? null : UUID.fromString(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("timestamptz")){
-            args.addOffsetDateTime(OffsetDateTime.parse(value));
+            args.addOffsetDateTime(value == null || value.trim().equals("") ? null : OffsetDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("integer")){
-            args.addInteger(Integer.parseInt(value));
+            args.addInteger(value == null || value.trim().equals("") ? null : Integer.parseInt(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("date")){
-            args.addLocalDate(LocalDate.parse(value));
+            args.addLocalDate(value == null || value.trim().equals("") ? null : LocalDate.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("timestamp")){
-            args.addLocalDateTime(LocalDateTime.parse(value));
+            args.addLocalDateTime(value == null || value.trim().equals("") ? null : LocalDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("datetime")){
-            args.addLocalDateTime(LocalDateTime.parse(value));
+            args.addLocalDateTime(value == null || value.trim().equals("") ? null : LocalDateTime.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("double")){
-            args.addDouble(Double.parseDouble(value));
+            args.addDouble(value == null || value.trim().equals("") ? null : Double.parseDouble(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("float")){
-            args.addFloat(Float.parseFloat(value));
+            args.addFloat(value == null || value.trim().equals("") ? null : Float.parseFloat(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("number")){
-            args.addValue(Numeric.parse(value));
+            args.addValue(value == null || value.trim().equals("") ? null : Numeric.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("boolean")){
-            args.addBoolean(Boolean.parseBoolean(value));
+            args.addBoolean(value == null || value.trim().equals("") ? null : Boolean.parseBoolean(value));
         }else{
-            args.addString(String.valueOf(value));
+            args.addString(value == null || value.trim().equals("") ? null : String.valueOf(value));
         }
         
         return args;
     }
 
+    private void stop(){
+        this.whereQuery = null;
+        this.whereArgsQuery = Tuple.tuple();
+        this.limitQuery = null;
+        this.orderQuery = null;
+        this.selectQuery = null;
+        this.selectQueryArray = new ArrayList<>();
+        this.index = 1;
+    }
     
     
 }

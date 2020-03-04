@@ -2,7 +2,7 @@
 I just tired to using primitive vert.x with so many random resource.
 
 ## Getting Started
-Inspired from laravel framework. ~~This will save your time while develop apps.~~
+Inspired from laravel framework. ~~This will save your time while developing an apps.~~
 
 >Minimum requirement: 
 1. Understand Java Language
@@ -63,10 +63,28 @@ Inspired from laravel framework. ~~This will save your time while develop apps.~
    - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
 6. Run `initial.sql` in folder project into Postgres
-7. Run project, if you using MAC klik `Control + R`
+7. Run project, if you using MAC press `Control + R` on the keyboard
    
 > Development - With Netbeans - TESTED ON WINDOWS 10
-   
+1. Open project with Netbeans
+2. Setting the project
+    - Click properties at this project in the project open side bar
+    - Goto the `run` tap
+    - Make sure if main class is `com.andrechristikan.http.MainVerticle` and working directory is `directory this project`
+3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `configs/vertx.json`
+4. Set config, config in `src/main/resources/configs`
+   - Rename `vertx-example.json` to `vertx.json`
+   - Open `vertx.json`
+   - Adjust your setting for `local`
+   - Don't miss with the `environment` value to `local`
+   - Resource directory for production is `resources`
+5. Set the messages `src/main/resources/messages`
+   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
+   - Then open the json file and change **the value** not **the key**.
+6. Run `initial.sql` in folder project into Postgres
+7. Build this project, press `shift + f11`
+8. Run project, press `f6` or `ctrl + f5`
+
 ## Development
 Still on developing, i will finish this project as soon as possible.
 ~~Because I still have another life man.~~
@@ -106,11 +124,11 @@ Still on developing, i will finish this project as soon as possible.
 - [x] Setting App From vertx.json File
 - [x] All messages from files
 - [x] Created Login controller
-- [ ] Model Class (Ongoing)
-- [ ] User model (Ongoing)
+- [x] Model Class
+- [x] User model
 - [ ] User Service Implementation (Ongoing)
 - [ ] Password Helper
-- [ ] Flow login
+- [ ] Flow login (Ongoing)
 - [ ] Create Middleware Request
 
 ### Authors

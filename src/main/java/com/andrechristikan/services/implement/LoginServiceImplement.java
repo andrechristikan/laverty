@@ -21,6 +21,8 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -83,11 +85,20 @@ public class LoginServiceImplement implements LoginService {
                 Transaction trans = conn.begin();
                 UserModel user = new UserModel(this.vertx, trans);
                 
+                
+                // --- INSERT
 //                user.columnsValue.put("role_id", "user");
 //                user.columnsValue.put("username", "andre");
 //                user.columnsValue.put("password", "12345");
 //                user.columnsValue.put("email", "andre@gmail.com");
-//
+//                
+//                
+//                Map<String, String> value = new HashMap<>();
+//                value.put("role_id", "user");
+//                value.put("username", "andre");
+//                value.put("password", "12345");
+//                value.put("email", "andre@gmail.com");
+//                user.insert(value);
 //                user.save().setHandler(select -> {
 //                    if(select.succeeded()){
 //                        String message = this.responseMessages.getString("success");
@@ -107,6 +118,9 @@ public class LoginServiceImplement implements LoginService {
 //                    conn.close();
 //                });
 
+
+
+                // --- SELECT
 //                ArrayList <String> columns = new ArrayList<>();
 //                columns.add("role_id");
 //                columns.add("username");
@@ -131,24 +145,61 @@ public class LoginServiceImplement implements LoginService {
 //                });
 
 
-                user.delete("9bb5e295-1627-4fad-b4b8-46755c50c2aa").setHandler(select -> {
+                // --- DELETE
+//                user.delete("95f45eee-26e4-4556-9e74-33101a878fe0").setHandler(select -> {
+//                    if(select.succeeded()){
+//                        String message = this.responseMessages.getString("success");
+//
+//                        trans.commit();
+//                        this.logger.info(this.systemMessages.getString("success"));
+//                        this.databaseHelper.closeConnection(conn);
+//                        String response = Response.DataStructure(0, message);
+//                        resultHandler.handle(Future.succeededFuture(response));
+//                    }else{
+//                        trans.rollback();
+//                        String response = Response.DataStructure(1, select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        resultHandler.handle(Future.failedFuture(response));
+//                    }
+//                    trans.close();
+//                    conn.close();
+//                });
+
+                // --- UPDATE
+                user.findOne("5fe32a18-f53a-4ed8-a023-379698a55e54").setHandler(select -> {
                     if(select.succeeded()){
                         String message = this.responseMessages.getString("success");
-
-                        trans.commit();
-                        this.logger.info(this.systemMessages.getString("success"));
-                        this.databaseHelper.closeConnection(conn);
-                        String response = Response.DataStructure(0, message);
-                        resultHandler.handle(Future.succeededFuture(response));
+                        
+                        this.logger.info(user.columnsValue.toString());
+                        user.columnsValue.replace("role_id", "user");
+                        user.columnsValue.replace("username", "andreck");
+                        user.columnsValue.replace("password", "123456");
+                        user.columnsValue.replace("email", "andreck@gmail.com");
+                        user.update().setHandler(update -> {
+                            if(update.succeeded()){
+                                trans.commit();
+                                this.logger.info(this.systemMessages.getString("success"));
+                                this.databaseHelper.closeConnection(conn);
+                                String response = Response.DataStructure(0, message, user.toJson());
+                                resultHandler.handle(Future.succeededFuture(response));
+                            }else{
+                                trans.rollback();
+                                String response = Response.DataStructure(1, update.cause().getMessage());
+                                this.logger.error(this.systemMessages.getString("fail") +" "+update.cause().getMessage());
+                                resultHandler.handle(Future.failedFuture(response));
+                            }
+                            
+                            trans.close();
+                            conn.close();
+                        });
                     }else{
                         trans.rollback();
                         String response = Response.DataStructure(1, select.cause().getMessage());
                         this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
                         resultHandler.handle(Future.failedFuture(response));
                     }
-                    trans.close();
-                    conn.close();
                 });
+
             }else{
                 String response = Response.DataStructure(1, open.cause().getMessage());
                 this.logger.error(this.systemMessages.getString("fail") +" "+open.cause().getMessage());

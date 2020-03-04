@@ -7,7 +7,6 @@ package com.andrechristikan.http.models;
 
 import com.andrechristikan.Model;
 import io.vertx.core.Vertx;
-import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
 import org.slf4j.LoggerFactory;
 /**
@@ -25,7 +24,7 @@ public class UserModel extends Model {
         Set column from this function
     */ 
     @Override
-    public void setColumns(){
+    protected void setColumns(){
         this.columns.add("id");
         this.columns.add("role_id");
         this.columns.add("username");
@@ -41,7 +40,7 @@ public class UserModel extends Model {
         This count type must same with count of column
     */ 
     @Override
-    public void setColumnsName(){
+    protected void setColumnsName(){
         this.columnsName.put("id","user_id");
         this.columnsName.put("role_id","role_id");
         this.columnsName.put("username","user_name");
@@ -67,7 +66,7 @@ public class UserModel extends Model {
         - Boolean
     */ 
     @Override
-    public void setColumnsType(){
+    protected void setColumnsType(){
         this.columnsType.put("id","uuid");
         this.columnsType.put("role_id","string");
         this.columnsType.put("username","string");
@@ -82,7 +81,7 @@ public class UserModel extends Model {
         Table name in database
     */ 
     @Override
-    public void setTableName(){
+    protected void setTableName(){
         this.tableName = "users";
     }
     
@@ -90,8 +89,16 @@ public class UserModel extends Model {
         Reference from response.json in resources/messages folder
     */ 
     @Override
-    public void setService(){
+    protected void setService(){
         this.service = "user";
+    }
+    
+    /* 
+        If you want to change primary key
+    */ 
+    @Override
+    protected void setPrimaryKey(){
+        this.primaryKeyName = "id";
     }
 
 }
