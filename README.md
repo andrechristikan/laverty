@@ -180,17 +180,19 @@ Some example from this project
 
 ####  Use Model to select
 ```java
-        
+
     // Init class
+    // vertx from "io.vertx.core.Vertx" class
+    // trans from "io.vertx.sqlclient.Transaction" class
     UserModel user = new UserModel(vertx, trans);
 
-    // Set columns
+    // Set the columns
     ArrayList <String> columns = new ArrayList<>();
     columns.add("role_id");
     columns.add("username");
     columns.add("email");
 
-    // Select with selected columns
+    // Select columns that you want
     user.select("id").select(columns).select("password").findOne("primary-key").setHandler(select -> {
             if(select.succeeded()){
 
@@ -206,27 +208,37 @@ Some example from this project
         }
     });
 
-
-    // If you want to get columns from table, you can do like this
     // This will get all columns base on the model that you created
     user.findOne("primary-key").setHandler(select -> {
-           if(select.succeeded()){
-
-           // Commit the query transaction to have the data or get the changes
-           trans.commit();
-           
-           // Get the data
-           JsonObject jsonResult = user.toJson(); // For JsonObject
-           String stringResult = user.first(); // For String
-
-       }else{
-           trans.rollback();
-       }
+        ...
    });
 
     
     // If you to select more than one, do this
-    user.find()
+    // This will get all columns base on the model that you created
+    user.findAll().setHandler(select -> {
+         if(select.succeeded()){
+  
+             // Commit the query transaction to have the data or get the changes
+             trans.commit();
+             
+             // Get the data
+             JsonObject jsonResult = user.toJsonArray(); // For JsonArray
+             String stringResult = user.get(); // For String
+  
+         }else{
+             trans.rollback();
+         }
+     });
+
+    // Also you can use where, limit, and order by in the select statement
+    user.select(columns).where("username","=","user")
+        .limit("10")
+        .orderBy("role_id","asc")
+        .findAll()
+    .setHandler(select -> {
+        ...
+    });
 ```
 
 ## Development

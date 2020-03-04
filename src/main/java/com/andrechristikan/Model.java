@@ -67,6 +67,7 @@ public abstract class Model {
         this.setTableName();
         this.setService();
         this.setMessages();
+        this.setPrimaryKey();
     }
 
     /* 
@@ -185,7 +186,6 @@ public abstract class Model {
                 this.stop();
                 this.findOne(this.columnsValue.get(this.primaryKeyName)).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -246,7 +246,6 @@ public abstract class Model {
                 this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -307,7 +306,6 @@ public abstract class Model {
                 this.stop();
                 this.findOne(id).setHandler(select -> {
                     if(select.succeeded()){
-                        this.stop();
                         promise.complete();
                     }else{
                         promise.fail(select.cause().getMessage());
@@ -355,7 +353,6 @@ public abstract class Model {
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
         StringBuilder addWhere = new StringBuilder();
-        this.index = 1;
 
         addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
                 .append(this.tableName)
