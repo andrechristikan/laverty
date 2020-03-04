@@ -1,16 +1,16 @@
-# Vert.x-Proxy (Java)
-I just tired to using primitive vert.x with so many random resource.
+# Vert.x-Proxy Example For RestFul API (Java)
+I was tired using primitive vert.x with so many random resources.
 
 ## Getting Started
 Inspired from laravel framework. ~~This will save your time while developing an apps.~~
 
->Minimum requirement: 
-1. Understand Java Language
-2. Understand Asynchronous
+> Minimum requirement: 
+1. Understand Java Language (Beginner)
+2. Understand Asynchronous Programming
 3. [Know what vert.x is](https://vertx.io)
 4. [Vert.x Proxy](https://vertx.io/docs/vertx-service-proxy/java/)
 
-> Versioning
+> Tech stack
 1. Java 11..0.6
 2. Postgresql 12.2
 3. Maven 10.14.6
@@ -19,17 +19,17 @@ Inspired from laravel framework. ~~This will save your time while developing an 
 > Production - Normal Installing / Linux env - NEED TO TEST
 1. Open terminal, and pull this project
 2. Goto into project
-3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `classes`
+3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `classes/configs/vertx.json`
 4. Set config, config in `src/main/resources/configs`
    - Rename `vertx-example.json` to `vertx.json`
    - Open `vertx.json`
-   - Adjust your setting for `production`
-   - Don't miss with the `environment` value to `production`
+   - Adjust your setting to `production`
+   - Don't forget to change the `environment` value to `production`
    - Resource directory for production is `classes`
 5. Set the messages `src/main/resources/messages`
-   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
+   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to the new language folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
-6. Run `initial.sql` in folder project into Postgres
+6. Run `initial.sql` in project folder to inject data into Postgres
 7. Build your project `mvn clean install`, **if error --....**
 8. Run project `java -jar target/FileName.jar`
 
@@ -56,38 +56,38 @@ Inspired from laravel framework. ~~This will save your time while developing an 
 4. Set config, config in `src/main/resources/configs`
    - Rename `vertx-example.json` to `vertx.json`
    - Open `vertx.json`
-   - Adjust your setting for `local`
-   - Don't miss with the `environment` value to `local`
+   - Adjust your setting to `local`
+   - Don't forget to change the `environment` value to `local`
    - Resource directory for production is `resources`
 5. Set the messages `src/main/resources/messages`
-   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
+   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to the new language folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
-6. Run `initial.sql` in folder project into Postgres
+6. Run `initial.sql` in project folder to inject data into Postgres
 7. Run project, if you using MAC press `Control + R` on the keyboard
    
 > Development - With Netbeans - TESTED ON WINDOWS 10
 1. Open project with Netbeans
 2. Setting the project
-    - Click properties at this project in the project open side bar
+    - Right click -> properties at the project name in side bar
     - Goto the `run` tap
     - Make sure if main class is `com.andrechristikan.http.MainVerticle` and working directory is `directory this project`
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `configs/vertx.json`
 4. Set config, config in `src/main/resources/configs`
    - Rename `vertx-example.json` to `vertx.json`
    - Open `vertx.json`
-   - Adjust your setting for `local`
-   - Don't miss with the `environment` value to `local`
+   - Adjust your setting to `local`
+   - Don't forget to change the `environment` value to `local`
    - Resource directory for production is `resources`
 5. Set the messages `src/main/resources/messages`
-   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to new folder (ex:en to id). 
+   - You can change the language with create the new package in `src/main/resources/messages` and copy all messages from default language files to the new language folder (ex:en to id). 
    - Then open the json file and change **the value** not **the key**.
-6. Run `initial.sql` in folder project into Postgres
+6. Run `initial.sql` in project folder to inject data into Postgres
 7. Build this project, press `shift + f11`
 8. Run project, press `f6` or `ctrl + f5`
 
 ## Development
-Still on developing, i will finish this project as soon as possible.
-~~Because I still have another life man.~~
+Still on development, i will finish this project as soon as possible.
+~~Because I still have a life man.~~
 
 > Build With
 * [Vert.x Proxy](https://vertx.io/docs/vertx-service-proxy/java/)
@@ -95,28 +95,28 @@ Still on developing, i will finish this project as soon as possible.
 * [Vert.x Asynchronous Programming](https://vertx.io/docs/guide-for-java-devs/)
 
 
-> Futures :
+> Features :
 - Auth with JWT
-- Control variable from database
-- Controller
-- Exception
-- Model
-- Middleware for Request
-- Promise and Future
-- Route
-- Service and Implement
-- Setting app from JSON file
-- Vert.x proxy
+- Dynamic config from database
+- New Controller Class
+- New Exception Class
+- New Model Class
+- Request Middleware 
+- Promise and Future (Java Version)
+- New Route Class
+- Service and Implement Vert.x
+- Env control app from JSON file
+- Vert.x Proxy
 
 
 > Todo :
-- [x] Created Http Server (setting from vertx.json)
+- [x] Created Http Server (env from vertx.json)
 - [x] Created Default Exception
 - [x] Created Not Found Exception
 - [x] Created Login Exception
-- [x] Created Database Helper (setting from vertx.json)
+- [x] Created Database Helper (env from vertx.json)
 - [x] Created Parser Helper
-- [x] Created Jwt Helper (setting from vertx.json)
+- [x] Created Jwt Helper (env from vertx.json)
 - [x] Created Auth For User Login
 - [x] Created Auth For User Admin
 - [x] Folder Structure
@@ -142,4 +142,4 @@ Still on developing, i will finish this project as soon as possible.
 ## License
 This is totaly free ! :+1: :+1:
 
-# VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL. ~~MAYBE MY PROJECT CAN BE A FRAMEWORK :XD~~
+# ~~VERT.X IS NOT A FRAMEWORK, THIS IS JUST A TOOL. MAYBE MY PROJECT CAN BE A FRAMEWORK :XD~~
