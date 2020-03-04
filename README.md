@@ -87,7 +87,7 @@ Inspired from laravel framework. ~~This will save your time while developing an 
 
 ## Example
 Some example from this project
-#### Model class
+### Model
 ```java
     public class UserModel extends Model {
         
@@ -178,14 +178,16 @@ Some example from this project
     }
 ```
 
-####  Use Model to select
+#### Init model class
 ```java
-
-    // Init class
     // vertx from "io.vertx.core.Vertx" class
     // trans from "io.vertx.sqlclient.Transaction" class
     UserModel user = new UserModel(vertx, trans);
 
+```
+
+####  Use model to select
+```java
     // Set the columns
     ArrayList <String> columns = new ArrayList<>();
     columns.add("role_id");
@@ -193,19 +195,12 @@ Some example from this project
     columns.add("email");
 
     // Select columns that you want
-    user.select("id").select(columns).select("password").findOne("primary-key").setHandler(select -> {
-            if(select.succeeded()){
-
-            // Commit the query transaction to have the data or get the changes
-            trans.commit();
-            
-            // Get the data
-            JsonObject jsonResult = user.toJson(); // For JsonObject
-            String stringResult = user.first(); // For String
-
-        }else{
-            trans.rollback();
-        }
+    user.select("id")
+        .select(columns)
+        .select("password")
+        .findOne("primary-key")
+    .setHandler(select -> {
+        ...
     });
 
     // This will get all columns base on the model that you created
@@ -217,22 +212,13 @@ Some example from this project
     // If you to select more than one, do this
     // This will get all columns base on the model that you created
     user.findAll().setHandler(select -> {
-         if(select.succeeded()){
-  
-             // Commit the query transaction to have the data or get the changes
-             trans.commit();
-             
-             // Get the data
-             JsonObject jsonResult = user.toJsonArray(); // For JsonArray
-             String stringResult = user.get(); // For String
-  
-         }else{
-             trans.rollback();
-         }
+        ...
      });
 
     // Also you can use where, limit, and order by in the select statement
-    user.select(columns).where("username","=","user")
+    user.select(columns)
+        .where("username","=","user")
+        .where("role_id","like","%user%")
         .limit("10")
         .orderBy("role_id","asc")
         .findAll()
@@ -241,9 +227,123 @@ Some example from this project
     });
 ```
 
+####  Use model to insert
+```java
+    // Set value of columns
+    user.columnsValue.put("role_id", "user");
+    user.columnsValue.put("username", "user");
+    user.columnsValue.put("password", "12345");
+    user.columnsValue.put("email", "user@mail.com");
+    
+    // Save or insert new data
+    user.save().setHandler(insert -> {
+        ...
+    });
+    
+    // More example
+    Map<String, String> columnsValue = new HashMap<>();
+    columnsValue.put("role_id", "user");
+    columnsValue.put("username", "user");
+    columnsValue.put("password", "12345");
+    columnsValue.put("email", "user@mail.com");
+
+    // Insert with other method
+    user.insert(columnsValue).setHandler(insert -> {
+        ...
+    });
+```
+
+####  Use the model to update
+```java
+    // Select before update
+    user.findOne("primary-key").setHandler(select -> {
+        
+        // Set new value
+        user.columnsValue.replace("role_id", "user");
+        user.columnsValue.replace("username", "andreck");
+        user.columnsValue.replace("password", "123456");
+        user.columnsValue.replace("email", "andreck@gmail.com");
+        
+        // Update the data
+        user.saveUpdate().setHandler(update -> {
+           ... 
+        });
+    });
+
+    // More example for update
+    Map<String, String> columnsValue = new HashMap<>();
+    columnsValue.put("role_id", "user");
+    columnsValue.put("username", "user");
+    columnsValue.put("password", "12345");
+    columnsValue.put("email", "user@mail.com");
+
+    // Update the data
+    user.where("username","=","user")
+        .where("role_id","=","user")
+        .update(columnsValue, "primary-key")
+    .setHandler(update -> {
+        ...
+    });
+```
+
+####  Use the model to delete
+```java
+    // Delete user with primary key
+    user.findOne("primary-key").setHandler(select -> {
+
+        // Delete the data
+        user.where("username","=","user")
+            .delete()
+        .setHandler(delete -> {
+           ... 
+        });
+    });
+
+    // More example for delete
+    user.where("username","=","user")
+        .delete("primary-key")
+    .setHandler(delete -> {
+        ...
+    });
+```
+
+####  Model count
+```java
+    // Count of findOne
+    user.findOne("primary-key").setHandler(select -> {
+        user.count().setHandler(count -> {
+            String result = count.result();
+            ...
+        });
+    });
+    
+    // Count of findAll
+    user.findAll().setHandler(select -> {
+        user.count().setHandler(count -> {
+            String result = count.result();
+            ...
+        });
+    });
+
+    // Count with where statement
+    user.where("username","=","user")
+        .count()
+    .setHandler(count -> {
+         String result = count.result();
+         ...
+     });
+```
+
+#### How to get the result
+```java
+    user.first(); // this will return the String of JsonObject
+    user.toJson(); // this will return JsonObject
+    user.get(); // This will return the String of JsonArray
+    user.toJsonArray(); // this will return JsonArray
+```
+
 ## Development
-Still on development, i will finish this project as soon as possible.
-~~Because I still have a life man.~~
+Still on development. I will finish this project as soon as possible.
 
 > Build With
 * [Vert.x Proxy](https://vertx.io/docs/vertx-service-proxy/java/)
@@ -252,39 +352,42 @@ Still on development, i will finish this project as soon as possible.
 
 
 > Features :
-- Auth with JWT
-- Dynamic config from database
 - New Controller Class
 - New Exception Class
 - New Model Class
-- Request Middleware 
-- Promise and Future (Java Version)
 - New Route Class
-- Service and Implement Vert.x
+- Request Middleware
 - Env control app from JSON file
+- Dynamic configs from database
+- Auth with JWT
+- Promise and Future (Java Version)
+- Query Transaction (Java Version)
+- Service more that one verticle Vert.x
 - Vert.x Proxy
 
 
 > Todo :
-- [x] Created Http Server (env from vertx.json)
-- [x] Created Default Exception
-- [x] Created Not Found Exception
-- [x] Created Login Exception
-- [x] Created Database Helper (env from vertx.json)
-- [x] Created Parser Helper
-- [x] Created Jwt Helper (env from vertx.json)
-- [x] Created Auth For User Login
-- [x] Created Auth For User Admin
+- [x] Http Server (env from vertx.json)
+- [x] Default Exception
+- [x] Not Found Exception
+- [x] Login Exception
+- [x] Database Helper (env from vertx.json)
+- [x] Parser Helper
+- [x] Jwt Helper (env from vertx.json)
+- [x] Auth For User Login
+- [x] Auth For Admin
 - [x] Folder Structure
-- [x] Route (Very simple route class)
 - [x] Setting App From vertx.json File
-- [x] All messages from files
+- [x] All messages from files, and can change the message to what ever you want
 - [x] Created Login controller
-- [x] Model Class
+- [x] New Model Class
 - [x] User model
+- [ ] New Exception Class (Restructuring)
+- [ ] New Controller Class (Restructuring)
+- [ ] New Route Class (Restructuring)
 - [ ] User Service Implementation (Ongoing)
-- [ ] Password Helper
 - [ ] Flow login (Ongoing)
+- [ ] Password Helper
 - [ ] Create Middleware Request
 
 ### Authors
