@@ -97,6 +97,7 @@ Some example from this project
         }
         
         /* 
+            This is mandatory
             Set column from this function
         */ 
         @Override
@@ -112,6 +113,7 @@ Some example from this project
         }
         
         /* 
+            This is optional
             This count type must same with count of column
         */ 
         @Override
@@ -127,6 +129,7 @@ Some example from this project
         }
     
         /* 
+            This is mandatory
             This count type must same with count of column
             Support for Type
             - UUID
@@ -161,6 +164,7 @@ Some example from this project
         }
         
         /* 
+            This is mandatory
             Reference from response.json in resources/messages folder
         */ 
         @Override
@@ -169,6 +173,7 @@ Some example from this project
         }
         
         /* 
+            This is optional
             If you want to change primary key
         */ 
         @Override
@@ -204,6 +209,10 @@ Some example from this project
         .select("password")
         .findOne("primary-key")
     .setHandler(select -> {
+
+        // Get the result
+        JsonObject data = user.first();
+        String data = user.first().asString();
         ...
     });
 
@@ -221,6 +230,10 @@ Some example from this project
     // If you to select more than one, do this
     // This will get all columns base on the model that you created
     user.findAll().setHandler(select -> {
+
+        // Get the result
+        JsonObject data = user.get();
+        String data = user.get().asString();
         ...
      });
 
@@ -249,6 +262,10 @@ Some example from this project
     
     // Save or insert new data
     user.save().setHandler(insert -> {
+
+        // You also can get the new data
+        JsonObject data = user.first();
+        String data = user.first().asString();
         ...
     });
     
@@ -281,6 +298,10 @@ Some example from this project
         
         // Update the data
         user.saveUpdate().setHandler(update -> {
+
+            // You also can get the updated data
+            JsonObject data = user.first();
+            String data = user.first().asString();
            ... 
         });
     });
@@ -363,10 +384,12 @@ Some example from this project
 
 #### How to get the result of model
 ```java
-    user.first(); // this will return the String of JsonObject
-    user.toJson(); // this will return JsonObject
-    user.get(); // This will return the String of JsonArray
-    user.toJsonArray(); // this will return JsonArray
+    user.first(); // this will return as JsonObject
+    user.get(); // this will return as JsonArray
+
+    // this will return as String
+    user.first().asString();
+    user.get().asString();
 ```
 ### Route
 ```java
