@@ -70,17 +70,31 @@ public abstract class AbstractModel {
         this.setMessages();
         this.setPrimaryKey();
     }
+    
+    
+    /* 
+        This is mandatory
+        Set column from this function
+    */ 
+    protected void setColumns(){
+        this.columns.add("column1");
+        this.columns.add("column2");
+    }
+    
 
     /* 
-        Customizable
+        This is optional
         This count type must same with count of column
     */ 
     protected void setColumnsName(){
-        this.columnsName.put("column1","columnName1");
-        this.columnsName.put("column2","columnName2");
+        this.columns.forEach(column -> {
+            this.columnsName.put(column, column);
+        });
     }
 
+    
     /* 
+        This is mandatory
         This count type must same with count of column
         Support for Type
         - UUID
@@ -95,33 +109,33 @@ public abstract class AbstractModel {
         - Boolean
     */ 
     protected void setColumnsType(){
-        this.columnsType.put("column1","string");
-        this.columnsType.put("column2","integer");
+        this.columns.forEach(column -> {
+            this.columnsType.put(column, "string");
+        });
     }
     
-    /* 
-        Set column from this function
-    */ 
-    protected void setColumns(){
-        this.columns.add("column1");
-        this.columns.add("column2");
-    }
+
     
     /* 
+        This is mandatory
         Table name in database
     */ 
     protected void setTableName(){
         this.tableName = "tableName";
     }
     
+    
     /* 
+        This is mandatory
         Reference from response.json in resources/messages folder
     */ 
     protected void setService(){
         this.service = "service";
     }
     
+    
     /* 
+        This is optional
         If you want to change primary key
     */ 
     protected void setPrimaryKey(){
@@ -782,20 +796,21 @@ public abstract class AbstractModel {
         return this;
     }
 
-    public JsonObject toJson(){
+    public String asString(){
+        
+        if(this.valueArray != null && this.valueArray.size() > 0){
+            return this.valueArray.toString();
+        }
+        
+        return this.value.toString();
+    }
+
+    public JsonObject first(){
         return this.value;
     }
     
-    public JsonArray toJsonArray(){
+    public JsonArray get(){
         return this.valueArray;
-    }
-
-    public String first(){
-        return this.value.toString();
-    }
-    
-    public String get(){
-        return this.valueArray.toString();
     }
 
     private String result(Row row, String column){

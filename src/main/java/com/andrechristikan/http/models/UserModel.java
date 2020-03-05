@@ -21,6 +21,7 @@ public class UserModel extends AbstractModel {
     }
     
     /* 
+        This is mandatory
         Set column from this function
     */ 
     @Override
@@ -36,7 +37,7 @@ public class UserModel extends AbstractModel {
     }
     
     /* 
-        Customizable
+        This is optional
         This count type must same with count of column
     */ 
     @Override
@@ -52,6 +53,7 @@ public class UserModel extends AbstractModel {
     }
 
     /* 
+        This is mandatory
         This count type must same with count of column
         Support for Type
         - UUID
@@ -78,6 +80,7 @@ public class UserModel extends AbstractModel {
     }
     
     /* 
+        This is mandatory
         Table name in database
     */ 
     @Override
@@ -86,6 +89,7 @@ public class UserModel extends AbstractModel {
     }
     
     /* 
+        This is mandatory
         Reference from response.json in resources/messages folder
     */ 
     @Override
@@ -94,6 +98,7 @@ public class UserModel extends AbstractModel {
     }
     
     /* 
+        This is optional
         If you want to change primary key
     */ 
     @Override
