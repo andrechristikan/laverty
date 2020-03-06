@@ -197,9 +197,9 @@ public class LoginServiceImplement implements LoginService {
 //                });
 
             }else{
-                String response = Response.DataStructure(1, open.cause().getMessage());
-                this.logger.error(this.systemMessages.getString("fail") +" "+open.cause().getMessage());
-                resultHandler.handle(Future.failedFuture(response));
+//                String response = Response.DataStructure(1, open.cause().getMessage());
+//                this.logger.error(this.systemMessages.getString("fail") +" "+open.cause().getMessage());
+//                resultHandler.handle(Future.failedFuture(response));
             }
         });
     }

@@ -5,7 +5,7 @@
  */
 package com.andrechristikan.http;
 
-import com.andrechristikan.http.auth.LoginAuthorization;
+import com.andrechristikan.http.middleware.AuthMiddleware;
 import com.andrechristikan.http.controller.LoginController;
 import com.andrechristikan.http.exception.LoginException;
 import io.vertx.core.Vertx;
@@ -27,7 +27,7 @@ public class Route {
     LoginException loginException;
     
     // Authorization Init
-    LoginAuthorization loginAuthorization;
+    AuthMiddleware loginAuthorization;
     
     protected Route(Vertx vertx, Router router){
         this.router = router;
@@ -66,6 +66,6 @@ public class Route {
     
     // Init Authorization
     private void initAuthorization(){
-        this.loginAuthorization = new LoginAuthorization(this.vertx);
+        this.loginAuthorization = new AuthMiddleware(this.vertx);
     }
 }

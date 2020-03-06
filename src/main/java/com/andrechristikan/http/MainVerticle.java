@@ -7,8 +7,6 @@ package com.andrechristikan.http;
 
 import com.andrechristikan.Runner;
 import com.andrechristikan.Version;
-import com.andrechristikan.helper.JwtHelper;
-import com.andrechristikan.http.Server;
 import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -21,7 +19,6 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-import io.vertx.ext.auth.jwt.JWTAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

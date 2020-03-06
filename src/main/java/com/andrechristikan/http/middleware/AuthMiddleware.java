@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan.http.auth;
+package com.andrechristikan.http.middleware;
 
 import com.andrechristikan.helper.JwtHelper;
 import com.andrechristikan.helper.ParserHelper;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class LoginAuthorization{
+public class AuthMiddleware implements MiddlewareInterface{
     
     private final Logger logger;
     private final ParserHelper parser;
@@ -40,9 +40,9 @@ public class LoginAuthorization{
     protected JWTAuth jwtAuthConfig;
     
     
-    public LoginAuthorization(Vertx vertx){
+    public AuthMiddleware(Vertx vertx){
         // init
-        this.logger = LoggerFactory.getLogger(LoginAuthorization.class);
+        this.logger = LoggerFactory.getLogger(AuthMiddleware.class);
         this.parser = new ParserHelper();
         this.vertx = vertx;
         this.service = "jwt";
@@ -72,37 +72,38 @@ public class LoginAuthorization{
         this.responseMessages = jMapData.get("messages.response").getJsonObject(this.serviceMessage);
     }
     
+    @Override
     public void handler(RoutingContext ctx){
         
-        HttpServerResponse response = this.settingResponse.create(ctx);
-        String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
-        
-        if (authorization != null) {
-            String[] parts = authorization.split(" ");
-            String token = parts[1];
-        
-            this.jwtAuthConfig.authenticate(new JsonObject().put("jwt", token), checked -> {
-                if (checked.succeeded()) {
-                    this.logger.info(this.systemMessages.getString("success"));
-                    if(ctx.user() == null){
-                        ctx.setUser(checked.result());
-                    }
-                    ctx.next();  
-                }else{
-                    String message = this.responseMessages.getString("failed");
-                    this.logger.info(this.systemMessages.getString("fail")+" "+checked.cause().getMessage());
-                    String messageResponse = Response.DataStructure(1,message);
-                    response.setStatusCode(401);
-                    response.end(messageResponse);
-                }
-            });
-        }else{
-            String message = this.responseMessages.getString("token-required");
-            this.logger.info(this.systemMessages.getString("fail")+" "+message);
-            String messageResponse = Response.DataStructure(1,message);
-            response.setStatusCode(403);
-            response.end(messageResponse);
-        }
+//        HttpServerResponse response = this.settingResponse.create(ctx);
+//        String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
+//        
+//        if (authorization != null) {
+//            String[] parts = authorization.split(" ");
+//            String token = parts[1];
+//        
+//            this.jwtAuthConfig.authenticate(new JsonObject().put("jwt", token), checked -> {
+//                if (checked.succeeded()) {
+//                    this.logger.info(this.systemMessages.getString("success"));
+//                    if(ctx.user() == null){
+//                        ctx.setUser(checked.result());
+//                    }
+//                    ctx.next();  
+//                }else{
+//                    String message = this.responseMessages.getString("failed");
+//                    this.logger.info(this.systemMessages.getString("fail")+" "+checked.cause().getMessage());
+//                    String messageResponse = Response.DataStructure(1,message);
+//                    response.setStatusCode(401);
+//                    response.end(messageResponse);
+//                }
+//            });
+//        }else{
+//            String message = this.responseMessages.getString("token-required");
+//            this.logger.info(this.systemMessages.getString("fail")+" "+message);
+//            String messageResponse = Response.DataStructure(1,message);
+//            response.setStatusCode(403);
+//            response.end(messageResponse);
+//        }
                     
     }
 }
