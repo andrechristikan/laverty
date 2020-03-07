@@ -15,8 +15,8 @@
             "start":"[LoginProxyServiceStarting] Start service #eventBusServiceName...",
             "end":"[LoginProxyServiceOngoing]End service #eventBusServiceName.",
             "controller":{
-                "create":"[LoginControllerCreated] Controller #eventBusServiceName created.",
-
+                "create":"[LoginControllerCreated] Controller #eventBusServiceName creating.",
+                "end": "[LoginControllerEnded] Controller #eventBusServiceName created",
                 "login":{
                     "start":"[LoginControllerStarting] Login ongoing...",
                     "end":"[LoginControllerEnded] Login ended."

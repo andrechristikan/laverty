@@ -52,13 +52,13 @@ public class AuthMiddleware extends CoreMiddleware implements MiddlewareInterfac
                     ctx.next();
                 }else{
                     logger.info(trans("system.authentication.fail")+" "+checked.cause().getMessage());
-                    response.dataStructure(1, trans("response.authentication.failed"));
+                    response.dataStructure("1", trans("response.authentication.failed"));
                     response.response(401);
                 }
             });
         }else{
             logger.info(trans("system.authentication.fail")+" "+trans("response.authentication.token-required"));
-            response.dataStructure(1, trans("response.authentication.token-required"));
+            response.dataStructure("1", trans("response.authentication.token-required"));
             response.response(403);
         }
                     

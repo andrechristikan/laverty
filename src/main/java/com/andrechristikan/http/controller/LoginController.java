@@ -5,6 +5,7 @@
  */
 package com.andrechristikan.http.controller;
 
+import com.andrechristikan.core.CoreController;
 import com.andrechristikan.http.Response;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
@@ -22,80 +23,36 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class LoginController {
-    
-    private final Logger logger;
-    private final ParserHelper parser;
-    private final String service;
-    private final Vertx vertx;
-    private final Response settingResponse;
+public class LoginController extends CoreController implements ControllerInterface {
 
-    private LoginService loginService;
-
-    protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
-    protected JsonObject mainConfigs;
-    protected JsonObject serviceConfigs;
+    protected static LoginService service;
     
     public LoginController(Vertx vertx){
-
-        // init
-        this.logger = LoggerFactory.getLogger(LoginController.class);
-        this.parser = new ParserHelper();
-        this.service = "login";
-        this.vertx = vertx;
-        this.settingResponse = new Response(this.vertx);
-        
-        // Message & Config
-        this.setConfigs();
-        this.setMessages();
-
-        // Proxy
-        this.setProxy();
+        super(vertx);
+        logger = LoggerFactory.getLogger(LoginController.class);
     }
 
-    private void setConfigs(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.mainConfigs = jMapData.get("configs.main");
-        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
+    @Override
+    public void setService(){
+        logger.info(trans("system.service.login.controller.create").replace("#eventBusServiceName", conf("service.login.address")));
+        service = LoginService.createProxy(coreVertx,conf("service.login.address"));
+        logger.info(trans("system.service.login.controller.end").replace("#eventBusServiceName", conf("service.login.address")));
     }
 
-    private void setMessages(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service).getJsonObject("controller");
-        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("controller");
-    }
-
-    private void setProxy(){
-        String eventBusServiceName = this.serviceConfigs.getString("address");
-        this.loginService = LoginService.createProxy(this.vertx,eventBusServiceName);
-
-        this.logger.info(this.systemMessages.getString("create").replace("#eventBusServiceName", eventBusServiceName));
-
-    }
-    
+    @Override
     public void login(RoutingContext ctx) {
-        this.logger.info(this.systemMessages.getJsonObject(this.service).getString("start"));
+        logger.info(trans("system.service.login.controller.login.start"));
+        response.create(ctx.response());
 
-        HttpServerResponse response = ctx.response();
-        response.setStatusCode(200);
-        response.end("success");
+        service.login(funct -> {
+            if(funct.succeeded()){
+                response.response(200, funct.result());
+            }else{
+                response.response(500, funct.cause().getMessage());
+            }
+        });
 
-//        HttpServerResponse response = this.settingResponse.create(ctx);
-
-//        this.loginService.login(funct -> {
-//            if(funct.succeeded()){
-//                response.setStatusCode(200);
-//                response.end(funct.result());
-//            }else{
-//                response.setStatusCode(500);
-//                response.end(funct.cause().getMessage());
-//            }
-//        });
-
-        this.logger.info(this.systemMessages.getJsonObject(this.service).getString("end"));
+        logger.info(trans("system.service.login.controller.login.end"));
 
 }
     

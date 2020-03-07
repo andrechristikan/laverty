@@ -1,53 +1,52 @@
 package com.andrechristikan.http;
 
+import com.andrechristikan.core.CoreHelper;
+import com.andrechristikan.helper.DatabaseHelper;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
+import org.slf4j.LoggerFactory;
 
-public class Response {
+public class Response extends CoreHelper {
 
-    protected static JsonObject mainConfigs;
-    protected static JsonObject responseConfig;
-    
     private JsonObject data = new JsonObject();
     private HttpServerResponse httpResponse;
 
     public Response(Vertx vertx){
-        this.setConfigs(vertx);
-    }
-
-    private void setConfigs(Vertx vertx){
-        SharedData sharedData = vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        mainConfigs = jMapData.get("configs.main");
-        responseConfig = mainConfigs.getJsonObject("response");
+        super(vertx);
+        logger = LoggerFactory.getLogger(DatabaseHelper.class);
     }
 
     public void create(HttpServerResponse httpResponse){
         
-        responseConfig.forEach(action ->{
-            httpResponse.putHeader(action.getKey(),responseConfig.getString(action.getKey()));
+        confAsJsonObject("main.response").forEach(action ->{
+            httpResponse.putHeader(action.getKey(),confAsJsonObject("main.response").getString(action.getKey()));
         });
         
         this.httpResponse = httpResponse;
     }
-    
+
     public void response(int code){
         this.httpResponse.setStatusCode(code);
         this.httpResponse.end(this.data.toString());
     }
 
-    public void dataStructure(int status, String message) {
+    public void response(int code, String data){
+        this.httpResponse.setStatusCode(code);
+        this.httpResponse.end(data);
+    }
+
+    public void dataStructure(String status, String message) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
         this.data = result;
     }
 
-    public void dataStructure(int status, String message, JsonObject jo) {
+    public void dataStructure(String status, String message, JsonObject jo) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
@@ -55,7 +54,7 @@ public class Response {
         this.data = result;
     }
 
-    public void dataStructure(int status, String message, JsonArray ja) {
+    public void dataStructure(String status, String message, JsonArray ja) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
@@ -64,7 +63,7 @@ public class Response {
     }
 
     // for list
-    public void dataStructure(int status, String message, JsonArray ja, int countData, int totalPage) {
+    public void dataStructure(String status, String message, JsonArray ja, String countData, String totalPage) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
@@ -73,4 +72,76 @@ public class Response {
         result.put("data", ja);
         this.data = result;
     }
+
+    public static JsonObject dataStructureJson(String status, String message) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        return result;
+    }
+
+    public static JsonObject dataStructureJson(String status, String message, JsonObject jo) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("data", jo);
+        return result;
+    }
+
+    public static JsonObject dataStructureJson(String status, String message, JsonArray ja) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("data", ja);
+        return result;
+    }
+
+    // for list
+    public static JsonObject dataStructureJson(String status, String message, JsonArray ja, String countData, String totalPage) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("countData", countData);
+        result.put("totalPage", totalPage);
+        result.put("data", ja);
+
+        return result;
+    }
+
+
+    public static String dataStructureAsString(String status, String message) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        return result.toString();
+    }
+
+    public static String dataStructureAsString(String status, String message, JsonObject jo) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("data", jo);
+        return result.toString();
+    }
+
+    public static String dataStructureAsString(String status, String message, JsonArray ja) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("data", ja);
+        return result.toString();
+    }
+
+    // for list
+    public static String dataStructureAsString(String status, String message, JsonArray ja, String countData, String totalPage) {
+        JsonObject result = new JsonObject();
+        result.put("status", status);
+        result.put("message", message);
+        result.put("countData", countData);
+        result.put("totalPage", totalPage);
+        result.put("data", ja);
+
+        return result.toString();
+    }
+
 }

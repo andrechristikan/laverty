@@ -75,6 +75,8 @@ public class LoginServiceImplement implements LoginService {
     @Override
     public void login(Handler<AsyncResult<String>> resultHandler){
 
+        resultHandler.handle(Future.succeededFuture(Response.dataStructureAsString("1", "abc")));
+
 //        this.databaseHelper.openConnection(this.poolConnection).setHandler(open -> {
 //            if(open.succeeded()){
 //                SqlConnection conn = open.result();

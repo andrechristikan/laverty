@@ -10,9 +10,7 @@ public class NotFoundException extends CoreException implements ExceptionInterfa
 
     public NotFoundException(Vertx vertx){
         super(vertx);
-
         logger = LoggerFactory.getLogger(LoginException.class);
-        response = new Response(vertx);
     }
 
     @Override
@@ -20,7 +18,7 @@ public class NotFoundException extends CoreException implements ExceptionInterfa
         logger.info(trans("system.exception.not-found.start"));
 
         response.create(ctx.response());
-        response.dataStructure(1, trans("response.exception.not-found"));
+        response.dataStructure("1", trans("response.exception.not-found"));
         response.response(ctx.response().getStatusCode());
 
         logger.info(trans("system.exception.not-found.start"));

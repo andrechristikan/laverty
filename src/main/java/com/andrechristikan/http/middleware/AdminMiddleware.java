@@ -58,24 +58,24 @@ public class AdminMiddleware extends CoreMiddleware implements MiddlewareInterfa
                                 ctx.next();
                             } else {
                                 logger.info(trans("system.authorization.fail")+" "+trans("response.authorization.failed"));
-                                response.dataStructure(1, trans("response.authorization.failed"));
+                                response.dataStructure("1", trans("response.authorization.failed"));
                                 response.response(403);
                             }
                         }else{
                             logger.info(trans("system.authorization.fail")+" "+trans("response.authorization.forbidden"));
-                            response.dataStructure(1, trans("response.authorization.forbidden"));
+                            response.dataStructure("1", trans("response.authorization.forbidden"));
                             response.response(403);
                         }
                     });
                 }else{
                     logger.info(trans("system.authentication.fail")+" "+checked.cause().getMessage());
-                    response.dataStructure(1, trans("response.authentication.failed"));
+                    response.dataStructure("1", trans("response.authentication.failed"));
                     response.response(401);
                 }
             });
         }else{
             logger.info(trans("system.authentication.fail")+" "+trans("response.authentication.token-required"));
-            response.dataStructure(1, trans("response.authentication.token-required"));
+            response.dataStructure("1", trans("response.authentication.token-required"));
             response.response(403);
         }
                     

@@ -10,9 +10,7 @@ public class DefaultException extends CoreException implements ExceptionInterfac
     
     public DefaultException(Vertx vertx){
         super(vertx);
-        
         logger = LoggerFactory.getLogger(DefaultException.class);
-        response = new Response(vertx);
     }
 
     @Override
@@ -20,7 +18,7 @@ public class DefaultException extends CoreException implements ExceptionInterfac
         logger.info(trans("system.exception.default.start"));
         
         response.create(ctx.response());
-        response.dataStructure(1, trans("response.exception.default"));
+        response.dataStructure("1", trans("response.exception.default"));
         response.response(ctx.response().getStatusCode());
 
         logger.info(trans("system.exception.default.end"));

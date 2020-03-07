@@ -1,4 +1,4 @@
-# Laverty For RestFul API (Vert-x Proxy | Java Version) - STILL ON DEVELOPING
+# Laverty For RestFul API with Postgres (Vert-x Proxy | Java Version) - STILL ON DEVELOPING
 Inspired from laravel framework. 
 This project wanna be like mini-laravel framework. 
 ~~This will save your time while developing apps.~~
@@ -21,7 +21,7 @@ Let start from the bottom
 
 ## Installation
 Guide for install this project
-### Production - Normal Installing / Linux env (NEED TO TEST)
+### Production - Linux env (NEED TO TEST)
 1. Open terminal, and pull this project
 2. Goto into project
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `classes/configs/vertx.json`
