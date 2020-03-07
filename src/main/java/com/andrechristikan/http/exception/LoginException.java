@@ -6,6 +6,7 @@
 package com.andrechristikan.http.exception;
 
 import com.andrechristikan.core.CoreException;
+import com.andrechristikan.helper.JwtHelper;
 import com.andrechristikan.helper.RequestHelper;
 import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
@@ -20,32 +21,30 @@ public class LoginException extends CoreException implements ExceptionInterface{
     
     public LoginException(Vertx vertx){
         super(vertx);
-        
-        // Set the main variable
+
         logger = LoggerFactory.getLogger(LoginException.class);
         response = new Response(vertx);
-        service = "login";
     }
     
     @Override
     public final void handler(RoutingContext ctx){
-        
-        logger.info(systemMessage("start"));
+
+        logger.info(trans("system.exception.login.start"));
     
-        String authorization = RequestHelper.getAuthorization(ctx);
+        String authorization = JwtHelper.getTokenFromHeader(ctx);
         
         if(authorization == null || authorization.trim().equals("")){
             response.create(ctx.response());
-            response.dataStructure(1, responseMessage(service));
+            response.dataStructure(1, trans("response.exception.login"));
             response.response(ctx.response().getStatusCode());
 
-            logger.info(systemMessage("fail") + " " +responseMessage(service));
+            logger.info(trans("system.exception.login.fail") + " " +trans("response.exception.login"));
 
         }else{
             ctx.next();
         }
 
-        logger.info(systemMessage("end"));
+        logger.info(trans("system.exception.login.end"));
 
     }
 }

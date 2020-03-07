@@ -13,6 +13,6 @@ import io.vertx.ext.web.RoutingContext;
  */
 public interface ExceptionInterface {
     
-    public void handler(RoutingContext ctx);
+    void handler(RoutingContext ctx);
     
 }

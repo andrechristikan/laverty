@@ -13,19 +13,17 @@ public class DefaultException extends CoreException implements ExceptionInterfac
         
         logger = LoggerFactory.getLogger(DefaultException.class);
         response = new Response(vertx);
-        service = "default";
-        
     }
 
     @Override
     public final void handler(RoutingContext ctx){
-        logger.info(systemMessage("start"));
+        logger.info(trans("system.exception.default.start"));
         
         response.create(ctx.response());
-        response.dataStructure(1, responseMessage(service));
+        response.dataStructure(1, trans("response.exception.default"));
         response.response(ctx.response().getStatusCode());
 
-        logger.info(systemMessage("end"));
+        logger.info(trans("system.exception.default.end"));
 
     }
 

@@ -5,13 +5,13 @@
  */
 package com.andrechristikan.core;
 
+import com.andrechristikan.helper.GeneralHelper;
+import com.andrechristikan.helper.ParserHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Transaction;
@@ -33,13 +33,14 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class CoreModel {
     
-    protected static Logger logger = LoggerFactory.getLogger(CoreModel.class);;
+    protected static Logger logger = LoggerFactory.getLogger(CoreModel.class);
+    protected static ParserHelper parser = new ParserHelper();
     private final Transaction trans;
+    protected static Vertx coreVertx;
     
     // mandatory field
     protected static String tableName = "TableName";
     protected static String primaryKeyName = "id";
-    protected static String service = "service";
     
     // for column
     private ArrayList<String> columns = new ArrayList<>();
@@ -58,23 +59,24 @@ public abstract class CoreModel {
     private String orderQuery;
     private String primaryKeyValue;
     
-    private JsonObject jsonObejectValue = new JsonObject();
+    private JsonObject jsonObjectValue = new JsonObject();
     private JsonArray jsonArrayValue = new JsonArray();
     
     // other
-    private static JsonObject responseMessages;
+    private static JsonObject messages;
+    private static JsonObject configs;
     private int index = 1;
     
     protected CoreModel(Vertx vertx, Transaction trans){
         this.trans = trans;
-        this.init(vertx);
-    }
-    
-    private void init(Vertx vertx){
+
         this.setColumnsTypeToMap();
         this.setColumnsNameToMap();
         this.setColumnsToMap();
-        this.setMessages(vertx);
+
+        messages = GeneralHelper.setMessages(vertx);
+        configs = GeneralHelper.setConfigs(vertx);
+        coreVertx = vertx;
     }
     
     
@@ -116,7 +118,22 @@ public abstract class CoreModel {
         return new HashMap<>();
     }
 
-    
+    protected static String trans(String path){
+        return GeneralHelper.trans(path, messages);
+    }
+
+    protected static String conf(String path){
+        return GeneralHelper.conf(path, configs);
+    }
+
+    protected static JsonArray confAsJsonArray(String path){
+        return GeneralHelper.confAsJsonArray(path, configs);
+    }
+
+    protected static JsonObject confAsJsonObject(String path){
+        return GeneralHelper.confAsJsonObject(path, configs);
+    }
+
     private void setColumnsToMap(){
         this.columns = setColumns();
     }
@@ -142,31 +159,6 @@ public abstract class CoreModel {
     private void setColumnArray(String columns){
         this.selectQueryArray.add(columns);
     }
-
-    private void setMessages(Vertx vertx){
-        SharedData sharedData = vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(service).getJsonObject("model");
-
-    }
-    
-    protected static String responseMessage(String path){
-        String splitPath[] = path.split(".");
-        String message = "";
-        JsonObject jMessage = new JsonObject();
-        
-        for(int i = 0; i < splitPath.length; i++){
-            
-            if(i == (splitPath.length-1)){
-                message = jMessage.getString(splitPath[i]);
-            }else{
-                jMessage = responseMessages.getJsonObject(splitPath[i]);
-            }
-        }
-        
-        return message;
-        
-    }
     
     public Future<Void> update(){
     
@@ -174,8 +166,8 @@ public abstract class CoreModel {
         StringBuilder query = new StringBuilder();
         Tuple args = this.whereArgsQuery;
 
-        if(this.jsonObejectValue == null || this.jsonObejectValue.size() == 0 ){
-            promise.fail(responseMessage("update.need-select-before-update"));
+        if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
+            promise.fail(trans("response.service.user.model.update.need-select-before-update"));
         }
         
         query.append("UPDATE ")
@@ -194,7 +186,7 @@ public abstract class CoreModel {
                     query.append(", ");
                 }
                 
-                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
                 
                 query.append(" ");
             }
@@ -205,7 +197,7 @@ public abstract class CoreModel {
             .append(";");
         
         if(this.whereQuery == null){
-            args = this.addArgs(primaryKeyName, this.primaryKeyValue, args);
+            this.addArgs(primaryKeyName, this.primaryKeyValue, args);
         }
         
         logger.info("Query : "+query.toString());
@@ -251,7 +243,7 @@ public abstract class CoreModel {
                     query.append(", ");
                 }
 
-                args = this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
 
                 query.append(" ");
             }
@@ -263,7 +255,7 @@ public abstract class CoreModel {
                 .append(this.whereQuery == null ? String.format(" WHERE %s = $%d ", primaryKeyName, this.index++) : String.format(" AND %s = $%d ", primaryKeyName, this.index++))
                 .append(";");
 
-        args = this.addArgs(primaryKeyName, id, args);
+        this.addArgs(primaryKeyName, id, args);
 
         logger.info("Query : "+query.toString());
         logger.info("Parameter : "+args.toString());
@@ -316,7 +308,7 @@ public abstract class CoreModel {
                     queryValue.append(", ");
                 }
                 
-                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
                 
                 query.append(" ");
                 queryValue.append(" ");
@@ -376,7 +368,7 @@ public abstract class CoreModel {
                     queryValue.append(", ");
                 }
 
-                args = this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
 
                 query.append(" ");
                 queryValue.append(" ");
@@ -412,8 +404,8 @@ public abstract class CoreModel {
         StringBuilder query = new StringBuilder();
         Tuple args = this.whereArgsQuery;
         
-        if(this.jsonObejectValue == null || this.jsonObejectValue.size() == 0 ){
-            promise.fail(responseMessage("delete.need-select-before-delete"));
+        if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
+            promise.fail(trans("response.service.user.model.delete.need-select-before-delete"));
         }
 
         query.append("DELETE FROM ")
@@ -422,7 +414,7 @@ public abstract class CoreModel {
             .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.index++) : this.whereQuery);
 
         if(this.whereQuery == null){
-            args = this.addArgs(primaryKeyName, this.primaryKeyValue, args);
+            this.addArgs(primaryKeyName, this.primaryKeyValue, args);
         }
         
         logger.info("Query : "+query.toString());
@@ -457,7 +449,7 @@ public abstract class CoreModel {
                 .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
                 .append(";");
 
-        args = this.addArgs(primaryKeyName, id, args);
+        this.addArgs(primaryKeyName, id, args);
         
         logger.info("Query : "+query.toString());
         logger.info("Parameter : "+args.toString());
@@ -496,7 +488,7 @@ public abstract class CoreModel {
             .append(" ")
             .append(" LIMIT 1 ;");
 
-        args = this.addArgs(primaryKeyName, id, args);
+        this.addArgs(primaryKeyName, id, args);
         
         logger.info("Query : "+query.toString());
         logger.info("Parameter : "+args.toString());
@@ -506,7 +498,7 @@ public abstract class CoreModel {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = responseMessage("find-one.not-found");
+                    String message = trans("response.service.user.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();
@@ -521,7 +513,7 @@ public abstract class CoreModel {
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
-                    this.jsonObejectValue = data;
+                    this.jsonObjectValue = data;
 
                     this.stop();
                     promise.complete();
@@ -540,7 +532,7 @@ public abstract class CoreModel {
         StringBuilder query = new StringBuilder();
         
         if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
-            promise.fail(responseMessage("find-one.need-where-statement"));
+            promise.fail(trans("response.service.user.model.find-one.need-where-statement"));
         }
 
         if(this.selectQuery == null){
@@ -563,7 +555,7 @@ public abstract class CoreModel {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = responseMessage("find-one.not-found");
+                    String message = trans("response.service.user.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();
@@ -578,7 +570,7 @@ public abstract class CoreModel {
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
-                    this.jsonObejectValue = data;
+                    this.jsonObjectValue = data;
 
                     this.stop();
                     promise.complete();
@@ -641,7 +633,7 @@ public abstract class CoreModel {
         Promise<String> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
 
-        if(this.jsonObejectValue != null && this.jsonObejectValue.size() > 0 ){
+        if(this.jsonObjectValue != null && this.jsonObjectValue.size() > 0 ){
             this.stop();
             promise.complete("1");
         }else if(this.jsonArrayValue != null && this.jsonArrayValue.size() > 0){
@@ -715,7 +707,7 @@ public abstract class CoreModel {
                 .append(" ");
         }
         
-        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
+        this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -746,7 +738,7 @@ public abstract class CoreModel {
                 .append(" ");
         }
         
-        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
+        this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -812,11 +804,11 @@ public abstract class CoreModel {
             return this.jsonArrayValue.toString();
         }
         
-        return this.jsonObejectValue.toString();
+        return this.jsonObjectValue.toString();
     }
 
     public JsonObject first(){
-        return this.jsonObejectValue;
+        return this.jsonObjectValue;
     }
     
     public JsonArray get(){
@@ -853,7 +845,7 @@ public abstract class CoreModel {
         return result;
     }
     
-    private Tuple addArgs(String column, String value, Tuple args){
+    private void addArgs(String column, String value, Tuple args){
         
         if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
             args.addUUID(value == null || value.trim().equals("") ? null : UUID.fromString(value));
@@ -878,8 +870,6 @@ public abstract class CoreModel {
         }else{
             args.addString(value == null || value.trim().equals("") ? null : String.valueOf(value));
         }
-        
-        return args;
     }
 
     private void stop(){
@@ -900,7 +890,7 @@ public abstract class CoreModel {
         this.primaryKeyValue = null;
         this.columnsValue = new HashMap<>();;
         
-        this.jsonObejectValue = new JsonObject();
+        this.jsonObjectValue = new JsonObject();
         this.jsonArrayValue = new JsonArray();
     }
     

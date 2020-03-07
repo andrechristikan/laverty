@@ -13,8 +13,5 @@ import io.vertx.ext.web.RoutingContext;
  * @author Syn-User
  */
 public class RequestHelper {
-    
-    public static String getAuthorization(RoutingContext ctx){
-        return ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
-    }
+
 }

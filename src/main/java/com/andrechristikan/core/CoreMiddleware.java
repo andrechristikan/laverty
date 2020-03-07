@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.andrechristikan.core;
 
 import com.andrechristikan.helper.GeneralHelper;
@@ -17,21 +12,17 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Syn-User
- */
-public abstract class CoreException {
+public abstract class CoreMiddleware {
 
-    protected static Logger logger = LoggerFactory.getLogger(CoreException.class);
+    protected static Logger logger = LoggerFactory.getLogger(CoreMiddleware.class);
     protected static ParserHelper parser = new ParserHelper();
     protected static Response response;
     protected static Vertx coreVertx;
 
     private static JsonObject messages;
     private static JsonObject configs;
-    
-    protected CoreException(Vertx vertx){
+
+    public CoreMiddleware(Vertx vertx){
         coreVertx = vertx;
         messages = GeneralHelper.setMessages(vertx);
         configs = GeneralHelper.setConfigs(vertx);
@@ -54,4 +45,5 @@ public abstract class CoreException {
     }
 
     public void handler(RoutingContext ctx){}
+
 }

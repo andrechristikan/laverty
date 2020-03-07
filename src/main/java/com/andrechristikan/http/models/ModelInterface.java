@@ -14,10 +14,10 @@ import java.util.Map;
  */
 public interface ModelInterface {
     
-    public ArrayList<String> setColumns();
+    ArrayList<String> setColumns();
     
-    public Map<String, String> setColumnsName();
+    Map<String, String> setColumnsName();
     
-    public Map<String, String> setColumnsType();
+    Map<String, String> setColumnsType();
     
 }

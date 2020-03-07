@@ -10,22 +10,20 @@ public class NotFoundException extends CoreException implements ExceptionInterfa
 
     public NotFoundException(Vertx vertx){
         super(vertx);
-        
-        // Set the main variable
+
         logger = LoggerFactory.getLogger(LoginException.class);
         response = new Response(vertx);
-        service = "not-found";
     }
 
     @Override
     public final void handler(RoutingContext ctx){
-        logger.info(systemMessage("start"));
+        logger.info(trans("system.exception.not-found.start"));
 
         response.create(ctx.response());
-        response.dataStructure(1, responseMessage("not-found"));
+        response.dataStructure(1, trans("response.exception.not-found"));
         response.response(ctx.response().getStatusCode());
-        
-        logger.info(systemMessage("end"));
+
+        logger.info(trans("system.exception.not-found.start"));
 
     }
 

@@ -5,105 +5,62 @@
  */
 package com.andrechristikan.http.middleware;
 
+import com.andrechristikan.core.CoreMiddleware;
 import com.andrechristikan.helper.JwtHelper;
-import com.andrechristikan.helper.ParserHelper;
+import com.andrechristikan.helper.RequestHelper;
 import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Syn-User
  */
-public class AuthMiddleware implements MiddlewareInterface{
-    
-    private final Logger logger;
-    private final ParserHelper parser;
+public class AuthMiddleware extends CoreMiddleware implements MiddlewareInterface{
+
     private final JwtHelper jwtHelper;
-    private final String service;
-    private final String serviceMessage;
-    private final Vertx vertx;
-    private final Response settingResponse;
-    
-    protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
-    protected JsonObject mainConfigs;
-    protected JsonObject serviceConfigs;
-    protected JWTAuth jwtAuthConfig;
-    
     
     public AuthMiddleware(Vertx vertx){
-        // init
-        this.logger = LoggerFactory.getLogger(AuthMiddleware.class);
-        this.parser = new ParserHelper();
-        this.vertx = vertx;
-        this.service = "jwt";
-        this.serviceMessage = "authentication";
-        this.settingResponse = new Response(this.vertx);
-        this.jwtHelper = new JwtHelper(this.vertx);
-        
-        // Message & Config
-        this.setConfigs();
-        this.setMessages();
-        
-        // Jwt Config
-        this.jwtAuthConfig = this.jwtHelper.getSettingJwtAuth();
-    }
-    
-    private void setConfigs(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.mainConfigs = jMapData.get("configs.main");
-        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
+        super(vertx);
+        logger = LoggerFactory.getLogger(AuthMiddleware.class);
+        response = new Response(vertx);
+
+        this.jwtHelper = new JwtHelper(vertx);
+
     }
 
-    private void setMessages(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject(this.serviceMessage);
-        this.responseMessages = jMapData.get("messages.response").getJsonObject(this.serviceMessage);
-    }
-    
     @Override
     public void handler(RoutingContext ctx){
-        
-//        HttpServerResponse response = this.settingResponse.create(ctx);
-//        String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
-//        
-//        if (authorization != null) {
-//            String[] parts = authorization.split(" ");
-//            String token = parts[1];
-//        
-//            this.jwtAuthConfig.authenticate(new JsonObject().put("jwt", token), checked -> {
-//                if (checked.succeeded()) {
-//                    this.logger.info(this.systemMessages.getString("success"));
-//                    if(ctx.user() == null){
-//                        ctx.setUser(checked.result());
-//                    }
-//                    ctx.next();  
-//                }else{
-//                    String message = this.responseMessages.getString("failed");
-//                    this.logger.info(this.systemMessages.getString("fail")+" "+checked.cause().getMessage());
-//                    String messageResponse = Response.DataStructure(1,message);
-//                    response.setStatusCode(401);
-//                    response.end(messageResponse);
-//                }
-//            });
-//        }else{
-//            String message = this.responseMessages.getString("token-required");
-//            this.logger.info(this.systemMessages.getString("fail")+" "+message);
-//            String messageResponse = Response.DataStructure(1,message);
-//            response.setStatusCode(403);
-//            response.end(messageResponse);
-//        }
+
+        String authorization = JwtHelper.getTokenFromHeader(ctx);
+        JWTAuth jwtAuthConfig = this.jwtHelper.getSettingJwtAuth();
+        response.create(ctx.response());
+
+        if (authorization != null) {
+            String[] parts = authorization.split(" ");
+            String token = parts[1];
+
+            jwtAuthConfig.authenticate(new JsonObject().put("jwt", token), checked -> {
+                if (checked.succeeded()) {
+                    logger.info(trans("system.authentication.success"));
+                    if(ctx.user() == null){
+                        ctx.setUser(checked.result());
+                    }
+                    ctx.next();
+                }else{
+                    logger.info(trans("system.authentication.fail")+" "+checked.cause().getMessage());
+                    response.dataStructure(1, trans("response.authentication.failed"));
+                    response.response(401);
+                }
+            });
+        }else{
+            logger.info(trans("system.authentication.fail")+" "+trans("response.authentication.token-required"));
+            response.dataStructure(1, trans("response.authentication.token-required"));
+            response.response(403);
+        }
                     
     }
 }

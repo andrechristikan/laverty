@@ -21,14 +21,9 @@ public class UserModel extends CoreModel implements ModelInterface{
     public UserModel(Vertx vertx, Transaction trans){
         super(vertx, trans);
         logger = LoggerFactory.getLogger(UserModel.class);
-        
+
         tableName = "users";
-        service = "users";
-        
-        // you can change the primary key name from this
         primaryKeyName = "id";
-    
-        
     }
     
     

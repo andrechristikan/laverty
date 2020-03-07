@@ -1,9 +1,13 @@
-# Vert.x-Proxy Example For RestFul API (Java)
-I was tired using primitive vert.x with so many random resources.
+# Laverty For RestFul API (Vert-x Proxy | Java Version) - STILL ON DEVELOPING
+Inspired from laravel framework. 
+This project wanna be like mini-laravel framework. 
+~~This will save your time while developing apps.~~
+
+Tbh, i have no idea with my code. 
+I just put everything that i know about Vert-x (Java) based 3 years experience be Backend Engineer. Hope you gonna like it. Enjoy~
 
 ## Getting Started
-Inspired from laravel framework. This project wanna be like mini-laravel framework. ~~This will save your time while developing apps.~~
-
+Let start from the bottom
 > Minimum requirement: 
 1. Understand Java Language (Beginner - Intermediate)
 2. Understand Asynchronous Programming (Intermediate)
@@ -12,10 +16,10 @@ Inspired from laravel framework. This project wanna be like mini-laravel framewo
 
 > Tech stack
 1. Java 11.0.6
-2. Postgresql 12.2
+2. Postgres 12.2
 3. Maven 10.14.6
 
-## Instalation
+## Installation
 Guide for install this project
 ### Production - Normal Installing / Linux env (NEED TO TEST)
 1. Open terminal, and pull this project
@@ -44,7 +48,7 @@ Guide for install this project
     - Exclude : 
         1. `target/`
         2. `.idea/`
-2. Set Runner
+2. Set IDE Runner
     - Use `Template Application`
     - Main class : `io.vertx.core.Launcher`
     - Program Argument : `run com.andrechristikan.http.MainVerticle`
@@ -52,7 +56,7 @@ Guide for install this project
     - Before Lunch
         1. Add `Run Maven Goal`
         2. Fill `clean install`
-        3. Complete
+        3. Done, save all configuration
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `configs/vertx.json`
 4. Set config, config in `src/main/resources/configs`
    - Rename `vertx-example.json` to `vertx.json`
@@ -399,17 +403,17 @@ public class UserModel extends AbstractModel {
 ```java
 
 ```
-### Middleware Request
+### Middleware
 ```java
 
 ```
 
-### Authorization with JWT
+### JWT Authorization
 ```java
 
 ```
 
-### Control Env
+### Env
 ```java
 
 ```
@@ -422,56 +426,49 @@ Still on development. I will finish this project as soon as possible.
 * [Vert.x Asynchronous Programming](https://vertx.io/docs/guide-for-java-devs/)
 
 
-> Features :
-- New Controller Class
-- New Exception Class
-- New Model Class
-- New Route Class
-- New Database Migration
-- Request Middleware
-- Auth Middleware
-- Env control app from JSON file
-- Dynamic configs from database
-- Auth with JWT
-- Promise and Future (Java Version)
-- Query Transaction (Java Version)
-- Service more that one verticle Vert.x
-- Vert.x Proxy
-
-
-> Todo :
-- [x] Http Server (env from vertx.json)
-- [x] Default Exception
-- [x] Not Found Exception
-- [x] Login Exception
-- [x] Database Helper (env from vertx.json)
-- [x] Parser Helper
-- [x] Jwt Helper (env from vertx.json)
-- [x] Request Helper
-- [x] Folder Structure
-- [x] Setting App From vertx.json File
-- [x] All messages from files, and can change the message to what ever you want
-- [x] New Model Class (Restructured)
-- [x] User model (Restructured)
-- [x] New Exception Class (Restructured)
-- [x] New Response Class (Restructured)
-- [ ] New Auth Class (Restructuring)
-- [ ] Middleware Auth (Restructuring)
-- [ ] Middleware Admin Auth (Restructuring)
+> Features & Todo :
+- [x] New Http Server Class
+- [x] New Helper Class
+- [x] Friendly Folder Structure
+- [x] Apps settings from File ( Vertx.json )
+- [x] Support multi languages
+- [x] New Exception Class
+- [x] Basic Query Builder
+- [x] New Exception Class
+- [x] New Response Class
+- [x] New Middleware Class
+- [x] Auth Class
 - [ ] New Controller Class (Restructuring)
 - [ ] New Route Class (Restructuring)
-- [ ] Create Login controller
-- [ ] User Service Implementation
-- [ ] Flow login
-- [ ] Password Helper
-- [ ] Request Middleware
-- [ ] Model Join
+- [ ] Vert-x Service Implementation
+- [ ] User Login Pattern
+- [ ] Query Builder With Full Features (Join, Having, Group, Distinct, Raw Query, etc)
 - [ ] Database Migration
 
 
 ### Authors
-> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | andrechrisikan@gmail.com
+> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | [andrechrisikan@gmail.com](mailto:@andrechrisikan@gmial.com)
 
+Skills
+1. Program Languages
+    - PHP (Laravel Framework and CI Framework)
+    - Python (Flask Framework)
+    - Java (Vert-x)
+2. DevOps skill
+    - Containers and configuration management tools (Docker)
+    - Web server (Nginx, Apache)
+    - Cloud service providers (AWS Cloud)
+    - Scripting( Bash and Python)
+    - Application Building
+    - Linux Fundamentals (Ubuntu)
+    - Source Code management (Git)
+3. Database Skill
+    1. Relational Database
+        - Mysql
+        - Postgres
+        - MariaDB
+    2. NoSQL Database
+        - MongoDB
 
 ## Other Information
 > Users Access App

@@ -13,6 +13,6 @@ import io.vertx.ext.web.RoutingContext;
  */
 public interface MiddlewareInterface {
     
-    public void handler(RoutingContext ctx);
+    void handler(RoutingContext ctx);
     
 }
