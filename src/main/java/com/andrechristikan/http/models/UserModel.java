@@ -5,53 +5,70 @@
  */
 package com.andrechristikan.http.models;
 
-import com.andrechristikan.AbstractModel;
+import com.andrechristikan.core.CoreModel;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Transaction;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.LoggerFactory;
 /**
  *
  * @author Syn-UserModel
  */
-public class UserModel extends AbstractModel {
+public class UserModel extends CoreModel implements ModelInterface{
     
     public UserModel(Vertx vertx, Transaction trans){
         super(vertx, trans);
-        this.logger = LoggerFactory.getLogger(UserModel.class);
+        logger = LoggerFactory.getLogger(UserModel.class);
+
+        tableName = "users";
+        primaryKeyName = "id";
     }
+    
     
     /* 
         This is mandatory
         Set column from this function
     */ 
     @Override
-    protected void setColumns(){
-        this.columns.add("id");
-        this.columns.add("role_id");
-        this.columns.add("username");
-        this.columns.add("password");
-        this.columns.add("email");
-        this.columns.add("created_at");
-        this.columns.add("updated_at");
-        this.columns.add("last_login");
+    public ArrayList<String> setColumns(){
+        
+        ArrayList<String> columns = new ArrayList<>();
+        columns.add("id");
+        columns.add("role_id");
+        columns.add("username");
+        columns.add("password");
+        columns.add("email");
+        columns.add("created_at");
+        columns.add("updated_at");
+        columns.add("last_login");
+        
+        return columns;
     }
     
     /* 
         This is optional
         This count type must same with count of column
     */ 
+    
     @Override
-    protected void setColumnsName(){
-        this.columnsName.put("id","user_id");
-        this.columnsName.put("role_id","role_id");
-        this.columnsName.put("username","user_name");
-        this.columnsName.put("password","password");
-        this.columnsName.put("email","email_user");
-        this.columnsName.put("created_at","created_at");
-        this.columnsName.put("updated_at","updated_at");
-        this.columnsName.put("last_login","last_login");
+    public Map<String, String> setColumnsName(){
+        
+        Map<String, String> columnsName = new HashMap<>();
+        columnsName.put("id","user_id");
+        columnsName.put("role_id","role_id");
+        columnsName.put("username","user_name");
+        columnsName.put("password","password");
+        columnsName.put("email","email_user");
+        columnsName.put("created_at","created_at");
+        columnsName.put("updated_at","updated_at");
+        columnsName.put("last_login","last_login");
+        
+        return columnsName;
     }
-
+    
+    
     /* 
         This is mandatory
         This count type must same with count of column
@@ -68,42 +85,20 @@ public class UserModel extends AbstractModel {
         - Boolean
     */ 
     @Override
-    protected void setColumnsType(){
-        this.columnsType.put("id","uuid");
-        this.columnsType.put("role_id","string");
-        this.columnsType.put("username","string");
-        this.columnsType.put("password","string");
-        this.columnsType.put("email","string");
-        this.columnsType.put("created_at","timestamptz");
-        this.columnsType.put("updated_at","timestamptz");
-        this.columnsType.put("last_login","timestamptz");
+    public Map<String, String> setColumnsType(){
+        
+        Map<String, String> columnsType = new HashMap<>();
+        columnsType.put("id","uuid");
+        columnsType.put("role_id","string");
+        columnsType.put("username","string");
+        columnsType.put("password","string");
+        columnsType.put("email","string");
+        columnsType.put("created_at","timestamptz");
+        columnsType.put("updated_at","timestamptz");
+        columnsType.put("last_login","timestamptz");
+        
+        return columnsType;
     }
     
-    /* 
-        This is mandatory
-        Table name in database
-    */ 
-    @Override
-    protected void setTableName(){
-        this.tableName = "users";
-    }
-    
-    /* 
-        This is mandatory
-        Reference from response.json in resources/messages folder
-    */ 
-    @Override
-    protected void setService(){
-        this.service = "user";
-    }
-    
-    /* 
-        This is optional
-        If you want to change primary key
-    */ 
-    @Override
-    protected void setPrimaryKey(){
-        this.primaryKeyName = "id";
-    }
 
 }

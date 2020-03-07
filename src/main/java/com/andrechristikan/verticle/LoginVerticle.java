@@ -5,6 +5,8 @@
  */
 package com.andrechristikan.verticle;
 
+import com.andrechristikan.core.CoreVerticle;
+import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.services.LoginService;
 import com.andrechristikan.services.implement.LoginServiceImplement;
@@ -21,36 +23,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class LoginVerticle extends AbstractVerticle{
-    
-    private final Logger logger;
-    private final String service;
-    
-    protected JsonObject systemMessages;
-    protected JsonObject serviceConfigs;
-    
+public class LoginVerticle extends CoreVerticle implements  VerticleInterface{
+
     public LoginVerticle(){
-        this.logger = LoggerFactory.getLogger(LoginVerticle.class);
-        this.service = "login";
+        logger = LoggerFactory.getLogger(LoginVerticle.class);
     }
-    
+
     @Override
     public void start(Promise<Void> promise) throws Exception {
-        
-        //Config
-        this.serviceConfigs = config().getJsonObject("service").getJsonObject(this.service);
-        String eventBusServiceName = this.serviceConfigs.getString("address");
-        
-        // Message
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service);
-     
-        this.logger.info(this.systemMessages.getString("start").replace("#eventBusServiceName", eventBusServiceName));
+
+        messages = GeneralHelper.setMessages(vertx);
+        configs = GeneralHelper.setConfigs(vertx);
+
+        logger.info(trans("system.service.login.start").replace("#eventBusServiceName", conf("service.login.address")));
         ServiceBinder binder = new ServiceBinder(this.vertx);
-        binder.setAddress(eventBusServiceName).register(LoginService.class, new LoginServiceImplement(this.vertx));
-        this.logger.info(this.systemMessages.getString("end").replace("#eventBusServiceName", eventBusServiceName));
+        binder.setAddress(conf("service.login.address")).register(LoginService.class, new LoginServiceImplement(this.vertx));
+        logger.info(trans("system.service.login.end").replace("#eventBusServiceName", conf("service.login.address")));
 
         promise.complete();
     }
+
 }

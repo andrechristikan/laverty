@@ -5,70 +5,51 @@
  */
 package com.andrechristikan.http;
 
+import com.andrechristikan.core.CoreVerticle;
+import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.http.exception.DefaultException;
 import com.andrechristikan.http.exception.NotFoundException;
 import com.andrechristikan.helper.ParserHelper;
-import io.vertx.core.AbstractVerticle;
+import com.andrechristikan.verticle.VerticleInterface;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Syn-User
  */
-public class Server extends AbstractVerticle {
-    
-    private final Logger logger;
-    private final ParserHelper parser;
-    private final String service;
-    
-    protected HttpServer server;
-    protected JsonObject systemMessages;
-    protected JsonObject mainConfigs;
+public class Server extends CoreVerticle implements VerticleInterface {
+
+    private HttpServer server;
     
     protected Server(){
-        this.logger = LoggerFactory.getLogger(Server.class);
-        this.parser = new ParserHelper();
-        this.service = "server";
+        logger = LoggerFactory.getLogger(Server.class);
     }
     
     @Override
     public void start(final Promise<Void> promise) throws Exception {
-        
-        // Config
-        this.mainConfigs = config().getJsonObject("main");
-        
-        // Message
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system");
-        JsonObject systemMessage = this.systemMessages.getJsonObject("service").getJsonObject(this.service);
-        
-        // -- START
-        this.logger.info(systemMessage.getString("start"));
-        
-        // Create Security
+
+        messages = GeneralHelper.setMessages(vertx);
+        configs = GeneralHelper.setConfigs(vertx);
+
+        logger.info(trans("system.service.server.start"));
+
         Router router = Router.router(this.vertx);
         Route route = new Route(this.vertx, router);
         DefaultException defaultException = new DefaultException(this.vertx);
         NotFoundException notFoundException = new NotFoundException(this.vertx);
-        JsonArray requestConfigHeader = this.mainConfigs.getJsonObject("cors").getJsonArray("header");
-        JsonArray requestConfigMethod = this.mainConfigs.getJsonObject("cors").getJsonArray("method");
-        CorsHandler cors = CorsHandler.create(this.mainConfigs.getJsonObject("cors").getString("allow-origin"));
-        
-        // Set cors
+        JsonArray requestConfigHeader = confAsJsonArray("main.cors.header");
+        JsonArray requestConfigMethod = confAsJsonArray("main.cors.method");
+        CorsHandler cors = CorsHandler.create(conf("main.cors.allow-origin"));
+
         if(!requestConfigHeader.isEmpty()){
             requestConfigHeader.forEach(action -> {
                 cors.allowedHeader(action.toString());
@@ -77,98 +58,89 @@ public class Server extends AbstractVerticle {
         
         if(!requestConfigMethod.isEmpty()){
             requestConfigMethod.forEach(action -> {
-                if(action.toString().toUpperCase().equals("GET")){
+                if(action.toString().equalsIgnoreCase("GET")){
                     cors.allowedMethod(HttpMethod.GET);
                 }
                 
-                if(action.toString().toUpperCase().equals("POST")){
+                if(action.toString().equalsIgnoreCase("POST")){
                     cors.allowedMethod(HttpMethod.POST);
                 }
                 
-                if(action.toString().toUpperCase().equals("PUT")){
+                if(action.toString().equalsIgnoreCase("PUT")){
                     cors.allowedMethod(HttpMethod.PUT);
                 }
                 
-                if(action.toString().toUpperCase().equals("DELETE")){
+                if(action.toString().equalsIgnoreCase("DELETE")){
                     cors.allowedMethod(HttpMethod.DELETE);
                 }
                 
-                if(action.toString().toUpperCase().equals("OPTIONS")){
+                if(action.toString().equalsIgnoreCase("OPTIONS")){
                     cors.allowedMethod(HttpMethod.OPTIONS);
                 }
-                
-                if(action.toString().toUpperCase().equals("HEAD")){
+
+                if(action.toString().equalsIgnoreCase("HEAD")){
                     cors.allowedMethod(HttpMethod.HEAD);
                 }
                 
-                if(action.toString().toUpperCase().equals("CONNECT")){
+                if(action.toString().equalsIgnoreCase("CONNECT")){
                     cors.allowedMethod(HttpMethod.CONNECT);
                 }
                 
-                if(action.toString().toUpperCase().equals("HEAD")){
+                if(action.toString().equalsIgnoreCase("HEAD")){
                     cors.allowedMethod(HttpMethod.HEAD);
                 }
                 
-                if(action.toString().toUpperCase().equals("OPTIONS")){
+                if(action.toString().equalsIgnoreCase("OPTIONS")){
                     cors.allowedMethod(HttpMethod.OPTIONS);
                 }
                 
-                if(action.toString().toUpperCase().equals("OTHER")){
+                if(action.toString().equalsIgnoreCase("OTHER")){
                     cors.allowedMethod(HttpMethod.OTHER);
                 }
                 
-                if(action.toString().toUpperCase().equals("PATCH")){
+                if(action.toString().equalsIgnoreCase("PATCH")){
                     cors.allowedMethod(HttpMethod.PATCH);
                 }
             });
         }
-        
-        // Put setting into router
+
         router.route()
             .consumes("application/json")
             .produces("application/json");
         router.route().handler(cors);
-        
-        // Upload Setting
+
         router.route().handler(
             BodyHandler.create()
-                .setUploadsDirectory(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("upload-files").getString("files-uploaded"))
-                .setDeleteUploadedFilesOnEnd(this.parser.parseBoolean(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("upload-files").getString("delete-on-end"), Boolean.TRUE))
+                .setUploadsDirectory(conf("main."+conf("main.environment")+".upload-files.files-uploaded"))
+                .setDeleteUploadedFilesOnEnd(parser.parseBoolean(conf("main."+conf("main.environment")+".upload-files.delete-on-end") ,Boolean.TRUE))
         );
         router.route().handler(StaticHandler.create());
-        
-        // Router
+
         route.create();
 
-        // Exception
         router.route().failureHandler(defaultException::handler);
         router.route().handler(notFoundException::handler);
         
-        
-        // No SSL requested, start a non-SSL HTTP server.
+
         this.server = this.vertx.createHttpServer(
                 new HttpServerOptions()
-                        .setPort(this.parser.parseInt(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("http-server").getString("port"),8181))
-                        .setHost(this.parser.parseString(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("http-server").getString("address"),"127.0.0.1")));
+                        .setPort(parser.parseInt(conf("main."+conf("main.environment")+".http-server.port"),8181))
+                        .setHost(parser.parseString(conf("main."+conf("main.environment")+".http-server.address"),"127.0.0.1")));
         this.server.requestHandler(router)
             .listen(
                 ar -> {
                     if(ar.succeeded()){
-                        this.logger.info(
-                            systemMessage
-                                .getString("ongoing")
-                                .replace("#IP_ADDRESS", this.parser.parseString(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("http-server").getString("address"),"127.0.0.1"))
-                                .replace("#PORT", this.parser.parseString(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getJsonObject("http-server").getString("port"),"8181"))
+                        logger.info(
+                            trans("system.service.server.ongoing")
+                                .replace("#IP_ADDRESS", parser.parseString(conf("main."+conf("main.environment")+".http-server.address"),"127.0.0.1"))
+                                .replace("#PORT", parser.parseString(conf("main."+conf("main.environment")+".http-server.port"),"8181"))
                         );
                         promise.complete();
                     }else{
-                        this.logger.error(systemMessage.getString("fail")+" "+ar.cause().getMessage());
+                        logger.error(trans("system.service.server.failed")+" "+ar.cause().getMessage());
                         promise.fail(ar.cause().getMessage());
                     }
             });
-        
-        
-        // -- END
         
     }
     

@@ -3,12 +3,12 @@
         "main":{
             "start": "[MainVerticleStarting] start...",
             "success":"[MainVerticleSucceeded] successfully running.",
-            "fail":"[MainVerticleFailed] : ",
+            "failed":"[MainVerticleFailed] : ",
             "otherwise":"[MainVerticleOterwise] : "
         },
         "server":{
             "start":"[ServerStarting] Server trying to start..",
-            "fail": "[ServerFailed] : ",
+            "failed": "[ServerFailed] : ",
             "ongoing":"[ServerOngoing] Web server started on #IP_ADDRESS:#PORT"
         },
         "login":{
@@ -25,7 +25,7 @@
             "implement":{
                 "database-connection":"[LoginImplementDatabaseConnection] Database connection pool for #serviceAddress Service created.",
                 "success":"[LoginImplementSuccess] Success to login",
-                "fail":"[LoginImplementFailed] : "
+                "failed":"[LoginImplementFailed] : "
             },
             "exception": {
                 "start": "[LoginException] Enter the LoginException.",
@@ -44,17 +44,17 @@
         },
         "login":{
             "start": "[LoginExceptionStarting] Enter the LoginException.",
-            "fail": "[LoginExceptionFailed] : ",
+            "failed": "[LoginExceptionFailed] : ",
             "end": "[LoginExceptionEnded] LoginException End."
         }
     },
     "authorization":{
         "success":"[AuthorizationSuccess] Welcome majesty",
-        "fail":"[AuthorizationFailed] : "
+        "failed":"[AuthorizationFailed] : "
     },
     "authentication":{
         "success":"[AuthenticationSuccess] Let's roll",
-        "fail": "[AuthenticationFailed] : "
+        "failed": "[AuthenticationFailed] : "
     },
     "database":{
         "create-pool":{

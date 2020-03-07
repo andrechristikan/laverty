@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.andrechristikan;
+package com.andrechristikan.core;
 
+import com.andrechristikan.helper.GeneralHelper;
+import com.andrechristikan.helper.ParserHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Transaction;
@@ -25,50 +25,58 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Syn-User
  */
-public abstract class AbstractModel {
+public abstract class CoreModel {
     
-    protected ArrayList<String> columns = new ArrayList<>();
-    protected String tableName;
-    protected String service;
-    protected Vertx vertx;
-    protected Logger logger;
-    protected Transaction trans;
-    protected Map<String, String> columnsName = new HashMap<>();
-    protected Map<String, String> columnsType = new HashMap<>();
-    protected String primaryKeyName;
+    protected static Logger logger = LoggerFactory.getLogger(CoreModel.class);
+    protected static ParserHelper parser = new ParserHelper();
+    private final Transaction trans;
+    protected static Vertx coreVertx;
+    
+    // mandatory field
+    protected static String tableName = "TableName";
+    protected static String primaryKeyName = "id";
+    
+    // for column
+    private ArrayList<String> columns = new ArrayList<>();
+    private final Map<String, String> columnsName = new HashMap<>();
+    private final Map<String, String> columnsType = new HashMap<>();
     public Map<String, String> columnsValue = new HashMap<>();
 
-    private JsonObject responseMessages;
-    private JsonObject value = new JsonObject();
-    private JsonArray valueArray = new JsonArray();
+    // For query
     private String selectQuery;
+    private ArrayList <String> selectQueryArray = new ArrayList<>();
+    
     private String whereQuery;
     private Tuple whereArgsQuery = Tuple.tuple();
+    
     private String limitQuery;
     private String orderQuery;
     private String primaryKeyValue;
+    
+    private JsonObject jsonObjectValue = new JsonObject();
+    private JsonArray jsonArrayValue = new JsonArray();
+    
+    // other
+    private static JsonObject messages;
+    private static JsonObject configs;
     private int index = 1;
-    private ArrayList <String> selectQueryArray = new ArrayList<>();
     
-    protected AbstractModel(Vertx vertx, Transaction trans){
-        this.vertx = vertx;
+    protected CoreModel(Vertx vertx, Transaction trans){
         this.trans = trans;
-        this.init();
-    }
-    
-    private void init(){
-        this.setColumnsName();
-        this.setColumnsType();
-        this.setColumns();
-        this.setTableName();
-        this.setService();
-        this.setMessages();
-        this.setPrimaryKey();
+
+        this.setColumnsTypeToMap();
+        this.setColumnsNameToMap();
+        this.setColumnsToMap();
+
+        messages = GeneralHelper.setMessages(vertx);
+        configs = GeneralHelper.setConfigs(vertx);
+        coreVertx = vertx;
     }
     
     
@@ -76,20 +84,18 @@ public abstract class AbstractModel {
         This is mandatory
         Set column from this function
     */ 
-    protected void setColumns(){
-        this.columns.add("column1");
-        this.columns.add("column2");
+    protected ArrayList<String> setColumns(){
+        return new ArrayList<>();
     }
+    
     
 
     /* 
         This is optional
         This count type must same with count of column
     */ 
-    protected void setColumnsName(){
-        this.columns.forEach(column -> {
-            this.columnsName.put(column, column);
-        });
+    protected Map<String, String> setColumnsName(){
+        return new HashMap<>();
     }
 
     
@@ -108,40 +114,44 @@ public abstract class AbstractModel {
         - Number
         - Boolean
     */ 
-    protected void setColumnsType(){
+    protected Map<String, String> setColumnsType(){
+        return new HashMap<>();
+    }
+
+    protected static String trans(String path){
+        return GeneralHelper.trans(path, messages);
+    }
+
+    protected static String conf(String path){
+        return GeneralHelper.conf(path, configs);
+    }
+
+    protected static JsonArray confAsJsonArray(String path){
+        return GeneralHelper.confAsJsonArray(path, configs);
+    }
+
+    protected static JsonObject confAsJsonObject(String path){
+        return GeneralHelper.confAsJsonObject(path, configs);
+    }
+
+    private void setColumnsToMap(){
+        this.columns = setColumns();
+    }
+    
+    private void setColumnsTypeToMap(){
+        Map<String, String> columnsTypeFromSetter = setColumnsType();
         this.columns.forEach(column -> {
-            this.columnsType.put(column, "string");
+            this.columnsType.put(column, columnsTypeFromSetter.get(column));
         });
     }
     
-
-    
-    /* 
-        This is mandatory
-        Table name in database
-    */ 
-    protected void setTableName(){
-        this.tableName = "tableName";
+    private void setColumnsNameToMap(){
+        Map<String, String> columnsNameFromSetter = setColumnsName();
+        this.columns.forEach(column -> {
+            this.columnsName.put(column, columnsNameFromSetter.get(column));
+        });
     }
     
-    
-    /* 
-        This is mandatory
-        Reference from response.json in resources/messages folder
-    */ 
-    protected void setService(){
-        this.service = "service";
-    }
-    
-    
-    /* 
-        This is optional
-        If you want to change primary key
-    */ 
-    protected void setPrimaryKey(){
-        this.primaryKeyName = "id";
-    }
-
     private void setColumnsArray(ArrayList<String> columns){
         this.selectQueryArray.addAll(columns);
     }
@@ -149,30 +159,23 @@ public abstract class AbstractModel {
     private void setColumnArray(String columns){
         this.selectQueryArray.add(columns);
     }
-
-    private void setMessages(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("model");
-
-    }
     
-    public Future<Void> saveUpdate(){
+    public Future<Void> update(){
     
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        Tuple args = Tuple.tuple();
+        Tuple args = this.whereArgsQuery;
 
-        if(this.value == null || this.value.size() == 0 ){
-            promise.fail(this.responseMessages.getJsonObject("update").getString("need-select-before-update"));
+        if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
+            promise.fail(trans("response.service.user.model.update.need-select-before-update"));
         }
         
         query.append("UPDATE ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" SET ");
         
         for (int i = 0 ; i < this.columns.size() ; i++){
-            if(! this.columns.get(i).equalsIgnoreCase(this.primaryKeyName) && this.columnsValue.get(this.columns.get(i)) != null){
+            if( !this.columns.get(i).equalsIgnoreCase(primaryKeyName) && this.columnsValue.get(this.columns.get(i)) != null){
                 query.append(" ")
                     .append(this.columns.get(i))
                     .append(" = $")
@@ -183,20 +186,22 @@ public abstract class AbstractModel {
                     query.append(", ");
                 }
                 
-                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
                 
                 query.append(" ");
             }
         }
         
         query.append(" ")
-            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", this.primaryKeyName, this.index) : this.whereQuery)
+            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.index) : this.whereQuery)
             .append(";");
         
-        args = this.addArgs(this.primaryKeyName, this.primaryKeyValue, args);
+        if(this.whereQuery == null){
+            this.addArgs(primaryKeyName, this.primaryKeyValue, args);
+        }
         
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+args.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
         
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
@@ -216,42 +221,44 @@ public abstract class AbstractModel {
         return promise.future();
     }
 
-    public Future<Void> update(Map<String, String> columnsValue, String id){
+    public Future<Void> update(Map<String, String> localColumnsValue, String id){
 
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        Tuple args = Tuple.tuple();
+        Tuple args = this.whereArgsQuery;
 
         query.append("UPDATE ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(" SET ");
 
         for (int i = 0 ; i < this.columns.size() ; i++){
-            if(! this.columns.get(i).equalsIgnoreCase(this.primaryKeyName) && columnsValue.get(this.columns.get(i)) != null){
+            if(! this.columns.get(i).equalsIgnoreCase(primaryKeyName) && localColumnsValue.get(this.columns.get(i)) != null){
                 query.append(" ")
                         .append(this.columns.get(i))
                         .append(" = $")
                         .append(this.index++)
                         .append(" ");
 
-                if(i != (columnsValue.size()-1) ){
+                if(i != (localColumnsValue.size()-1) ){
                     query.append(", ");
                 }
 
-                args = this.addArgs(this.columns.get(i), columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
 
                 query.append(" ");
             }
         }
 
         query.append(" ")
-                .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", this.primaryKeyName, this.index) : this.whereQuery)
+                .append(this.whereQuery)
+                .append(" ")
+                .append(this.whereQuery == null ? String.format(" WHERE %s = $%d ", primaryKeyName, this.index++) : String.format(" AND %s = $%d ", primaryKeyName, this.index++))
                 .append(";");
 
-        args = this.addArgs(this.primaryKeyName, id, args);
+        this.addArgs(primaryKeyName, id, args);
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+args.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
 
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
@@ -280,12 +287,12 @@ public abstract class AbstractModel {
         Tuple args = Tuple.tuple();
         String id = UUID.randomUUID().toString();
         
-        if(this.columnsValue.get(this.primaryKeyName) == null || this.columnsValue.get(this.primaryKeyName).trim().equalsIgnoreCase("")){
-            this.columnsValue.put(this.primaryKeyName, id);
+        if(!this.columnsValue.containsKey(primaryKeyName) || this.columnsValue.get(primaryKeyName) == null || this.columnsValue.get(primaryKeyName).trim().equalsIgnoreCase("")){
+            this.columnsValue.put(primaryKeyName, id);
         }
         
         query.append("INSERT INTO ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" ( ");
         
         for (int i = 0 ; i < this.columns.size() ; i++){
@@ -301,7 +308,7 @@ public abstract class AbstractModel {
                     queryValue.append(", ");
                 }
                 
-                args = this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), this.columnsValue.get(this.columns.get(i)), args);
                 
                 query.append(" ");
                 queryValue.append(" ");
@@ -310,8 +317,8 @@ public abstract class AbstractModel {
         
         query.append(" ) VALUES ( ").append(queryValue.toString()).append(" ) ;");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+args.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
         
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
@@ -330,8 +337,8 @@ public abstract class AbstractModel {
 
         return promise.future();
     }
-
-    public Future<Void> insert(Map<String, String> columnsValue){
+    
+    public Future<Void> insert(Map<String, String> localColumnsValue){
 
         Promise<Void> promise = Promise.promise();
 
@@ -340,28 +347,28 @@ public abstract class AbstractModel {
         Tuple args = Tuple.tuple();
         String id = UUID.randomUUID().toString();
 
-        if(columnsValue.get(this.primaryKeyName) == null || columnsValue.get(this.primaryKeyName).trim().equalsIgnoreCase("")){
-            columnsValue.put(this.primaryKeyName, id);
+        if(!localColumnsValue.containsKey(primaryKeyName) || localColumnsValue.get(primaryKeyName) == null || localColumnsValue.get(primaryKeyName).trim().equalsIgnoreCase("")){
+            localColumnsValue.put(primaryKeyName, id);
         }
 
         query.append("INSERT INTO ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(" ( ");
 
         for (int i = 0 ; i < this.columns.size() ; i++){
-            if(columnsValue.get(this.columns.get(i)) != null){
+            if(localColumnsValue.get(this.columns.get(i)) != null){
                 query.append(" ")
                         .append(this.columns.get(i));
 
                 queryValue.append(" $")
                         .append(this.index++);
 
-                if(i != (columnsValue.size()-1) ){
+                if(i != (localColumnsValue.size()-1) ){
                     query.append(", ");
                     queryValue.append(", ");
                 }
 
-                args = this.addArgs(this.columns.get(i), columnsValue.get(this.columns.get(i)), args);
+                this.addArgs(this.columns.get(i), localColumnsValue.get(this.columns.get(i)), args);
 
                 query.append(" ");
                 queryValue.append(" ");
@@ -370,8 +377,8 @@ public abstract class AbstractModel {
 
         query.append(" ) VALUES ( ").append(queryValue.toString()).append(" ) ;");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+args.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
 
         this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
@@ -390,29 +397,33 @@ public abstract class AbstractModel {
 
         return promise.future();
     }
-
+    
     public Future<Void> delete(){
 
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-
-        if(this.value == null || this.value.size() == 0 ){
-            promise.fail(this.responseMessages.getJsonObject("delete").getString("need-select-before-update"));
+        Tuple args = this.whereArgsQuery;
+        
+        if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
+            promise.fail(trans("response.service.user.model.delete.need-select-before-delete"));
         }
 
         query.append("DELETE FROM ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" ")
-            .append(this.whereQuery)
-            .append(";");
+            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.index++) : this.whereQuery);
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        if(this.whereQuery == null){
+            this.addArgs(primaryKeyName, this.primaryKeyValue, args);
+        }
+        
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
 
-        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
                 this.stop();
-                this.setNullPrimaryKeyValue();
+                this.setNullModelValues();
                 promise.complete();
             }else{
                 promise.fail(fetch.cause().getMessage());
@@ -421,35 +432,32 @@ public abstract class AbstractModel {
 
         return promise.future();
     }
-
+    
     public Future<Void> delete(String id){
 
         Promise <Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-        StringBuilder addWhere = new StringBuilder();
-
-        addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
-                .append(this.tableName)
-                .append(".")
-                .append(this.primaryKeyName)
-                .append(" = $")
-                .append(this.index++);
-        this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
-
-        this.whereArgsQuery = this.addArgs(this.primaryKeyName, id, this.whereArgsQuery);
+        Tuple args = this.whereArgsQuery;
+        
         query.append("DELETE FROM ")
-                .append(this.tableName)
-                .append(" ")
+                .append(tableName)
+                .append(" ");
+        
+        query.append(" ")
                 .append(this.whereQuery)
+                .append(" ")
+                .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
                 .append(";");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        this.addArgs(primaryKeyName, id, args);
+        
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
 
-        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
                 this.stop();
-                this.setNullPrimaryKeyValue();
+                this.setNullModelValues();
                 promise.complete();
             }else{
                 promise.fail(fetch.cause().getMessage());
@@ -458,43 +466,39 @@ public abstract class AbstractModel {
 
         return promise.future();
     }
-
+    
     public Future<Void> findOne(String id){
 
-        StringBuilder addWhere = new StringBuilder();
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
+        Tuple args = this.whereArgsQuery;
         
         if(this.selectQuery == null){
             this.selectQuery = this.select();
         }
         
-        addWhere.append(this.whereQuery != null ? " AND " : " WHERE ")
-            .append(this.tableName)
-            .append(".")
-            .append(this.primaryKeyName)
-            .append(" = $")
-            .append(this.index++);
-        this.whereQuery = this.whereQuery != null ? this.whereQuery +addWhere.toString() : addWhere.toString();
-        
-        this.whereArgsQuery = this.addArgs(this.primaryKeyName, id, this.whereArgsQuery);
         query.append(this.selectQuery)
+            .append(" ")
             .append(" FROM ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" ")
             .append(this.whereQuery)
             .append(" ")
+            .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
+            .append(" ")
             .append(" LIMIT 1 ;");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        this.addArgs(primaryKeyName, id, args);
+        
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+args.toString());
 
-        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+        this.trans.preparedQuery(query.toString(), args, fetch -> {
             if (fetch.succeeded()) {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = this.responseMessages.getJsonObject("find-one").getString("not-found");
+                    String message = trans("response.service.user.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();
@@ -502,14 +506,14 @@ public abstract class AbstractModel {
 
                     this.selectQueryArray.forEach( column -> {
 
-                        if(column.equalsIgnoreCase(this.primaryKeyName)){
+                        if(column.equalsIgnoreCase(primaryKeyName)){
                             this.primaryKeyValue = this.result(row, column);
                         }
 
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
-                    this.value = data;
+                    this.jsonObjectValue = data;
 
                     this.stop();
                     promise.complete();
@@ -526,9 +530,9 @@ public abstract class AbstractModel {
 
         Promise<Void> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
-
+        
         if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
-            promise.fail(this.responseMessages.getJsonObject("find-one").getString("need-where-statement"));
+            promise.fail(trans("response.service.user.model.find-one.need-where-statement"));
         }
 
         if(this.selectQuery == null){
@@ -537,21 +541,21 @@ public abstract class AbstractModel {
         
         query.append(this.selectQuery)
             .append(" FROM ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
             .append(" LIMIT 1 ;");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+this.whereArgsQuery.toString());
 
         this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = this.responseMessages.getJsonObject("find-one").getString("not-found");
+                    String message = trans("response.service.user.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();
@@ -559,14 +563,14 @@ public abstract class AbstractModel {
 
                     this.selectQueryArray.forEach( column -> {
 
-                        if(column.equalsIgnoreCase(this.primaryKeyName)){
+                        if(column.equalsIgnoreCase(primaryKeyName)){
                             this.primaryKeyValue = this.result(row, column);
                         }
 
                         data.put(this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
-                    this.value = data;
+                    this.jsonObjectValue = data;
 
                     this.stop();
                     promise.complete();
@@ -581,16 +585,16 @@ public abstract class AbstractModel {
     
     public Future<Void> findAll(){
 
+        Promise<Void> promise = Promise.promise();
+        StringBuilder query = new StringBuilder();
+        
         if(this.selectQuery == null){
             this.selectQuery = this.select();
         }
         
-        Promise<Void> promise = Promise.promise();
-        StringBuilder query = new StringBuilder();
-        
         query.append(this.selectQuery)
             .append(" FROM ")
-            .append(this.tableName)
+            .append(tableName)
             .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
@@ -599,17 +603,19 @@ public abstract class AbstractModel {
             .append(this.orderQuery == null ? "" : this.orderQuery)
             .append(";");
 
-        this.logger.info("Query : "+query.toString());
-        this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+this.whereArgsQuery.toString());
 
         this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
             if (fetch.succeeded()) {
+
                 for (Row row : fetch.result()) {
                     JsonObject data = new JsonObject();
+                    
                     this.selectQueryArray.forEach( i -> {
                         data.put(this.columnsName.get(i),this.result(row, i));
                     });
-                   this.valueArray.add(data);
+                    this.jsonArrayValue.add(data);
                 }
                 
                 this.stop();
@@ -627,30 +633,26 @@ public abstract class AbstractModel {
         Promise<String> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
 
-        if(this.value != null && this.value.size() > 0 ){
+        if(this.jsonObjectValue != null && this.jsonObjectValue.size() > 0 ){
             this.stop();
             promise.complete("1");
-        }else if(this.valueArray != null && this.valueArray.size() > 0){
+        }else if(this.jsonArrayValue != null && this.jsonArrayValue.size() > 0){
             this.stop();
-            promise.complete(String.valueOf(this.valueArray.size()));
+            promise.complete(String.valueOf(this.jsonArrayValue.size()));
         }else{
-
-            if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
-                promise.fail(this.responseMessages.getJsonObject("count").getString("need-where-statement"));
-            }
-
+            
             query.append("SELECT count(")
-                    .append(this.tableName)
+                    .append(tableName)
                     .append(".")
-                    .append(this.primaryKeyName)
-                    .append(" FROM ")
-                    .append(this.tableName)
+                    .append(primaryKeyName)
+                    .append(") FROM ")
+                    .append(tableName)
                     .append(" ")
                     .append(this.whereQuery == null ? "" : this.whereQuery)
                     .append(";");
 
-            this.logger.info("Query : "+query.toString());
-            this.logger.info("Parameter : "+this.whereArgsQuery.toString());
+            logger.info("Query : "+query.toString());
+            logger.info("Parameter : "+this.whereArgsQuery.toString());
 
             this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
                 if (fetch.succeeded()) {
@@ -668,23 +670,23 @@ public abstract class AbstractModel {
         return promise.future();
     }
     
-    public AbstractModel limit(String limit){
+    public CoreModel limit(String limit){
         this.limitQuery = String.format(" LIMIT %s ",limit);
         return this;
     }
     
-    public AbstractModel orderBy(String column, String orderType){
+    public CoreModel orderBy(String column, String orderType){
         this.orderQuery = String.format(" ORDER BY %s $s ",column,orderType);
         return this;
     }
 
-    public AbstractModel where(String column, String operator, String value){
+    public CoreModel where(String column, String operator, String value){
         
         StringBuilder where = new StringBuilder();
         
         if(this.whereQuery == null){
             where.append(" WHERE ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
                 .append(column)
                 .append(" ")
@@ -695,7 +697,7 @@ public abstract class AbstractModel {
         }else{
             where
                 .append(" AND ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
                 .append(column)
                 .append(" ")
@@ -705,18 +707,18 @@ public abstract class AbstractModel {
                 .append(" ");
         }
         
-        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
+        this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
     
-    public AbstractModel orWhere(String column, String operator, String value){
+    public CoreModel orWhere(String column, String operator, String value){
         
         StringBuilder where = new StringBuilder();
         
         if(this.whereQuery == null){
             where.append(" WHERE ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
                 .append(column)
                 .append(" ")
@@ -726,7 +728,7 @@ public abstract class AbstractModel {
                 .append(" ");
         }else{
             where.append(" OR ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
                 .append(column)
                 .append(" ")
@@ -736,7 +738,7 @@ public abstract class AbstractModel {
                 .append(" ");
         }
         
-        this.whereArgsQuery = this.addArgs(column, value, this.whereArgsQuery);
+        this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -745,7 +747,7 @@ public abstract class AbstractModel {
         StringBuilder query = new StringBuilder();
         query.append(" SELECT ");
         for (int i = 0; i < this.columns.size() ; i++) {
-            query.append(this.tableName)
+            query.append(tableName)
                 .append(".")
                 .append(this.columns.get(i));
             if(i != (this.columns.size()-1) )
@@ -756,61 +758,61 @@ public abstract class AbstractModel {
         return query.toString();
     }
 
-    public AbstractModel select(ArrayList<String> columns){
+    public CoreModel select(ArrayList<String> localColumns){
         StringBuilder query = new StringBuilder();
         query.append(" SELECT ");
-        for (int i = 0; i < columns.size() ; i++) {
-            query.append(this.tableName);
+        for (int i = 0; i < localColumns.size() ; i++) {
+            query.append(tableName);
             query.append(".");
-            query.append(columns.get(i));
-            if(i != (columns.size()-1) )
+            query.append(localColumns.get(i));
+            if(i != (localColumns.size()-1) )
                 query.append(", ");
 
         }
-        this.setColumnsArray(columns);
+        this.setColumnsArray(localColumns);
         this.selectQuery = query.toString();
         return this;
     }
 
-    public AbstractModel select(String column){
+    public CoreModel select(String localColumn){
 
         StringBuilder query = new StringBuilder();
 
         if(this.selectQuery == null){
             query.append(" SELECT ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
-                .append(column)
+                .append(localColumn)
                 .append(" ");
             this.selectQuery = query.toString();
         }else{
             query.append(", ")
-                .append(this.tableName)
+                .append(tableName)
                 .append(".")
-                .append(column)
+                .append(localColumn)
                 .append(" ");
             this.selectQuery = this.selectQuery+query.toString();
         }
 
-        this.setColumnArray(column);
+        this.setColumnArray(localColumn);
         return this;
     }
 
     public String asString(){
         
-        if(this.valueArray != null && this.valueArray.size() > 0){
-            return this.valueArray.toString();
+        if(this.jsonArrayValue != null && this.jsonArrayValue.size() > 0){
+            return this.jsonArrayValue.toString();
         }
         
-        return this.value.toString();
+        return this.jsonObjectValue.toString();
     }
 
     public JsonObject first(){
-        return this.value;
+        return this.jsonObjectValue;
     }
     
     public JsonArray get(){
-        return this.valueArray;
+        return this.jsonArrayValue;
     }
 
     private String result(Row row, String column){
@@ -843,7 +845,7 @@ public abstract class AbstractModel {
         return result;
     }
     
-    private Tuple addArgs(String column, String value, Tuple args){
+    private void addArgs(String column, String value, Tuple args){
         
         if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
             args.addUUID(value == null || value.trim().equals("") ? null : UUID.fromString(value));
@@ -868,22 +870,28 @@ public abstract class AbstractModel {
         }else{
             args.addString(value == null || value.trim().equals("") ? null : String.valueOf(value));
         }
-        
-        return args;
     }
 
     private void stop(){
         this.whereQuery = null;
         this.whereArgsQuery = Tuple.tuple();
+        
         this.limitQuery = null;
         this.orderQuery = null;
+        
         this.selectQuery = null;
         this.selectQueryArray = new ArrayList<>();
+        
         this.index = 1;
+    
     }
 
-    private void setNullPrimaryKeyValue(){
+    private void setNullModelValues(){
         this.primaryKeyValue = null;
+        this.columnsValue = new HashMap<>();;
+        
+        this.jsonObjectValue = new JsonObject();
+        this.jsonArrayValue = new JsonArray();
     }
     
 }

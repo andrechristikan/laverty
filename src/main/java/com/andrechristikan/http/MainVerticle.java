@@ -7,8 +7,7 @@ package com.andrechristikan.http;
 
 import com.andrechristikan.Runner;
 import com.andrechristikan.Version;
-import com.andrechristikan.helper.JwtHelper;
-import com.andrechristikan.http.Server;
+import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.verticle.LoginVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -21,7 +20,6 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-import io.vertx.ext.auth.jwt.JWTAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,26 +30,19 @@ import org.slf4j.LoggerFactory;
 public class MainVerticle extends AbstractVerticle{
     
     private final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
-    private final String service = "main";
-        
-    JsonObject systemMessages;
-    JsonObject responseMessages;
-    JsonObject mainConfigs;
-    JsonObject serviceConfigs;
+    private JsonObject messages = new JsonObject();
+    private JsonObject configs = new JsonObject();
 
     @Override
     public void start(Promise<Void> start) throws Exception {
-        
+
         this.getConfig().setHandler(config -> {
             if(config.succeeded()){
 
-                this.logger.info("System Messages : "+ this.systemMessages.toString());
-                this.logger.info("Response Messages : "+ this.responseMessages.toString());
-                this.logger.info("Main Configs : "+ this.mainConfigs.toString());
-                this.logger.info("Service Configs : "+ this.serviceConfigs.toString());
-                
-                JsonObject systemMessage = this.systemMessages.getJsonObject("service").getJsonObject(this.service);
-                this.logger.info(systemMessage.getString("start"));
+                this.logger.info("Configs : "+ this.configs.toString());
+                this.logger.info("Messages : "+ this.messages.toString());
+
+                this.logger.info(trans("system.service.main.start"));
 
                 // DEPLOY VERTICLE
                 start.future().compose(st -> {
@@ -61,9 +52,7 @@ public class MainVerticle extends AbstractVerticle{
                     this.vertx.deployVerticle(
                         new LoginVerticle(),
                         new DeploymentOptions().setConfig(
-                            new JsonObject()
-                                .put("main", this.mainConfigs)
-                                .put("service", this.serviceConfigs)
+                            this.configs
                         ),
                         promise
                     );
@@ -80,24 +69,22 @@ public class MainVerticle extends AbstractVerticle{
                     // -- SERVER
                     Promise <String> promise = Promise.promise();
                     this.vertx.deployVerticle(
-                            new Server(),
-                            new DeploymentOptions().setConfig(
-                                    new JsonObject()
-                                            .put("main", this.mainConfigs)
-                                            .put("service", this.serviceConfigs)
-                            ),
-                            promise
+                        new Server(),
+                        new DeploymentOptions().setConfig(
+                            this.configs
+                        ),
+                        promise
                     );
                     return promise.future();
                 }).setHandler(prom -> {
                     if (prom.succeeded()) {
-                        this.logger.info(systemMessage.getString("success"));
+                        this.logger.info(trans("system.service.main.success"));
                     }else{
-                        this.logger.error(systemMessage.getString("fail")+" "+ prom.cause().toString());
-                        start.fail(prom.cause());
+                        this.logger.error(trans("system.service.main.failed")+" "+ prom.cause().getMessage());
+                        start.fail(prom.cause().getMessage());
                     }
                 }).otherwise(otherWise -> {
-                    this.logger.error(systemMessage.getString("otherwise")+" "+ otherWise.getCause().toString());
+                    this.logger.error(trans("system.service.main.otherwise")+" "+ otherWise.getCause().getMessage());
                     start.fail(otherWise.getCause().getMessage());
                     return otherWise.getMessage();
                 });
@@ -125,22 +112,22 @@ public class MainVerticle extends AbstractVerticle{
         this.getMainConfig().setHandler(ar -> {
             if(ar.succeeded()){
                 JsonObject config = ar.result();
-                this.mainConfigs = config;
+                this.configs.put("main", config);
                 jMapData.put("configs.main", config);
-                
+
                 this.getResponseMessage(config.getString("language")).compose( messages -> {
-                    this.responseMessages = messages;
+                    this.messages.put("response", messages);
                     jMapData.put("messages.response", messages);
                     return this.getSystemMessage(config.getString("language"));
                 }).compose( messages -> {
-                    this.systemMessages = messages;
+                    this.messages.put("system", messages);
                     jMapData.put("messages.system", messages);
                     return this.getServiceConfig();
                 }).setHandler( messages -> {
                     if(messages.succeeded()){
-                        this.serviceConfigs = messages.result();
+                        this.configs.put("service", messages.result());
                         jMapData.put("configs.service", messages.result());
-                        promise.complete(null);
+                        promise.complete();
                     }else{
                         promise.fail(messages.cause().getMessage());
                     }
@@ -156,9 +143,8 @@ public class MainVerticle extends AbstractVerticle{
     private Future <JsonObject> getResponseMessage(String language){
         
         Promise <JsonObject> promise = Promise.promise();
-        
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/messages/"+language+"/response.json", readFile -> {
+        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/messages/"+language+"/response.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -175,7 +161,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/messages/"+language+"/system.json", readFile -> {
+        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/messages/"+language+"/system.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -192,7 +178,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
         
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(this.mainConfigs.getJsonObject(this.mainConfigs.getString("environment")).getString("resources-directory")+"/configs/services.json", readFile -> {
+        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/configs/services.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -220,6 +206,14 @@ public class MainVerticle extends AbstractVerticle{
         ConfigRetriever retriever = ConfigRetriever.create(this.vertx, options);
 
         return ConfigRetriever.getConfigAsFuture(retriever);
+    }
+
+    protected String trans(String path){
+        return GeneralHelper.trans(path, this.messages);
+    }
+
+    protected String conf(String path){
+        return GeneralHelper.conf(path, this.configs);
     }
 
     public static void main(String[] args) throws Exception {

@@ -79,17 +79,21 @@ public class LoginController {
     public void login(RoutingContext ctx) {
         this.logger.info(this.systemMessages.getJsonObject(this.service).getString("start"));
 
-        HttpServerResponse response = this.settingResponse.create(ctx);
+        HttpServerResponse response = ctx.response();
+        response.setStatusCode(200);
+        response.end("success");
 
-        this.loginService.login(funct -> {
-            if(funct.succeeded()){
-                response.setStatusCode(200);
-                response.end(funct.result());
-            }else{
-                response.setStatusCode(500);
-                response.end(funct.cause().getMessage());
-            }
-        });
+//        HttpServerResponse response = this.settingResponse.create(ctx);
+
+//        this.loginService.login(funct -> {
+//            if(funct.succeeded()){
+//                response.setStatusCode(200);
+//                response.end(funct.result());
+//            }else{
+//                response.setStatusCode(500);
+//                response.end(funct.cause().getMessage());
+//            }
+//        });
 
         this.logger.info(this.systemMessages.getJsonObject(this.service).getString("end"));
 

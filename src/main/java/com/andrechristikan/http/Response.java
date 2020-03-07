@@ -6,70 +6,71 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-import io.vertx.ext.web.RoutingContext;
 
 public class Response {
 
-    private final Vertx vertx;
-
-    protected JsonObject mainConfigs;
-    protected JsonObject responseConfig;
+    protected static JsonObject mainConfigs;
+    protected static JsonObject responseConfig;
+    
+    private JsonObject data = new JsonObject();
+    private HttpServerResponse httpResponse;
 
     public Response(Vertx vertx){
-        this.vertx = vertx;
-
-        // Config
-        this.setConfigs();
+        this.setConfigs(vertx);
     }
 
-    private void setConfigs(){
-        SharedData sharedData = this.vertx.sharedData();
+    private void setConfigs(Vertx vertx){
+        SharedData sharedData = vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.mainConfigs = jMapData.get("configs.main");
-        this.responseConfig = this.mainConfigs.getJsonObject("response");
+        mainConfigs = jMapData.get("configs.main");
+        responseConfig = mainConfigs.getJsonObject("response");
     }
 
-    public HttpServerResponse create(RoutingContext routingContext){
-        HttpServerResponse response = routingContext.response();
-
-        this.responseConfig.forEach(action ->{
-            response.putHeader(action.getKey(),this.responseConfig.getString(action.getKey()));
+    public void create(HttpServerResponse httpResponse){
+        
+        responseConfig.forEach(action ->{
+            httpResponse.putHeader(action.getKey(),responseConfig.getString(action.getKey()));
         });
-
-        return response;
+        
+        this.httpResponse = httpResponse;
+    }
+    
+    public void response(int code){
+        this.httpResponse.setStatusCode(code);
+        this.httpResponse.end(this.data.toString());
     }
 
-    public static String DataStructure(int status, String message) {
+    public void dataStructure(int status, String message) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
-        return result.toString();
+        this.data = result;
     }
 
-    public static String DataStructure(int status, String message, JsonObject jo) {
+    public void dataStructure(int status, String message, JsonObject jo) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
         result.put("data", jo);
-        return result.toString();
+        this.data = result;
     }
 
-    public static String DataStructure(int status, String message, JsonArray ja) {
+    public void dataStructure(int status, String message, JsonArray ja) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
         result.put("data", ja);
-        return result.toString();
+        this.data = result;
     }
 
     // for list
-    public static String DataStructure(int status, String message, JsonArray ja, int countData, int totalPage) {
+    public void dataStructure(int status, String message, JsonArray ja, int countData, int totalPage) {
         JsonObject result = new JsonObject();
         result.put("status", status);
         result.put("message", message);
         result.put("countData", countData);
         result.put("totalPage", totalPage);
         result.put("data", ja);
-        return result.toString();
+        this.data = result;
     }
 }

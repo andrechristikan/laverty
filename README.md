@@ -1,9 +1,13 @@
-# Vert.x-Proxy Example For RestFul API (Java)
-I was tired using primitive vert.x with so many random resources.
+# Laverty For RestFul API (Vert-x Proxy | Java Version) - STILL ON DEVELOPING
+Inspired from laravel framework. 
+This project wanna be like mini-laravel framework. 
+~~This will save your time while developing apps.~~
+
+Tbh, i have no idea with my code. 
+I just put everything that i know about Vert-x (Java) based 3 years experience be Backend Engineer. Hope you gonna like it. Enjoy~
 
 ## Getting Started
-Inspired from laravel framework. This project wanna be like mini-laravel framework. ~~This will save your time while developing apps.~~
-
+Let start from the bottom
 > Minimum requirement: 
 1. Understand Java Language (Beginner - Intermediate)
 2. Understand Asynchronous Programming (Intermediate)
@@ -12,10 +16,10 @@ Inspired from laravel framework. This project wanna be like mini-laravel framewo
 
 > Tech stack
 1. Java 11.0.6
-2. Postgresql 12.2
+2. Postgres 12.2
 3. Maven 10.14.6
 
-## Instalation
+## Installation
 Guide for install this project
 ### Production - Normal Installing / Linux env (NEED TO TEST)
 1. Open terminal, and pull this project
@@ -44,7 +48,7 @@ Guide for install this project
     - Exclude : 
         1. `target/`
         2. `.idea/`
-2. Set Runner
+2. Set IDE Runner
     - Use `Template Application`
     - Main class : `io.vertx.core.Launcher`
     - Program Argument : `run com.andrechristikan.http.MainVerticle`
@@ -52,7 +56,7 @@ Guide for install this project
     - Before Lunch
         1. Add `Run Maven Goal`
         2. Fill `clean install`
-        3. Complete
+        3. Done, save all configuration
 3. Set your config directory in Project MainClass `com.andrechristikan.http.MainVerticle` to `configs/vertx.json`
 4. Set config, config in `src/main/resources/configs`
    - Rename `vertx-example.json` to `vertx.json`
@@ -90,97 +94,94 @@ Guide for install this project
 Some example from this project
 ### Model
 ```java
-    public class UserModel extends Model {
-        
-        public UserModel(Vertx vertx, Transaction trans){
-            super(vertx, trans);
-        }
-        
-        /* 
-            This is mandatory
-            Set column from this function
-        */ 
-        @Override
-        protected void setColumns(){
-            this.columns.add("id");
-            this.columns.add("role_id");
-            this.columns.add("username");
-            this.columns.add("password");
-            this.columns.add("email");
-            this.columns.add("created_at");
-            this.columns.add("updated_at");
-            this.columns.add("last_login");
-        }
-        
-        /* 
-            This is optional
-            This count type must same with count of column
-        */ 
-        @Override
-        protected void setColumnsName(){
-            this.columnsName.put("id","user_id");
-            this.columnsName.put("role_id","role_id");
-            this.columnsName.put("username","user_name");
-            this.columnsName.put("password","password");
-            this.columnsName.put("email","email_user");
-            this.columnsName.put("created_at","created_at");
-            this.columnsName.put("updated_at","updated_at");
-            this.columnsName.put("last_login","last_login");
-        }
     
-        /* 
-            This is mandatory
-            This count type must same with count of column
-            Support for Type
-            - UUID
-            - Timestamptz
-            - Integer
-            - Date
-            - Datetime
-            - Timestamp
-            - Double
-            - Float
-            - Number
-            - Boolean
-        */ 
-        @Override
-        protected void setColumnsType(){
-            this.columnsType.put("id","uuid");
-            this.columnsType.put("role_id","string");
-            this.columnsType.put("username","string");
-            this.columnsType.put("password","string");
-            this.columnsType.put("email","string");
-            this.columnsType.put("created_at","timestamptz");
-            this.columnsType.put("updated_at","timestamptz");
-            this.columnsType.put("last_login","timestamptz");
-        }
-        
-        /* 
-            Table name in database
-        */ 
-        @Override
-        protected void setTableName(){
-            this.tableName = "users";
-        }
-        
-        /* 
-            This is mandatory
-            Reference from response.json in resources/messages folder
-        */ 
-        @Override
-        protected void setService(){
-            this.service = "user";
-        }
-        
-        /* 
-            This is optional
-            If you want to change primary key
-        */ 
-        @Override
-        protected void setPrimaryKey(){
-            this.primaryKeyName = "id";
-        }
+public class UserModel extends AbstractModel {
     
+    public UserModel(Vertx vertx, Transaction trans){
+        super(vertx, trans);
+        // logger = LoggerFactory.getLogger(UserModel.class); // Just in case if you want to put log with specific model
+        
+        tableName = "users";
+        service = "users";
+        
+        // you can change the primary key name from this
+        primaryKeyName = "id";
+    
+        
+    }
+    
+    
+    /* 
+        This is mandatory
+        Set column from this function
+    */ 
+    @Override
+    protected ArrayList<String> setColumns(){
+        
+        ArrayList<String> columns = new ArrayList<>();
+        columns.add("id");
+        columns.add("role_id");
+        columns.add("username");
+        columns.add("password");
+        columns.add("email");
+        columns.add("created_at");
+        columns.add("updated_at");
+        columns.add("last_login");
+        
+        return columns;
+    }
+    
+    /* 
+        This is optional
+        This count type must same with count of column
+    */ 
+    
+    @Override
+    protected Map<String, String> setColumnsName(){
+        
+        Map<String, String> columnsName = new HashMap<>();
+        columnsName.put("id","user_id");
+        columnsName.put("role_id","role_id");
+        columnsName.put("username","user_name");
+        columnsName.put("password","password");
+        columnsName.put("email","email_user");
+        columnsName.put("created_at","created_at");
+        columnsName.put("updated_at","updated_at");
+        columnsName.put("last_login","last_login");
+        
+        return columnsName;
+    }
+    
+    
+    /* 
+        This is mandatory
+        This count type must same with count of column
+        Support for Type
+        - UUID
+        - Timestamptz
+        - Integer
+        - Date
+        - Datetime
+        - Timestamp
+        - Double
+        - Float
+        - Number
+        - Boolean
+    */ 
+    @Override
+    protected Map<String, String> setColumnsType(){
+        
+        Map<String, String> columnsType = new HashMap<>();
+        columnsType.put("id","uuid");
+        columnsType.put("role_id","string");
+        columnsType.put("username","string");
+        columnsType.put("password","string");
+        columnsType.put("email","string");
+        columnsType.put("created_at","timestamptz");
+        columnsType.put("updated_at","timestamptz");
+        columnsType.put("last_login","timestamptz");
+        
+        return columnsType;
     }
 ```
 
@@ -199,9 +200,6 @@ Some example from this project
     columns.add("role_id");
     columns.add("username");
     columns.add("email");
-
-
-
 
     // Select columns that you want
     user.select("id")
@@ -405,17 +403,17 @@ Some example from this project
 ```java
 
 ```
-### Middleware Request
+### Middleware
 ```java
 
 ```
 
-### Authorization with JWT
+### JWT Authorization
 ```java
 
 ```
 
-### Control Env
+### Env
 ```java
 
 ```
@@ -428,50 +426,49 @@ Still on development. I will finish this project as soon as possible.
 * [Vert.x Asynchronous Programming](https://vertx.io/docs/guide-for-java-devs/)
 
 
-> Features :
-- New Controller Class
-- New Exception Class
-- New Model Class
-- New Route Class
-- Request Middleware
-- Env control app from JSON file
-- Dynamic configs from database
-- Auth with JWT
-- Promise and Future (Java Version)
-- Query Transaction (Java Version)
-- Service more that one verticle Vert.x
-- Vert.x Proxy
-
-
-> Todo :
-- [x] Http Server (env from vertx.json)
-- [x] Default Exception
-- [x] Not Found Exception
-- [x] Login Exception
-- [x] Database Helper (env from vertx.json)
-- [x] Parser Helper
-- [x] Jwt Helper (env from vertx.json)
-- [x] Auth For User Login
-- [x] Auth For Admin
-- [x] Folder Structure
-- [x] Setting App From vertx.json File
-- [x] All messages from files, and can change the message to what ever you want
-- [x] Created Login controller
-- [x] New Model Class
-- [x] User model
-- [ ] New Exception Class (Restructuring)
+> Features & Todo :
+- [x] New Http Server Class
+- [x] New Helper Class
+- [x] Friendly Folder Structure
+- [x] Apps settings from File ( Vertx.json )
+- [x] Support multi languages
+- [x] New Exception Class
+- [x] Basic Query Builder
+- [x] New Exception Class
+- [x] New Response Class
+- [x] New Middleware Class
+- [x] Auth Class
 - [ ] New Controller Class (Restructuring)
 - [ ] New Route Class (Restructuring)
-- [ ] User Service Implementation (Ongoing)
-- [ ] Flow login (Ongoing)
-- [ ] Password Helper
-- [ ] Create Middleware Request
-- [ ] Model Join
+- [ ] Vert-x Service Implementation
+- [ ] User Login Pattern
+- [ ] Query Builder With Full Features (Join, Having, Group, Distinct, Raw Query, etc)
 - [ ] Database Migration
 
-### Authors
-> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | andrechrisikan@gmail.com
 
+### Authors
+> [@andrechrisikan](https://github.com/andrechristikan) | [Instagram](https://instagram.com/andrechristikan) | [andrechrisikan@gmail.com](mailto:@andrechrisikan@gmial.com)
+
+Skills
+1. Program Languages
+    - PHP (Laravel Framework and CI Framework)
+    - Python (Flask Framework)
+    - Java (Vert-x)
+2. DevOps skill
+    - Containers and configuration management tools (Docker)
+    - Web server (Nginx, Apache)
+    - Cloud service providers (AWS Cloud)
+    - Scripting( Bash and Python)
+    - Application Building
+    - Linux Fundamentals (Ubuntu)
+    - Source Code management (Git)
+3. Database Skill
+    1. Relational Database
+        - Mysql
+        - Postgres
+        - MariaDB
+    2. NoSQL Database
+        - MongoDB
 
 ## Other Information
 > Users Access App

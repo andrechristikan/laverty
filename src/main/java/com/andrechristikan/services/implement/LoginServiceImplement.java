@@ -27,62 +27,62 @@ import org.slf4j.LoggerFactory;
  */
 public class LoginServiceImplement implements LoginService {
     
-    private final Logger logger;
-    private final Vertx vertx;
-    private final String service;
-    private final DatabaseHelper databaseHelper;
-
-    protected JsonObject systemMessages;
-    protected JsonObject responseMessages;
-    protected JsonObject mainConfigs;
-    protected JsonObject serviceConfigs;
-    
-    protected PgPool poolConnection;
+//    private final Logger logger;
+//    private final Vertx vertx;
+//    private final String service;
+//    private final DatabaseHelper databaseHelper;
+//
+//    protected JsonObject systemMessages;
+//    protected JsonObject responseMessages;
+//    protected JsonObject mainConfigs;
+//    protected JsonObject serviceConfigs;
+//
+//    protected PgPool poolConnection;
 
     public LoginServiceImplement(Vertx vertx) {
-        this.logger = LoggerFactory.getLogger(LoginServiceImplement.class);
-        this.vertx = vertx;
-        this.service = "login";
-        this.databaseHelper = new DatabaseHelper(vertx, this.service);
-
-        // Message & Config
-        this.setConfigs();
-        this.setMessages();
-        this.setDatabaseConnection();
+//        this.logger = LoggerFactory.getLogger(LoginServiceImplement.class);
+//        this.vertx = vertx;
+//        this.service = "login";
+//        this.databaseHelper = new DatabaseHelper(vertx, this.service);
+//
+//        // Message & Config
+//        this.setConfigs();
+//        this.setMessages();
+//        this.setDatabaseConnection();
 
 
     }
 
-    private void setConfigs(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.mainConfigs = jMapData.get("configs.main");
-        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
-    }
-
-    private void setMessages(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
-        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
-    }
-    
-    private void setDatabaseConnection(){
-        this.poolConnection = this.databaseHelper.createPool();
-        this.logger.info(this.systemMessages.getString("database-connection").replace("#serviceAddress", this.serviceConfigs.getString("address")));
-    }
+//    private void setConfigs(){
+//        SharedData sharedData = this.vertx.sharedData();
+//        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
+//        this.mainConfigs = jMapData.get("configs.main");
+//        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
+//    }
+//
+//    private void setMessages(){
+//        SharedData sharedData = this.vertx.sharedData();
+//        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
+//        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
+//        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
+//    }
+//
+//    private void setDatabaseConnection(){
+//        this.poolConnection = this.databaseHelper.createPool();
+//        this.logger.info(this.systemMessages.getString("database-connection").replace("#serviceAddress", this.serviceConfigs.getString("address")));
+//    }
 
     @Override
     public void login(Handler<AsyncResult<String>> resultHandler){
 
-        this.databaseHelper.openConnection(this.poolConnection).setHandler(open -> {
-            if(open.succeeded()){
-                SqlConnection conn = open.result();
-                Transaction trans = conn.begin();
-                UserModel user = new UserModel(this.vertx, trans);
-                
-                
-                // --- INSERT
+//        this.databaseHelper.openConnection(this.poolConnection).setHandler(open -> {
+//            if(open.succeeded()){
+//                SqlConnection conn = open.result();
+//                Transaction trans = conn.begin();
+//                UserModel user = new UserModel(this.vertx, trans);
+//
+//
+//                // --- INSERT
 //                user.columnsValue.put("role_id", "user");
 //                user.columnsValue.put("username", "andre");
 //                user.columnsValue.put("password", "12345");
@@ -107,16 +107,16 @@ public class LoginServiceImplement implements LoginService {
 //                    }else{
 //                        trans.rollback();
 //                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
 //                        resultHandler.handle(Future.failedFuture(response));
 //                    }
 //                    trans.close();
 //                    conn.close();
 //                });
-
-
-
-                // --- SELECT
+//
+//
+//
+//                // --- SELECT
 //                ArrayList <String> columns = new ArrayList<>();
 //                columns.add("role_id");
 //                columns.add("username");
@@ -133,15 +133,15 @@ public class LoginServiceImplement implements LoginService {
 //                    }else{
 //                        trans.rollback();
 //                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
 //                        resultHandler.handle(Future.failedFuture(response));
 //                    }
 //                    trans.close();
 //                    conn.close();
 //                });
-
-
-                // --- DELETE
+//
+//
+//                // --- DELETE
 //                user.delete("95f45eee-26e4-4556-9e74-33101a878fe0").setHandler(select -> {
 //                    if(select.succeeded()){
 //                        String message = this.responseMessages.getString("success");
@@ -154,7 +154,7 @@ public class LoginServiceImplement implements LoginService {
 //                    }else{
 //                        trans.rollback();
 //                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
 //                        resultHandler.handle(Future.failedFuture(response));
 //                    }
 //                    trans.close();
@@ -181,7 +181,7 @@ public class LoginServiceImplement implements LoginService {
 //                            }else{
 //                                trans.rollback();
 //                                String response = Response.DataStructure(1, update.cause().getMessage());
-//                                this.logger.error(this.systemMessages.getString("fail") +" "+update.cause().getMessage());
+//                                this.logger.error(this.systemMessages.getString("failed") +" "+update.cause().getMessage());
 //                                resultHandler.handle(Future.failedFuture(response));
 //                            }
 //
@@ -191,17 +191,17 @@ public class LoginServiceImplement implements LoginService {
 //                    }else{
 //                        trans.rollback();
 //                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("fail") +" "+select.cause().getMessage());
+//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
 //                        resultHandler.handle(Future.failedFuture(response));
 //                    }
 //                });
-
-            }else{
-                String response = Response.DataStructure(1, open.cause().getMessage());
-                this.logger.error(this.systemMessages.getString("fail") +" "+open.cause().getMessage());
-                resultHandler.handle(Future.failedFuture(response));
-            }
-        });
+//
+//            }else{
+//                String response = Response.DataStructure(1, open.cause().getMessage());
+//                this.logger.error(this.systemMessages.getString("failed") +" "+open.cause().getMessage());
+//                resultHandler.handle(Future.failedFuture(response));
+//            }
+//        });
     }
 
 

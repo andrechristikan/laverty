@@ -5,6 +5,7 @@
  */
 package com.andrechristikan.helper;
 
+import com.andrechristikan.core.CoreHelper;
 import com.andrechristikan.http.MainVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -26,57 +27,41 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class JwtHelper {
-    
-    private final Vertx vertx;
-    private final JsonObject jwtConfig;
-    
-    protected JsonObject mainConfigs;
-    
-    public JwtHelper(Vertx vertx){
-        this.vertx = vertx;
-        
-        // Message & Config
-        this.setConfigs();
-    
-        this.jwtConfig = this.mainConfigs.getJsonObject("jwt");
-    }
-    
-    private void setConfigs(){
-        SharedData sharedData = this.vertx.sharedData();
-        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-        this.mainConfigs = jMapData.get("configs.main");
-    }
+public class JwtHelper extends CoreHelper {
 
+    public JwtHelper(Vertx vertx){
+        super(vertx);
+        logger = LoggerFactory.getLogger(DatabaseHelper.class);
+    }
     
     public JWTAuth getSettingJwtAuth(){
         
         JWTAuth jwt;
-        String jwtType = this.jwtConfig.getString("type");
+        String jwtType = conf("main.jwt.type");
         if (jwtType.equalsIgnoreCase("rsa")) {
             // openssl genrsa -subj -out jwt.pem 2048
             // openssl pkcs8 -topk8 -inform PEM -in jwt.pem -out jwt_private_key.pem -nocrypt
             // openssl rsa -in jwt.pem -outform PEM -pubout -out jwt_public_key.pem
-            jwt = JWTAuth.create(this.vertx, new JWTAuthOptions()
+            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .addPubSecKey(new PubSecKeyOptions()
                             .setAlgorithm("RS256")
-                            .setPublicKey(this.jwtConfig.getString("rsaPublicKey"))
-                            .setSecretKey(this.jwtConfig.getString("rsaPrivateKey"))
+                            .setPublicKey(conf("main.jwt.rsaPublicKey"))
+                            .setSecretKey(conf("main.jwt.rsaPrivateKey"))
                     ));
         } else if (jwtType.equalsIgnoreCase("jceks")) {
             // keytool -genkeypair -keystore cirrus.jceks -storetype jceks -storepass 1234567890
             //    -keyalg EC -keysize 256 -alias ES256 -keypass 1234567890 -sigalg SHA256withECDSA
             //    -dname "CN=Sudito Lie,OU=Synectics,O=Gtech Digital Asia,L=Jakarta,ST=DKI,C=ID" -validity 360
-            jwt = JWTAuth.create(this.vertx, new JWTAuthOptions()
+            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .setKeyStore(new KeyStoreOptions()
                             .setType("jceks")
-                            .setPath(this.jwtConfig.getString("keyStore"))
-                            .setPassword(this.jwtConfig.getString("secret"))));
+                            .setPath(conf("main.jwt.keyStore"))
+                            .setPassword(conf("main.jwt.keyStore"))));
         } else {
-            jwt = JWTAuth.create(this.vertx, new JWTAuthOptions()
+            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .addPubSecKey(new PubSecKeyOptions()
                             .setAlgorithm("HS256")
-                            .setPublicKey(this.jwtConfig.getString("symmetricPublicKey"))
+                            .setPublicKey(conf("main.jwt.symmetricPublicKey"))
                             .setSymmetric(true)));
         }
         
@@ -85,7 +70,7 @@ public class JwtHelper {
     
     
     public JsonObject GetTokenJwt(JWTAuth jwt, String role, JsonObject jUser){
-        int tokenTimeout = this.jwtConfig.getInteger("tokenTimeout");
+        int tokenTimeout = parser.parseInt(conf("main.jwt.tokenTimeout"),1000);
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         List<String> authorities = new ArrayList<>();
         authorities.add(role.trim());
@@ -99,20 +84,15 @@ public class JwtHelper {
         );
         
         JsonObject token = new JsonObject();
-        Long expired_time = ts.getTime()+tokenTimeout;
+        long expired_time = ts.getTime()+tokenTimeout;
         token.put("token", tokenJwt);
-        token.put("expired_time", expired_time.toString());
+        token.put("expired_time", Long.toString(expired_time));
         
         return token;
     }
     
-    private String getTokenFromHeader(RoutingContext ctx){
-        
-        String authorization = ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
-        String[] parts = authorization.split(" ");
-        String token = parts[1];
-        
-        return token;
+    public static String getTokenFromHeader(RoutingContext ctx){
+        return ctx.request().headers().get(HttpHeaders.AUTHORIZATION);
     }
     
 }
