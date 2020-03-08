@@ -34,12 +34,10 @@ public class AdminMiddleware extends CoreMiddleware implements MiddlewareInterfa
         this.jwtHelper = new JwtHelper(vertx);
     }
 
-
-    
     @Override
     public void handler(RoutingContext ctx){
         String authorization = JwtHelper.getTokenFromHeader(ctx);
-        JWTAuth jwtAuthConfig = this.jwtHelper.getSettingJwtAuth();
+        JWTAuth jwtAuthConfig = this.jwtHelper.getJwtAuth();
         response.create(ctx.response());
 
         if (authorization != null) {

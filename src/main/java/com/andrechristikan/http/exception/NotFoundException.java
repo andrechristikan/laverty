@@ -1,7 +1,6 @@
 package com.andrechristikan.http.exception;
 
 import com.andrechristikan.core.CoreException;
-import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.LoggerFactory;

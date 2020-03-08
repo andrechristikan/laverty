@@ -1,13 +1,10 @@
 package com.andrechristikan.helper;
 
-import com.andrechristikan.http.MainVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GeneralHelper {
 

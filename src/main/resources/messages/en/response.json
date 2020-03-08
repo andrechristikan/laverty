@@ -1,9 +1,11 @@
 {
     "service":{
         "login": {
-            "controller":{},
-            "implement":{
+            "controller":{
                 "success": "Login Success."
+            },
+            "implement":{
+                "credential-not-match" : "Invalid Username and Password."
             }
         },
         "user": {

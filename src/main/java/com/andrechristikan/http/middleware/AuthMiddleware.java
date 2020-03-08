@@ -36,7 +36,7 @@ public class AuthMiddleware extends CoreMiddleware implements MiddlewareInterfac
     public void handler(RoutingContext ctx){
 
         String authorization = JwtHelper.getTokenFromHeader(ctx);
-        JWTAuth jwtAuthConfig = this.jwtHelper.getSettingJwtAuth();
+        JWTAuth jwtAuthConfig = this.jwtHelper.getJwtAuth();
         response.create(ctx.response());
 
         if (authorization != null) {

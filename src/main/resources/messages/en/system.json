@@ -25,7 +25,8 @@
             "implement":{
                 "database-connection":"[LoginImplementDatabaseConnection] Database connection pool for #serviceAddress Service created.",
                 "success":"[LoginImplementSuccess] Success to login",
-                "failed":"[LoginImplementFailed] : "
+                "failed":"[LoginImplementFailed] : ",
+                "get-token-success": "[LoginImplementSuccess] Success to get token : "
             },
             "exception": {
                 "start": "[LoginException] Enter the LoginException.",

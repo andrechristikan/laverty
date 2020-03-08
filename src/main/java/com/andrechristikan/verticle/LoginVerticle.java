@@ -23,24 +23,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class LoginVerticle extends CoreVerticle implements  VerticleInterface{
+public class LoginVerticle extends CoreVerticle {
 
     public LoginVerticle(){
         logger = LoggerFactory.getLogger(LoginVerticle.class);
     }
 
     @Override
-    public void start(Promise<Void> promise) throws Exception {
-
-        messages = GeneralHelper.setMessages(vertx);
-        configs = GeneralHelper.setConfigs(vertx);
+    public void run(Promise<Void> promise) {
 
         logger.info(trans("system.service.login.start").replace("#eventBusServiceName", conf("service.login.address")));
-        ServiceBinder binder = new ServiceBinder(this.vertx);
-        binder.setAddress(conf("service.login.address")).register(LoginService.class, new LoginServiceImplement(this.vertx));
+        ServiceBinder binder = new ServiceBinder(coreVertx);
+        binder.setAddress(conf("service.login.address")).register(LoginService.class, new LoginServiceImplement(coreVertx));
         logger.info(trans("system.service.login.end").replace("#eventBusServiceName", conf("service.login.address")));
 
         promise.complete();
     }
+
+    @Override
+    public void end(){}
 
 }

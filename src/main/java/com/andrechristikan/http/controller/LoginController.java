@@ -39,21 +39,23 @@ public class LoginController extends CoreController implements ControllerInterfa
         logger.info(trans("system.service.login.controller.end").replace("#eventBusServiceName", conf("service.login.address")));
     }
 
-    @Override
     public void login(RoutingContext ctx) {
+
         logger.info(trans("system.service.login.controller.login.start"));
         response.create(ctx.response());
 
-        service.login(funct -> {
+        service.login(ctx.request().getFormAttribute("login"),ctx.request().getFormAttribute("password"),funct -> {
             if(funct.succeeded()){
-                response.response(200, funct.result());
+                response.dataStructure("0", trans("response.service.login.controller.success"), funct.result());
+                response.response(200);
             }else{
-                response.response(500, funct.cause().getMessage());
+                response.dataStructure("1", funct.cause().getMessage());
+                response.response(500);
             }
         });
 
         logger.info(trans("system.service.login.controller.login.end"));
 
-}
+    }
     
 }

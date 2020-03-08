@@ -43,10 +43,11 @@ public class Route {
     protected Router create(){
         
         // Before Auth
-        this.router.get("/api/v1/login").handler(this.loginController::login);
+        this.router.post("/api/v1/login").handler(this.loginController::login);
         
         // Auth
         this.router.route("/api/v1/*").handler(this.loginAuthorization::handler).failureHandler(this.loginException::handler);
+//        this.router.get("/api/v1/user/:id").handler(this.loginController::login);
         
         // After Auth
         

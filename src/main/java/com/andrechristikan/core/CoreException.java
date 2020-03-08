@@ -8,6 +8,7 @@ package com.andrechristikan.core;
 import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.http.Response;
+import com.andrechristikan.http.exception.ExceptionInterface;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public abstract class CoreException {
+public abstract class CoreException implements ExceptionInterface {
 
     protected static Logger logger = LoggerFactory.getLogger(CoreException.class);
     protected static ParserHelper parser = new ParserHelper();
@@ -33,9 +34,10 @@ public abstract class CoreException {
     
     protected CoreException(Vertx vertx){
         coreVertx = vertx;
+        response = new Response(vertx);
+
         messages = GeneralHelper.setMessages(vertx);
         configs = GeneralHelper.setConfigs(vertx);
-        response = new Response(vertx);
     }
 
     protected static String trans(String path){
@@ -54,5 +56,6 @@ public abstract class CoreException {
         return GeneralHelper.confAsJsonObject(path, configs);
     }
 
+    @Override
     public void handler(RoutingContext ctx){}
 }

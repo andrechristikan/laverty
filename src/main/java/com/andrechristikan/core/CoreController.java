@@ -3,6 +3,7 @@ package com.andrechristikan.core;
 import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.helper.ParserHelper;
 import com.andrechristikan.http.Response;
+import com.andrechristikan.http.controller.ControllerInterface;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -10,7 +11,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CoreController {
+public abstract class CoreController implements ControllerInterface {
 
     protected static Logger logger = LoggerFactory.getLogger(CoreController.class);
     protected static ParserHelper parser = new ParserHelper();
@@ -23,9 +24,10 @@ public class CoreController {
 
     public CoreController(Vertx vertx){
         coreVertx = vertx;
+        response = new Response(vertx);
+
         messages = GeneralHelper.setMessages(vertx);
         configs = GeneralHelper.setConfigs(vertx);
-        response = new Response(vertx);
 
         this.setService();
     }
@@ -46,7 +48,8 @@ public class CoreController {
         return GeneralHelper.confAsJsonObject(path, configs);
     }
 
-    protected void setService(){}
+    @Override
+    public void setService(){}
 
     protected void login(RoutingContext ctx) {}
 

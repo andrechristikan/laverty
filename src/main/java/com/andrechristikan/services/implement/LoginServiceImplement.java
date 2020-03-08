@@ -5,205 +5,107 @@
  */
 package com.andrechristikan.services.implement;
 
+import com.andrechristikan.core.CoreImplement;
 import com.andrechristikan.helper.DatabaseHelper;
-import com.andrechristikan.http.Response;
+import com.andrechristikan.helper.JwtHelper;
+import com.andrechristikan.helper.PasswordHelper;
 import com.andrechristikan.http.models.UserModel;
 import com.andrechristikan.services.LoginService;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
-import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 /**
  *
  * @author Syn-User
  */
-public class LoginServiceImplement implements LoginService {
-    
-//    private final Logger logger;
-//    private final Vertx vertx;
-//    private final String service;
-//    private final DatabaseHelper databaseHelper;
-//
-//    protected JsonObject systemMessages;
-//    protected JsonObject responseMessages;
-//    protected JsonObject mainConfigs;
-//    protected JsonObject serviceConfigs;
-//
-//    protected PgPool poolConnection;
+public class LoginServiceImplement extends CoreImplement implements LoginService {
+
+    private final JwtHelper jwtHelper;
 
     public LoginServiceImplement(Vertx vertx) {
-//        this.logger = LoggerFactory.getLogger(LoginServiceImplement.class);
-//        this.vertx = vertx;
-//        this.service = "login";
-//        this.databaseHelper = new DatabaseHelper(vertx, this.service);
-//
-//        // Message & Config
-//        this.setConfigs();
-//        this.setMessages();
-//        this.setDatabaseConnection();
+        super(vertx);
+        logger = LoggerFactory.getLogger(LoginServiceImplement.class);
 
-
+        this.jwtHelper = new JwtHelper(vertx);
     }
 
-//    private void setConfigs(){
-//        SharedData sharedData = this.vertx.sharedData();
-//        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-//        this.mainConfigs = jMapData.get("configs.main");
-//        this.serviceConfigs = jMapData.get("configs.service").getJsonObject(this.service);
-//    }
-//
-//    private void setMessages(){
-//        SharedData sharedData = this.vertx.sharedData();
-//        LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
-//        this.systemMessages = jMapData.get("messages.system").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
-//        this.responseMessages = jMapData.get("messages.response").getJsonObject("service").getJsonObject(this.service).getJsonObject("implement");
-//    }
-//
-//    private void setDatabaseConnection(){
-//        this.poolConnection = this.databaseHelper.createPool();
-//        this.logger.info(this.systemMessages.getString("database-connection").replace("#serviceAddress", this.serviceConfigs.getString("address")));
-//    }
+    @Override
+    public void setDatabaseConnection(){
+        databaseHelper = new DatabaseHelper(coreVertx, "login");
+        poolConnection = databaseHelper.createPool();
+        logger.info(trans("system.service.login.implement.database-connection").replace("#serviceAddress", conf("service.login.address")));
+    }
 
     @Override
-    public void login(Handler<AsyncResult<String>> resultHandler){
+    public void login(String loginString, String passwordString, Handler<AsyncResult<JsonObject>> resultHandler){
 
-        resultHandler.handle(Future.succeededFuture(Response.dataStructureAsString("1", "abc")));
+        databaseHelper.openConnection(poolConnection).setHandler(open -> {
+            if(open.succeeded()){
 
-//        this.databaseHelper.openConnection(this.poolConnection).setHandler(open -> {
-//            if(open.succeeded()){
-//                SqlConnection conn = open.result();
-//                Transaction trans = conn.begin();
-//                UserModel user = new UserModel(this.vertx, trans);
-//
-//
-//                // --- INSERT
-//                user.columnsValue.put("role_id", "user");
-//                user.columnsValue.put("username", "andre");
-//                user.columnsValue.put("password", "12345");
-//                user.columnsValue.put("email", "andre@gmail.com");
-//
-//
-//                Map<String, String> value = new HashMap<>();
-//                value.put("role_id", "user");
-//                value.put("username", "andre");
-//                value.put("password", "12345");
-//                value.put("email", "andre@gmail.com");
-//                user.insert(value);
-//                user.save().setHandler(select -> {
-//                    if(select.succeeded()){
-//                        String message = this.responseMessages.getString("success");
-//
-//                        trans.commit();
-//                        this.logger.info(this.systemMessages.getString("success"));
-//                        this.databaseHelper.closeConnection(conn);
-//                        String response = Response.DataStructure(0, message, user.toJson());
-//                        resultHandler.handle(Future.succeededFuture(response));
-//                    }else{
-//                        trans.rollback();
-//                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
-//                        resultHandler.handle(Future.failedFuture(response));
-//                    }
-//                    trans.close();
-//                    conn.close();
-//                });
-//
-//
-//
-//                // --- SELECT
-//                ArrayList <String> columns = new ArrayList<>();
-//                columns.add("role_id");
-//                columns.add("username");
-//                columns.add("email");
-//                user.select("id").select(columns).select("password").findOne("9a057751-3624-4216-a2ce-66b8fb64b2e6").setHandler(select -> {
-//                    if(select.succeeded()){
-//                        String message = this.responseMessages.getString("success");
-//
-//                        trans.commit();
-//                        this.logger.info(this.systemMessages.getString("success"));
-//                        this.databaseHelper.closeConnection(conn);
-//                        String response = Response.DataStructure(0, message, user.toJson());
-//                        resultHandler.handle(Future.succeededFuture(response));
-//                    }else{
-//                        trans.rollback();
-//                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
-//                        resultHandler.handle(Future.failedFuture(response));
-//                    }
-//                    trans.close();
-//                    conn.close();
-//                });
-//
-//
-//                // --- DELETE
-//                user.delete("95f45eee-26e4-4556-9e74-33101a878fe0").setHandler(select -> {
-//                    if(select.succeeded()){
-//                        String message = this.responseMessages.getString("success");
-//
-//                        trans.commit();
-//                        this.logger.info(this.systemMessages.getString("success"));
-//                        this.databaseHelper.closeConnection(conn);
-//                        String response = Response.DataStructure(0, message);
-//                        resultHandler.handle(Future.succeededFuture(response));
-//                    }else{
-//                        trans.rollback();
-//                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
-//                        resultHandler.handle(Future.failedFuture(response));
-//                    }
-//                    trans.close();
-//                    conn.close();
-//                });
+                SqlConnection conn = open.result();
+                Transaction trans = conn.begin();
+                UserModel user = new UserModel(coreVertx, trans);
 
-                // --- UPDATE
-//                user.findOne("5fe32a18-f53a-4ed8-a023-379698a55e54").setHandler(select -> {
-//                    if(select.succeeded()){
-//                        String message = this.responseMessages.getString("success");
-//
-//                        this.logger.info(user.columnsValue.toString());
-//                        user.columnsValue.replace("role_id", "user");
-//                        user.columnsValue.replace("username", "andreck");
-//                        user.columnsValue.replace("password", "123456");
-//                        user.columnsValue.replace("email", "andreck@gmail.com");
-//                        user.saveUpdate().setHandler(update -> {
-//                            if(update.succeeded()){
-//                                trans.commit();
-//                                this.logger.info(this.systemMessages.getString("success"));
-//                                this.databaseHelper.closeConnection(conn);
-//                                String response = Response.DataStructure(0, message, user.toJson());
-//                                resultHandler.handle(Future.succeededFuture(response));
-//                            }else{
-//                                trans.rollback();
-//                                String response = Response.DataStructure(1, update.cause().getMessage());
-//                                this.logger.error(this.systemMessages.getString("failed") +" "+update.cause().getMessage());
-//                                resultHandler.handle(Future.failedFuture(response));
-//                            }
-//
-//                            trans.close();
-//                            conn.close();
-//                        });
-//                    }else{
-//                        trans.rollback();
-//                        String response = Response.DataStructure(1, select.cause().getMessage());
-//                        this.logger.error(this.systemMessages.getString("failed") +" "+select.cause().getMessage());
-//                        resultHandler.handle(Future.failedFuture(response));
-//                    }
-//                });
-//
-//            }else{
-//                String response = Response.DataStructure(1, open.cause().getMessage());
-//                this.logger.error(this.systemMessages.getString("failed") +" "+open.cause().getMessage());
-//                resultHandler.handle(Future.failedFuture(response));
-//            }
-//        });
+                user.whereRaw("lower(username)","like","%"+loginString.toLowerCase()+"%")
+                    .orWhereRaw("lower(email)","like","%"+loginString.toLowerCase()+"%")
+                    .findOne()
+                .setHandler(select_user -> {
+                    if(select_user.succeeded()){
+                        JsonObject data = user.first();
+                        PasswordHelper ph = new PasswordHelper();
+
+                        try {
+                            // Check password
+                            if (!ph.validatePassword(passwordString, data.getString("password_hash"), data.getString("salt"))) {
+                                trans.rollback();
+                                resultHandler.handle(Future.failedFuture(trans("response.service.login.implement.credential-not-match")));
+                            }else{
+                                OffsetDateTime lastLogin = OffsetDateTime.now(ZoneOffset.UTC);
+                                user.columnsValue.replace("last_login",lastLogin.toString());
+                                user.update().setHandler(update_user -> {
+                                    if(update_user.succeeded()){
+                                        data.remove("password_hash");
+                                        data.remove("salt");
+
+                                        JsonObject tokenJwt = this.jwtHelper.getTokenJwt(data.getString("role_id"), data);
+                                        logger.info(trans("system.service.login.implement.get-token-success")+tokenJwt);
+
+                                        trans.commit();
+                                        resultHandler.handle(Future.succeededFuture(tokenJwt));
+
+                                    }else{
+                                        trans.rollback();
+                                        logger.error(trans("system.service.login.implement.failed") +" "+update_user.cause().getMessage());
+                                        resultHandler.handle(Future.failedFuture(update_user.cause().getMessage()));
+                                    }
+
+                                    trans.close();
+                                    conn.close();
+                                });
+                            }
+                        }catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+                            trans.rollback();
+                            resultHandler.handle(Future.failedFuture(ex.getMessage()));
+                        }
+                    }else{
+                        trans.rollback();
+                        logger.error(trans("system.service.login.implement.failed") +" "+select_user.cause().getMessage());
+                        resultHandler.handle(Future.failedFuture(select_user.cause().getMessage()));
+                    }
+                });
+            }else{
+                logger.error(trans("system.service.login.implement.failed") +" "+open.cause().getMessage());
+                resultHandler.handle(Future.failedFuture(open.cause().getMessage()));
+            }
+        });
     }
 
 

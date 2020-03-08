@@ -29,20 +29,24 @@ import org.slf4j.LoggerFactory;
  */
 public class JwtHelper extends CoreHelper {
 
+
+    protected JWTAuth jwt;
+
     public JwtHelper(Vertx vertx){
         super(vertx);
         logger = LoggerFactory.getLogger(DatabaseHelper.class);
+
+        this.getSettingJwtAuth();
     }
     
-    public JWTAuth getSettingJwtAuth(){
-        
-        JWTAuth jwt;
+    private void getSettingJwtAuth(){
+
         String jwtType = conf("main.jwt.type");
         if (jwtType.equalsIgnoreCase("rsa")) {
             // openssl genrsa -subj -out jwt.pem 2048
             // openssl pkcs8 -topk8 -inform PEM -in jwt.pem -out jwt_private_key.pem -nocrypt
             // openssl rsa -in jwt.pem -outform PEM -pubout -out jwt_public_key.pem
-            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
+            this.jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .addPubSecKey(new PubSecKeyOptions()
                             .setAlgorithm("RS256")
                             .setPublicKey(conf("main.jwt.rsaPublicKey"))
@@ -52,31 +56,28 @@ public class JwtHelper extends CoreHelper {
             // keytool -genkeypair -keystore cirrus.jceks -storetype jceks -storepass 1234567890
             //    -keyalg EC -keysize 256 -alias ES256 -keypass 1234567890 -sigalg SHA256withECDSA
             //    -dname "CN=Sudito Lie,OU=Synectics,O=Gtech Digital Asia,L=Jakarta,ST=DKI,C=ID" -validity 360
-            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
+            this.jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .setKeyStore(new KeyStoreOptions()
                             .setType("jceks")
                             .setPath(conf("main.jwt.keyStore"))
                             .setPassword(conf("main.jwt.keyStore"))));
         } else {
-            jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
+            this.jwt = JWTAuth.create(coreVertx, new JWTAuthOptions()
                     .addPubSecKey(new PubSecKeyOptions()
                             .setAlgorithm("HS256")
                             .setPublicKey(conf("main.jwt.symmetricPublicKey"))
                             .setSymmetric(true)));
         }
-        
-        return jwt;
     }
     
     
-    public JsonObject GetTokenJwt(JWTAuth jwt, String role, JsonObject jUser){
+    public JsonObject getTokenJwt(String role, JsonObject jUser){
         int tokenTimeout = parser.parseInt(conf("main.jwt.tokenTimeout"),1000);
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         List<String> authorities = new ArrayList<>();
         authorities.add(role.trim());
-
         
-        String tokenJwt = jwt.generateToken(
+        String tokenJwt = this.jwt.generateToken(
                             jUser,
                             new JWTOptions()
                                 .setExpiresInMinutes(tokenTimeout)
@@ -90,6 +91,12 @@ public class JwtHelper extends CoreHelper {
         
         return token;
     }
+
+    public JWTAuth getJwtAuth(){
+        return this.jwt;
+    }
+
+
     
     public static String getTokenFromHeader(RoutingContext ctx){
         return ctx.request().headers().get(HttpHeaders.AUTHORIZATION);

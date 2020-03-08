@@ -6,8 +6,6 @@ import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,7 @@ public abstract class CoreMiddleware {
 
     public CoreMiddleware(Vertx vertx){
         coreVertx = vertx;
+
         messages = GeneralHelper.setMessages(vertx);
         configs = GeneralHelper.setConfigs(vertx);
     }

@@ -10,6 +10,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import com.andrechristikan.services.implement.LoginServiceImplement;
+import io.vertx.core.json.JsonObject;
 
 /**
  *
@@ -26,7 +27,8 @@ public interface LoginService {
         return new LoginServiceVertxEBProxy(vertx, address);
     }
 
-    void login(Handler<AsyncResult<String>> resultHandler);
+    void login(String loginString, String passwordString, Handler<AsyncResult<JsonObject>> resultHandler);
 
+    void setDatabaseConnection();
 
 }

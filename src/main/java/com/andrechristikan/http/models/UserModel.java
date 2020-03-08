@@ -26,50 +26,52 @@ public class UserModel extends CoreModel implements ModelInterface{
         primaryKeyName = "id";
     }
     
-    
-    /* 
+
+    /*
         This is mandatory
         Set column from this function
-    */ 
+    */
     @Override
     public ArrayList<String> setColumns(){
-        
+
         ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("role_id");
         columns.add("username");
-        columns.add("password");
+        columns.add("password_hash");
+        columns.add("salt");
         columns.add("email");
         columns.add("created_at");
         columns.add("updated_at");
         columns.add("last_login");
-        
+
         return columns;
     }
-    
-    /* 
+
+    /*
         This is optional
         This count type must same with count of column
-    */ 
-    
+    */
+
     @Override
     public Map<String, String> setColumnsName(){
-        
+
         Map<String, String> columnsName = new HashMap<>();
-        columnsName.put("id","user_id");
+        columnsName.put("id","id");
         columnsName.put("role_id","role_id");
         columnsName.put("username","user_name");
-        columnsName.put("password","password");
-        columnsName.put("email","email_user");
+        columnsName.put("password_hash","password_hash");
+        columnsName.put("salt","salt");
+        columnsName.put("email","email");
         columnsName.put("created_at","created_at");
         columnsName.put("updated_at","updated_at");
         columnsName.put("last_login","last_login");
-        
+
         return columnsName;
     }
-    
-    
-    /* 
+
+
+    /*
         This is mandatory
         This count type must same with count of column
         Support for Type
@@ -83,20 +85,21 @@ public class UserModel extends CoreModel implements ModelInterface{
         - Float
         - Number
         - Boolean
-    */ 
+    */
     @Override
     public Map<String, String> setColumnsType(){
-        
+
         Map<String, String> columnsType = new HashMap<>();
         columnsType.put("id","uuid");
         columnsType.put("role_id","string");
         columnsType.put("username","string");
-        columnsType.put("password","string");
+        columnsType.put("password_hash","string");
+        columnsType.put("salt","string");
         columnsType.put("email","string");
         columnsType.put("created_at","timestamptz");
         columnsType.put("updated_at","timestamptz");
         columnsType.put("last_login","timestamptz");
-        
+
         return columnsType;
     }
     

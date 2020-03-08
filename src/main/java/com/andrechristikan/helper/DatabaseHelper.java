@@ -17,7 +17,7 @@ public class DatabaseHelper extends CoreHelper {
         super(vertx);
         logger = LoggerFactory.getLogger(DatabaseHelper.class);
 
-        this.dbConfig = new JsonObject(conf("main."+conf("main.environment")+".database."+conf("service."+database+".database-usage")));
+        this.dbConfig = confAsJsonObject("main."+conf("main.environment")+".database."+conf("service."+database+".database-usage"));
     }
 
     public PgPool createPool(){

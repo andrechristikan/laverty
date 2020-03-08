@@ -69,14 +69,14 @@ public abstract class CoreModel {
     
     protected CoreModel(Vertx vertx, Transaction trans){
         this.trans = trans;
+        coreVertx = vertx;
 
-        this.setColumnsTypeToMap();
-        this.setColumnsNameToMap();
         this.setColumnsToMap();
+        this.setColumnsNameToMap();
+        this.setColumnsTypeToMap();
 
         messages = GeneralHelper.setMessages(vertx);
         configs = GeneralHelper.setConfigs(vertx);
-        coreVertx = vertx;
     }
     
     
@@ -250,7 +250,7 @@ public abstract class CoreModel {
         }
 
         query.append(" ")
-                .append(this.whereQuery)
+                .append(this.whereQuery == null ? "" : this.whereQuery)
                 .append(" ")
                 .append(this.whereQuery == null ? String.format(" WHERE %s = $%d ", primaryKeyName, this.index++) : String.format(" AND %s = $%d ", primaryKeyName, this.index++))
                 .append(";");
@@ -444,7 +444,7 @@ public abstract class CoreModel {
                 .append(" ");
         
         query.append(" ")
-                .append(this.whereQuery)
+                .append(this.whereQuery == null ? "" : this.whereQuery)
                 .append(" ")
                 .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
                 .append(";");
@@ -482,7 +482,7 @@ public abstract class CoreModel {
             .append(" FROM ")
             .append(tableName)
             .append(" ")
-            .append(this.whereQuery)
+            .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
             .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
             .append(" ")
@@ -711,6 +711,34 @@ public abstract class CoreModel {
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
+
+    public CoreModel whereRaw(String column, String operator, String value){
+
+        StringBuilder where = new StringBuilder();
+
+        if(this.whereQuery == null){
+            where.append(" WHERE ")
+                    .append(column)
+                    .append(" ")
+                    .append(operator)
+                    .append(" $")
+                    .append(this.index++)
+                    .append(" ");
+        }else{
+            where
+                    .append(" AND ")
+                    .append(column)
+                    .append(" ")
+                    .append(operator)
+                    .append(" $")
+                    .append(this.index++)
+                    .append(" ");
+        }
+
+        this.addArgsRaw(column, value, this.whereArgsQuery);
+        this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
+        return this;
+    }
     
     public CoreModel orWhere(String column, String operator, String value){
         
@@ -739,6 +767,33 @@ public abstract class CoreModel {
         }
         
         this.addArgs(column, value, this.whereArgsQuery);
+        this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
+        return this;
+    }
+
+    public CoreModel orWhereRaw(String column, String operator, String value){
+
+        StringBuilder where = new StringBuilder();
+
+        if(this.whereQuery == null){
+            where.append(" WHERE ")
+                    .append(column)
+                    .append(" ")
+                    .append(operator)
+                    .append(" $")
+                    .append(this.index++)
+                    .append(" ");
+        }else{
+            where.append(" OR ")
+                    .append(column)
+                    .append(" ")
+                    .append(operator)
+                    .append(" $")
+                    .append(this.index++)
+                    .append(" ");
+        }
+
+        this.addArgsRaw(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
@@ -846,7 +901,7 @@ public abstract class CoreModel {
     }
     
     private void addArgs(String column, String value, Tuple args){
-        
+
         if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
             args.addUUID(value == null || value.trim().equals("") ? null : UUID.fromString(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("timestamptz")){
@@ -866,6 +921,37 @@ public abstract class CoreModel {
         }else if(this.columnsType.get(column).equalsIgnoreCase("number")){
             args.addValue(value == null || value.trim().equals("") ? null : Numeric.parse(value));
         }else if(this.columnsType.get(column).equalsIgnoreCase("boolean")){
+            args.addBoolean(value == null || value.trim().equals("") ? null : Boolean.parseBoolean(value));
+        }else{
+            args.addString(value == null || value.trim().equals("") ? null : String.valueOf(value));
+        }
+    }
+
+    private void addArgsRaw(String columnRaw, String value, Tuple args){
+
+        String localColumnArray[] = columnRaw.split("\\(");
+        String localColumn = localColumnArray[localColumnArray.length-1];
+        localColumn = localColumn.replace(")","");
+
+        if(this.columnsType.get(localColumn).equalsIgnoreCase("uuid")){
+            args.addUUID(value == null || value.trim().equals("") ? null : UUID.fromString(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("timestamptz")){
+            args.addOffsetDateTime(value == null || value.trim().equals("") ? null : OffsetDateTime.parse(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("integer")){
+            args.addInteger(value == null || value.trim().equals("") ? null : Integer.parseInt(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("date")){
+            args.addLocalDate(value == null || value.trim().equals("") ? null : LocalDate.parse(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("timestamp")){
+            args.addLocalDateTime(value == null || value.trim().equals("") ? null : LocalDateTime.parse(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("datetime")){
+            args.addLocalDateTime(value == null || value.trim().equals("") ? null : LocalDateTime.parse(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("double")){
+            args.addDouble(value == null || value.trim().equals("") ? null : Double.parseDouble(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("float")){
+            args.addFloat(value == null || value.trim().equals("") ? null : Float.parseFloat(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("number")){
+            args.addValue(value == null || value.trim().equals("") ? null : Numeric.parse(value));
+        }else if(this.columnsType.get(localColumn).equalsIgnoreCase("boolean")){
             args.addBoolean(value == null || value.trim().equals("") ? null : Boolean.parseBoolean(value));
         }else{
             args.addString(value == null || value.trim().equals("") ? null : String.valueOf(value));

@@ -17,25 +17,6 @@
                 "poolMinSize": 1,
                 "poolMaxSize": 10
             }
-        },
-        "resources-directory": "resources",
-        "upload-files":{
-            "delete-on-end":"true",
-            "folder":{
-                "default":"files-uploaded",
-                "images":{
-                    "default":"files-uploaded/defaults/general.jpg",
-                    "vehicle":"vehicles",
-                    "workshop":"workshops",
-                    "user-customer":"users-customer",
-                    "driver":"drivers",
-                    "invoice":"invoices",
-                    "service-detail":"service-details"
-                },
-                "pdf":{
-                    "contract":""
-                }
-            }
         }
     },
     "production":{
@@ -54,24 +35,23 @@
                 "poolMinSize": 1,
                 "poolMaxSize": 10
             }
-        },
-        "resources-directory": "resources",
-        "upload-files":{
-            "delete-on-end":"true",
-            "folder":{
-                "default":"files-uploaded",
-                "images":{
-                    "default":"files-uploaded/defaults/general.jpg",
-                    "vehicle":"vehicles",
-                    "workshop":"workshops",
-                    "user-customer":"users-customer",
-                    "driver":"drivers",
-                    "invoice":"invoices",
-                    "service-detail":"service-details"
-                },
-                "pdf":{
-                    "contract":""
-                }
+        }
+    },
+    "upload-files":{
+        "delete-on-end":"true",
+        "folder":{
+            "default":"files-uploaded",
+            "images":{
+                "default":"files-uploaded/defaults/general.jpg",
+                "vehicle":"vehicles",
+                "workshop":"workshops",
+                "user-customer":"users-customer",
+                "driver":"drivers",
+                "invoice":"invoices",
+                "service-detail":"service-details"
+            },
+            "pdf":{
+                "contract":""
             }
         }
     },
@@ -82,7 +62,7 @@
         "symmetricPublicKey": "TbfLSIUopL6dr50nLemDNE4wXxFleN1O",
         "keyStore": "/working/java/synectics.cirrus/cert/cirrus.jceks",
         "secret": "1234567890",
-        "tokenTimeout": 1000
+        "tokenTimeout": "1000"
     },
     "role":[
         "user",
@@ -97,9 +77,9 @@
             "Authorization"
         ],
         "method":[
-            "GET", 
-            "POST", 
-            "PUT", 
+            "GET",
+            "POST",
+            "PUT",
             "DELETE",
             "CONNECT",
             "HEAD",

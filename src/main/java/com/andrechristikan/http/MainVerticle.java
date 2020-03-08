@@ -17,6 +17,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author Syn-User
  */
 public class MainVerticle extends AbstractVerticle{
-    
+
     private final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
     private JsonObject messages = new JsonObject();
     private JsonObject configs = new JsonObject();
@@ -95,16 +96,16 @@ public class MainVerticle extends AbstractVerticle{
                 start.fail(config.cause().getMessage());
             }
         });
-        
+
     }
-    
+
     @Override
     public void stop(){
         this.vertx.close();
     }
-    
+
     private Future <Void> getConfig(){
-        
+
         Promise <Void> promise = Promise.promise();
         SharedData sharedData = this.vertx.sharedData();
         LocalMap<String, JsonObject> jMapData = sharedData.getLocalMap("vertx");
@@ -139,59 +140,59 @@ public class MainVerticle extends AbstractVerticle{
 
         return promise.future() ;
     }
-    
+
     private Future <JsonObject> getResponseMessage(String language){
-        
+
         Promise <JsonObject> promise = Promise.promise();
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/messages/"+language+"/response.json", readFile -> {
+        vertxFileSystem.readFile("messages/"+language+"/response.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
                 promise.fail(readFile.cause().getMessage());
             }
         });
-            
+
        return promise.future();
 
     }
-    
+
     private Future <JsonObject> getSystemMessage(String language){
-        
+
         Promise <JsonObject> promise = Promise.promise();
-        
+
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/messages/"+language+"/system.json", readFile -> {
+        vertxFileSystem.readFile("messages/"+language+"/system.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
                 promise.fail(readFile.cause().getMessage());
             }
         });
-    
+
        return promise.future();
 
     }
-    
+
     private Future <JsonObject> getServiceConfig(){
-        
+
         Promise <JsonObject> promise = Promise.promise();
-        
+
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile(conf("main."+conf("main.environment")+".resources-directory")+"/configs/services.json", readFile -> {
+        vertxFileSystem.readFile("configs/services.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
                 promise.fail(readFile.cause().getMessage());
             }
         });
-    
+
        return promise.future();
 
     }
-    
+
     private Future <JsonObject> getMainConfig() {
-       
+
         ConfigStoreOptions fileStore = new ConfigStoreOptions()
             .setType("file")
             .setConfig(
@@ -214,6 +215,14 @@ public class MainVerticle extends AbstractVerticle{
 
     protected String conf(String path){
         return GeneralHelper.conf(path, this.configs);
+    }
+
+    protected JsonArray confAsJsonArray(String path){
+        return GeneralHelper.confAsJsonArray(path, this.configs);
+    }
+
+    protected JsonObject confAsJsonObject(String path){
+        return GeneralHelper.confAsJsonObject(path, this.configs);
     }
 
     public static void main(String[] args) throws Exception {
