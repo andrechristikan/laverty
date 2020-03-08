@@ -167,7 +167,7 @@ public abstract class CoreModel {
         Tuple args = this.whereArgsQuery;
 
         if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
-            promise.fail(trans("response.service.user.model.update.need-select-before-update"));
+            promise.fail(trans("response.model.update.need-select-before-update"));
         }
         
         query.append("UPDATE ")
@@ -405,7 +405,7 @@ public abstract class CoreModel {
         Tuple args = this.whereArgsQuery;
         
         if(this.jsonObjectValue == null || this.jsonObjectValue.size() == 0 ){
-            promise.fail(trans("response.service.user.model.delete.need-select-before-delete"));
+            promise.fail(trans("response.model.delete.need-select-before-delete"));
         }
 
         query.append("DELETE FROM ")
@@ -498,7 +498,7 @@ public abstract class CoreModel {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = trans("response.service.user.model.find-one.not-found");
+                    String message = trans("response.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();
@@ -532,7 +532,7 @@ public abstract class CoreModel {
         StringBuilder query = new StringBuilder();
         
         if(this.whereQuery == null || this.whereQuery.trim().equalsIgnoreCase("")){
-            promise.fail(trans("response.service.user.model.find-one.need-where-statement"));
+            promise.fail(trans("response.model.find-one.need-where-statement"));
         }
 
         if(this.selectQuery == null){
@@ -555,7 +555,7 @@ public abstract class CoreModel {
                 RowSet <Row> rs = fetch.result();
 
                 if (rs.rowCount() == 0) {
-                    String message = trans("response.service.user.model.find-one.not-found");
+                    String message = trans("response.model.find-one.not-found");
                     promise.fail(message);
                 } else {
                     Row row = rs.iterator().next();

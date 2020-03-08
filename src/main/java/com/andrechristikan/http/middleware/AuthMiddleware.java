@@ -44,20 +44,20 @@ public class AuthMiddleware extends CoreMiddleware{
 
             jwtAuthConfig.authenticate(new JsonObject().put("jwt", token), checked -> {
                 if (checked.succeeded()) {
-                    logger.info(trans("system.authentication.success"));
+                    logger.info(trans("system.middleware.auth.success"));
                     if(ctx.user() == null){
                         ctx.setUser(checked.result());
                     }
                     ctx.next();
                 }else{
-                    logger.info(trans("system.authentication.fail")+" "+checked.cause().getMessage());
-                    response.dataStructure("1", trans("response.authentication.failed"));
+                    logger.info(trans("system.middleware.auth.failed")+" "+checked.cause().getMessage());
+                    response.dataStructure("1", trans("response.middleware.auth.invalid-token"));
                     response.response(401);
                 }
             });
         }else{
-            logger.info(trans("system.authentication.fail")+" "+trans("response.authentication.token-required"));
-            response.dataStructure("1", trans("response.authentication.token-required"));
+            logger.info(trans("system.middleware.auth.failed")+" "+trans("response.middleware.auth.token-required"));
+            response.dataStructure("1", trans("response.middleware.auth.token-required"));
             response.response(403);
         }
                     

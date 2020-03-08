@@ -7,7 +7,7 @@ package com.andrechristikan.http;
 
 import com.andrechristikan.http.controller.UserController;
 import com.andrechristikan.http.middleware.AuthMiddleware;
-import com.andrechristikan.http.controller.LoginController;
+import com.andrechristikan.http.controller.AuthController;
 import com.andrechristikan.http.exception.AuthException;
 import com.andrechristikan.http.middleware.RoleMiddleware;
 import io.vertx.core.Vertx;
@@ -20,7 +20,7 @@ import io.vertx.ext.web.Router;
 public class Route {
 
     // Controller Init
-    private static LoginController loginController;
+    private static AuthController authController;
     private static UserController userController;
     
     // Exception Init
@@ -40,7 +40,7 @@ public class Route {
     protected void create(Router router){
         
         // Before Auth
-        router.post("/api/v1/login").handler(loginController::login);
+        router.post("/api/v1/login").handler(authController::login);
         
         // After Auth
         router.route("/api/v1/*").handler(authMiddleware::handler).failureHandler(authException::handler);
@@ -56,7 +56,7 @@ public class Route {
     }
 
     private void initController(Vertx vertx){
-        loginController = new LoginController(vertx);
+        authController = new AuthController(vertx);
         userController = new UserController(vertx);
 
     }

@@ -9,7 +9,7 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import com.andrechristikan.services.implement.LoginServiceImplement;
+import com.andrechristikan.services.implement.AuthServiceImplement;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -17,14 +17,14 @@ import io.vertx.core.json.JsonObject;
  * @author Syn-User
  */
 @ProxyGen
-public interface LoginService {
+public interface AuthService {
     
-    static LoginService create(Vertx vertx) {
-        return new LoginServiceImplement(vertx);
+    static AuthService create(Vertx vertx) {
+        return new AuthServiceImplement(vertx);
     }
 
-    static LoginService createProxy(Vertx vertx, String address) {
-        return new LoginServiceVertxEBProxy(vertx, address);
+    static AuthService createProxy(Vertx vertx, String address) {
+        return new AuthServiceVertxEBProxy(vertx, address);
     }
 
     void setDatabaseConnection();

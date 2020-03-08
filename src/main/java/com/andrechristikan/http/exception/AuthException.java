@@ -25,22 +25,23 @@ public class AuthException extends CoreException implements ExceptionInterface{
     @Override
     public final void handler(RoutingContext ctx){
 
-        logger.info(trans("system.exception.login.start"));
+        logger.info(trans("system.exception.auth.start"));
     
         String authorization = JwtHelper.getTokenFromHeader(ctx);
         
         if(authorization == null || authorization.trim().equals("")){
             response.create(ctx.response());
-            response.dataStructure("1", trans("response.exception.login"));
+            response.dataStructure("1", trans("response.exception.auth"));
             response.response(ctx.response().getStatusCode());
 
-            logger.info(trans("system.exception.login.fail") + " " +trans("response.exception.login"));
+            logger.error(trans("system.exception.auth.failed") + " " +trans("response.exception.auth"));
 
         }else{
+            logger.info(trans("system.exception.auth.success"));
             ctx.next();
         }
 
-        logger.info(trans("system.exception.login.end"));
+        logger.info(trans("system.exception.auth.end"));
 
     }
 }

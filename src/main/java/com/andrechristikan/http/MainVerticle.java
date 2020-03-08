@@ -44,7 +44,7 @@ public class MainVerticle extends AbstractVerticle{
                 this.logger.info("Configs : "+ this.configs.toString());
                 this.logger.info("Messages : "+ this.messages.toString());
 
-                this.logger.info(trans("system.service.main.start"));
+                this.logger.info(trans("system.main.start"));
 
                 // DEPLOY VERTICLE
                 start.future().compose(st -> {
@@ -58,6 +58,7 @@ public class MainVerticle extends AbstractVerticle{
                         ),
                         promise
                     );
+//                    promise.complete();
                     return promise.future();
 
                 }).compose(st -> {
@@ -71,6 +72,7 @@ public class MainVerticle extends AbstractVerticle{
                             ),
                             promise
                     );
+//                    promise.complete();
                     return promise.future();
                 }).compose(st -> {
 
@@ -83,16 +85,17 @@ public class MainVerticle extends AbstractVerticle{
                         ),
                         promise
                     );
+//                    promise.complete();
                     return promise.future();
                 }).setHandler(prom -> {
                     if (prom.succeeded()) {
-                        this.logger.info(trans("system.service.main.success"));
+                        this.logger.info(trans("system.main.success"));
                     }else{
-                        this.logger.error(trans("system.service.main.failed")+" "+ prom.cause().getMessage());
+                        this.logger.error(trans("system.main.failed")+" "+ prom.cause().getMessage());
                         start.fail(prom.cause().getMessage());
                     }
                 }).otherwise(otherWise -> {
-                    this.logger.error(trans("system.service.main.otherwise")+" "+ otherWise.getCause().getMessage());
+                    this.logger.error(trans("system.main.otherwise")+" "+ otherWise.getCause().getMessage());
                     start.fail(otherWise.getCause().getMessage());
                     return otherWise.getMessage();
                 });

@@ -1,0 +1,40 @@
+{
+    "model": {
+        "delete": {
+            "need-select-before-delete": "Tidak bisa jalankan delete, select target dibutuhkan."
+        },
+        "update": {
+            "need-select-before-update": "Tidak bisa jalankan update, select target dibutuhkan."
+        },
+        "find-one": {
+            "not-found": "Tidak ditemukan, pastikan anda memakukan keyword atau data yang benar.",
+            "need-where-statement": "Dibutuhkan where statement."
+        }
+    },
+    "service":{
+        "auth":{
+            "login": {
+                "success": "Login sukses.",
+                "credential-not-match" : "Username atau password tidak cocok."
+            }
+        },
+        "user": {
+            "get": {
+                "success": "Sukses mendapatkan data user dengan id"
+            }
+        }
+    },
+    "middleware": {
+        "auth": {
+            "invalid-token": "Token tidak sah",
+            "token-required": "Token dibutuhkan",
+            "not-have-authority" : "Anda tidak berhak untuk mengakses fitur ini",
+            "admin-access" : "Dibutuhkan hak akses admin."
+        }
+    },
+    "exception": {
+        "auth": "Dituhkan authorisasi",
+        "not-found": "Alamat tidak ditemukan",
+        "default": "Terjadi error di server"
+    }
+}

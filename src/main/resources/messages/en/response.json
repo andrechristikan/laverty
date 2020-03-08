@@ -1,42 +1,43 @@
 {
+    "model": {
+        "delete": {
+            "need-select-before-delete": "Delete statement can't run, need select before delete."
+        },
+        "update": {
+            "need-select-before-update": "Update statement can't run, need select before update."
+        },
+        "find-one": {
+            "not-found": "Not found, make sure you put the right keyword or data.",
+            "need-where-statement": "Need where statement before find any data."
+        }
+    },
     "service":{
-        "login": {
-            "controller":{
-                "success": "Login Success."
-            },
-            "implement":{
+        "auth":{
+            "login": {
+                "success": "Successfully to login.",
                 "credential-not-match" : "Invalid Username and Password."
+            },
+            "logout": {
+
             }
         },
         "user": {
-            "controller":{
-                "success": "User Success."
-            },
-            "model": {
-                "find-one": {
-                    "need-where-statement": "Need where statement",
-                    "not-found": "User not found."
-                },
-                "delete": {
-                    "need-select-before-delete": "Delete statement can't run, need select before delete."
-                },
-                "update": {
-                    "need-select-before-update": "Update statement can't run, need select before update."
-                }
+            "get": {
+                "success": "Success to get user by id"
             }
         }
     },
-    "authorization":{
-        "failed":"Invalid token, your don't have Super Admin access.",
-        "forbidden":"User does not have the authority"
-    },
-    "authentication":{
-        "failed":"Invalid token",
-        "token-required":"Token required, don't forget to put the token into body of request."
+    "middleware": {
+        "auth": {
+            "invalid-token": "Invalid token",
+            "token-required": "Token required, don't forget to put the token into body of request",
+            "not-have-authority" : "User doest have authority",
+            "admin-access" : "Invalid token, your don't have Super Admin access."
+        }
     },
     "exception": {
-        "default": "Internal Server Error.",
-        "not-found": "Endpoint not found.",
-        "login":"Authorization needed."
+        "auth": "Authorization needed.",
+        "not-found": "Endpoint Not Found",
+        "default": "Internal Server Error"
     }
 }

@@ -6,17 +6,10 @@
 package com.andrechristikan.verticle;
 
 import com.andrechristikan.core.CoreVerticle;
-import com.andrechristikan.helper.GeneralHelper;
-import com.andrechristikan.helper.ParserHelper;
-import com.andrechristikan.services.LoginService;
-import com.andrechristikan.services.implement.LoginServiceImplement;
-import io.vertx.core.AbstractVerticle;
+import com.andrechristikan.services.AuthService;
+import com.andrechristikan.services.implement.AuthServiceImplement;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import io.vertx.serviceproxy.ServiceBinder;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -32,10 +25,10 @@ public class LoginVerticle extends CoreVerticle {
     @Override
     public void run(Promise<Void> promise) {
 
-        logger.info(trans("system.service.login.start").replace("#eventBusServiceName", conf("service.login.address")));
+        logger.info(trans("system.service.start-verticle").replace("#className",LoginVerticle.class.getName()).replace("#eventBusServiceName", conf("service.auth.address")));
         ServiceBinder binder = new ServiceBinder(coreVertx);
-        binder.setAddress(conf("service.login.address")).register(LoginService.class, new LoginServiceImplement(coreVertx));
-        logger.info(trans("system.service.login.end").replace("#eventBusServiceName", conf("service.login.address")));
+        binder.setAddress(conf("service.auth.address")).register(AuthService.class, new AuthServiceImplement(coreVertx));
+        logger.info(trans("system.service.end-verticle").replace("#className",LoginVerticle.class.getName()).replace("#eventBusServiceName", conf("service.auth.address")));
 
         promise.complete();
     }

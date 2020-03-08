@@ -34,7 +34,7 @@ public class Server extends CoreVerticle{
     @Override
     public void run(Promise<Void> promise) {
 
-        logger.info(trans("system.service.server.start"));
+        logger.info(trans("system.server.start"));
 
         Router router = Router.router(coreVertx);
         Route route = new Route(coreVertx);
@@ -126,13 +126,13 @@ public class Server extends CoreVerticle{
                 ar -> {
                     if(ar.succeeded()){
                         logger.info(
-                            trans("system.service.server.ongoing")
+                            trans("system.server.success")
                                 .replace("#IP_ADDRESS", parser.parseString(conf("main."+conf("main.environment")+".http-server.address"),"127.0.0.1"))
                                 .replace("#PORT", parser.parseString(conf("main."+conf("main.environment")+".http-server.port"),"8181"))
                         );
                         promise.complete();
                     }else{
-                        logger.error(trans("system.service.server.failed")+" "+ar.cause().getMessage());
+                        logger.error(trans("system.server.failed")+" "+ar.cause().getMessage());
                         promise.fail(ar.cause().getMessage());
                     }
             });

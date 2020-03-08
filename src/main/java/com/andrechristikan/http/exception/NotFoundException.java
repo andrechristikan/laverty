@@ -20,7 +20,7 @@ public class NotFoundException extends CoreException implements ExceptionInterfa
         response.dataStructure("1", trans("response.exception.not-found"));
         response.response(ctx.response().getStatusCode());
 
-        logger.info(trans("system.exception.not-found.start"));
+        logger.info(trans("system.exception.not-found.end"));
 
     }
 

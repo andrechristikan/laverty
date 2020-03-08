@@ -51,28 +51,28 @@ public class RoleMiddleware extends CoreMiddleware{
                         if(hndlr.succeeded()){
                             boolean hasAuthority = hndlr.result();
                             if (hasAuthority) {
-                                logger.info(trans("system.authorization.success"));
+                                logger.info(trans("system.middleware.auth.success"));
                                 ctx.next();
                             } else {
-                                logger.info(trans("system.authorization.fail")+" "+trans("response.authorization.failed"));
-                                response.dataStructure("1", trans("response.authorization.failed"));
+                                logger.info(trans("system.middleware.auth.failed")+" "+trans("response.middleware.auth.admin-access"));
+                                response.dataStructure("1", trans("response.middleware.auth.admin-access"));
                                 response.response(403);
                             }
                         }else{
-                            logger.info(trans("system.authorization.fail")+" "+trans("response.authorization.forbidden"));
-                            response.dataStructure("1", trans("response.authorization.forbidden"));
+                            logger.info(trans("system.middleware.auth.failed")+" "+trans("response.middleware.auth.not-have-authority"));
+                            response.dataStructure("1", trans("response.middleware.auth.not-have-authority"));
                             response.response(403);
                         }
                     });
                 }else{
-                    logger.info(trans("system.authentication.fail")+" "+checked.cause().getMessage());
-                    response.dataStructure("1", trans("response.authentication.failed"));
+                    logger.info(trans("system.middleware.auth.failed")+" "+checked.cause().getMessage());
+                    response.dataStructure("1", trans("response.middleware.auth.invalid-token"));
                     response.response(401);
                 }
             });
         }else{
-            logger.info(trans("system.authentication.fail")+" "+trans("response.authentication.token-required"));
-            response.dataStructure("1", trans("response.authentication.token-required"));
+            logger.info(trans("system.middleware.auth.failed")+" "+trans("response.middleware.auth.token-required"));
+            response.dataStructure("1", trans("response.middleware.auth.token-required"));
             response.response(403);
         }
                     

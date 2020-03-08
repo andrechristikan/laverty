@@ -1,9 +1,7 @@
 package com.andrechristikan.verticle;
 
 import com.andrechristikan.core.CoreVerticle;
-import com.andrechristikan.services.LoginService;
 import com.andrechristikan.services.UserService;
-import com.andrechristikan.services.implement.LoginServiceImplement;
 import com.andrechristikan.services.implement.UserServiceImplement;
 import io.vertx.core.Promise;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -19,10 +17,10 @@ public class UserVerticle extends CoreVerticle {
     @Override
     public void run(Promise<Void> promise) {
 
-        logger.info(trans("system.service.user.start").replace("#eventBusServiceName", conf("service.user.address")));
+        logger.info(trans("system.service.start-verticle").replace("#className",UserVerticle.class.getName()).replace("#eventBusServiceName", conf("service.user.address")));
         ServiceBinder binder = new ServiceBinder(coreVertx);
         binder.setAddress(conf("service.user.address")).register(UserService.class, new UserServiceImplement(coreVertx));
-        logger.info(trans("system.service.user.end").replace("#eventBusServiceName", conf("service.user.address")));
+        logger.info(trans("system.service.end-verticle").replace("#className",UserVerticle.class.getName()).replace("#eventBusServiceName", conf("service.user.address")));
 
         promise.complete();
     }

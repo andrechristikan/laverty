@@ -51,7 +51,7 @@ public class DatabaseHelper extends CoreHelper {
                 logger.info(trans("system.database.open-connection.success"));
                 promise.complete(ar.result());
             }else{
-                logger.info(ar.cause().getMessage());
+                logger.error(trans("system.database.open-connection.failed")+ar.cause().getMessage());
                 promise.fail(ar.cause().getMessage());
             }
         });

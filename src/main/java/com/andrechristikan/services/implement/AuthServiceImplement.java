@@ -10,7 +10,7 @@ import com.andrechristikan.helper.DatabaseHelper;
 import com.andrechristikan.helper.JwtHelper;
 import com.andrechristikan.helper.PasswordHelper;
 import com.andrechristikan.http.models.UserModel;
-import com.andrechristikan.services.LoginService;
+import com.andrechristikan.services.AuthService;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.SqlConnection;
@@ -26,22 +26,24 @@ import java.time.ZoneOffset;
  *
  * @author Syn-User
  */
-public class LoginServiceImplement extends CoreImplement implements LoginService {
+public class AuthServiceImplement extends CoreImplement implements AuthService {
 
     private final JwtHelper jwtHelper;
 
-    public LoginServiceImplement(Vertx vertx) {
+    public AuthServiceImplement(Vertx vertx) {
         super(vertx);
-        logger = LoggerFactory.getLogger(LoginServiceImplement.class);
+        logger = LoggerFactory.getLogger(AuthServiceImplement.class);
 
         this.jwtHelper = new JwtHelper(vertx);
     }
 
     @Override
     public void setDatabaseConnection(){
-        databaseHelper = new DatabaseHelper(coreVertx, "login");
+        databaseHelper = new DatabaseHelper(coreVertx, "auth");
         poolConnection = databaseHelper.createPool();
-        logger.info(trans("system.service.login.implement.database-connection").replace("#serviceAddress", conf("service.login.address")));
+        logger.info(trans("system.service.start-pool-database")
+                .replace("#className", AuthServiceImplement.class.getName())
+                .replace("#serviceAddress", conf("service.auth.address")));
     }
 
     @Override
@@ -66,7 +68,7 @@ public class LoginServiceImplement extends CoreImplement implements LoginService
                             // Check password
                             if (!ph.validatePassword(passwordString, data.getString("password_hash"), data.getString("salt"))) {
                                 trans.rollback();
-                                resultHandler.handle(Future.failedFuture(trans("response.service.login.implement.credential-not-match")));
+                                resultHandler.handle(Future.failedFuture(trans("response.service.auth.login.credential-not-match")));
                             }else{
                                 OffsetDateTime lastLogin = OffsetDateTime.now(ZoneOffset.UTC);
                                 user.columnsValue.replace("last_login",lastLogin.toString());
@@ -76,14 +78,14 @@ public class LoginServiceImplement extends CoreImplement implements LoginService
                                         data.remove("salt");
 
                                         JsonObject tokenJwt = this.jwtHelper.getTokenJwt(data.getString("role_id"), data);
-                                        logger.info(trans("system.service.login.implement.get-token-success")+tokenJwt);
+                                        logger.info(trans("system.service.auth.success-service")+tokenJwt);
 
                                         trans.commit();
                                         resultHandler.handle(Future.succeededFuture(tokenJwt));
 
                                     }else{
                                         trans.rollback();
-                                        logger.error(trans("system.service.login.implement.failed") +" "+update_user.cause().getMessage());
+                                        logger.error(trans("system.service.auth.failed-service") +" "+update_user.cause().getMessage());
                                         resultHandler.handle(Future.failedFuture(update_user.cause().getMessage()));
                                     }
 
@@ -92,17 +94,18 @@ public class LoginServiceImplement extends CoreImplement implements LoginService
                                 });
                             }
                         }catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+                            logger.error(trans("system.service.auth.failed-service") +" "+ex.getMessage());
                             trans.rollback();
                             resultHandler.handle(Future.failedFuture(ex.getMessage()));
                         }
                     }else{
                         trans.rollback();
-                        logger.error(trans("system.service.login.implement.failed") +" "+select_user.cause().getMessage());
+                        logger.error(trans("system.service.auth.failed-service") +" "+select_user.cause().getMessage());
                         resultHandler.handle(Future.failedFuture(select_user.cause().getMessage()));
                     }
                 });
             }else{
-                logger.error(trans("system.service.login.implement.failed") +" "+open.cause().getMessage());
+                logger.error(trans("system.service.auth.failed-service") +" "+open.cause().getMessage());
                 resultHandler.handle(Future.failedFuture(open.cause().getMessage()));
             }
         });
