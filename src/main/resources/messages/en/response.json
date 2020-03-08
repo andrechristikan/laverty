@@ -9,6 +9,9 @@
             }
         },
         "user": {
+            "controller":{
+                "success": "User Success."
+            },
             "model": {
                 "find-one": {
                     "need-where-statement": "Need where statement",

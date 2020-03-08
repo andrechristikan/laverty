@@ -9,6 +9,7 @@ import com.andrechristikan.Runner;
 import com.andrechristikan.Version;
 import com.andrechristikan.helper.GeneralHelper;
 import com.andrechristikan.verticle.LoginVerticle;
+import com.andrechristikan.verticle.UserVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -63,7 +64,13 @@ public class MainVerticle extends AbstractVerticle{
 
                     // -- User
                     Promise <String> promise = Promise.promise();
-                    promise.complete();
+                    this.vertx.deployVerticle(
+                            new UserVerticle(),
+                            new DeploymentOptions().setConfig(
+                                    this.configs
+                            ),
+                            promise
+                    );
                     return promise.future();
                 }).compose(st -> {
 

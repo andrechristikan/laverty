@@ -32,6 +32,24 @@
                 "start": "[LoginException] Enter the LoginException.",
                 "end": "[LoginException] LoginException End."
             }
+        },
+        "user": {
+            "start":"[UserProxyServiceStarting] Start service #eventBusServiceName...",
+            "end":"[UserProxyServiceOngoing]End service #eventBusServiceName.",
+            "controller":{
+                "create":"[UserControllerCreated] Controller #eventBusServiceName creating.",
+                "end": "[UserControllerEnded] Controller #eventBusServiceName created",
+                "get":{
+                    "start":"[UserControllerStarting] User ongoing...",
+                    "end":"[UserControllerEnded] User ended."
+                }
+            },
+            "implement":{
+                "database-connection":"[UserImplementDatabaseConnection] Database connection pool for #serviceAddress Service created.",
+                "success":"[UserImplementSuccess] Success to user",
+                "failed":"[UserImplementFailed] : ",
+                "get-token-success": "[UserImplementSuccess] Success to get token : "
+            }
         }
     },
     "exception": {

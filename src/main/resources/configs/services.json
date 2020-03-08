@@ -2,5 +2,9 @@
     "login": {
         "address":"login-proxy-service",
         "database-usage": "core"
+    },
+    "user": {
+        "address":"user-proxy-service",
+        "database-usage": "core"
     }
 }

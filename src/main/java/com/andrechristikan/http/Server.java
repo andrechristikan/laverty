@@ -37,7 +37,7 @@ public class Server extends CoreVerticle{
         logger.info(trans("system.service.server.start"));
 
         Router router = Router.router(coreVertx);
-        Route route = new Route(coreVertx, router);
+        Route route = new Route(coreVertx);
         DefaultException defaultException = new DefaultException(coreVertx);
         NotFoundException notFoundException = new NotFoundException(coreVertx);
         JsonArray requestConfigHeader = confAsJsonArray("main.cors.header");
@@ -116,7 +116,7 @@ public class Server extends CoreVerticle{
         );
         router.route().handler(StaticHandler.create());
 
-        route.create();
+        route.create(router);
 
         router.route().failureHandler(defaultException::handler);
         router.route().handler(notFoundException::handler);

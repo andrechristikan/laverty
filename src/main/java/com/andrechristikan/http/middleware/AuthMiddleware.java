@@ -7,7 +7,6 @@ package com.andrechristikan.http.middleware;
 
 import com.andrechristikan.core.CoreMiddleware;
 import com.andrechristikan.helper.JwtHelper;
-import com.andrechristikan.helper.RequestHelper;
 import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class AuthMiddleware extends CoreMiddleware implements MiddlewareInterface{
+public class AuthMiddleware extends CoreMiddleware{
 
     private final JwtHelper jwtHelper;
     

@@ -7,7 +7,6 @@ package com.andrechristikan.http.middleware;
 
 import com.andrechristikan.core.CoreMiddleware;
 import com.andrechristikan.helper.JwtHelper;
-import com.andrechristikan.helper.RequestHelper;
 import com.andrechristikan.http.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -20,15 +19,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class AdminMiddleware extends CoreMiddleware implements MiddlewareInterface{
+public class RoleMiddleware extends CoreMiddleware{
 
     private final JwtHelper jwtHelper;
-    private final String role = "admin";
+    private String role;
     
     
-    public AdminMiddleware(Vertx vertx){
+    public RoleMiddleware(Vertx vertx){
         super(vertx);
-        logger = LoggerFactory.getLogger(AdminMiddleware.class);
+        logger = LoggerFactory.getLogger(RoleMiddleware.class);
         response = new Response(vertx);
 
         this.jwtHelper = new JwtHelper(vertx);
@@ -48,7 +47,7 @@ public class AdminMiddleware extends CoreMiddleware implements MiddlewareInterfa
                 if (checked.succeeded()) {
                     User user = checked.result();
 
-                    user.isAuthorized(this.role, hndlr -> {
+                    user.isAuthorized(role, hndlr -> {
                         if(hndlr.succeeded()){
                             boolean hasAuthority = hndlr.result();
                             if (hasAuthority) {
@@ -77,5 +76,9 @@ public class AdminMiddleware extends CoreMiddleware implements MiddlewareInterfa
             response.response(403);
         }
                     
+    }
+
+    public void setRole(String roleName){
+        this.role = roleName;
     }
 }

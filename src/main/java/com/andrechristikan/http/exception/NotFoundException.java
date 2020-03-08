@@ -9,7 +9,7 @@ public class NotFoundException extends CoreException implements ExceptionInterfa
 
     public NotFoundException(Vertx vertx){
         super(vertx);
-        logger = LoggerFactory.getLogger(LoginException.class);
+        logger = LoggerFactory.getLogger(AuthException.class);
     }
 
     @Override

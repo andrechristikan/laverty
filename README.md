@@ -52,7 +52,7 @@ Guide for install this project
     - Use `Template Application`
     - Main class : `io.vertx.core.Launcher`
     - Program Argument : `run com.andrechristikan.http.MainVerticle`
-    - Working Directory : `projctDir/src/main/`
+    - Working Directory : `projctDir/src/main/resources`
     - Before Lunch
         1. Add `Run Maven Goal`
         2. Fill `clean install`
@@ -665,11 +665,12 @@ Still on development. I will finish this project as soon as possible.
 - [x] Jwt Authorization
 - [x] Auth Class
 - [x] New Controller Class
-- [ ] Dynamic Column Name
-- [ ] Controllable from database
-- [ ] New Route Class (Restructure)
-- [ ] Vert-x Service Implementation (ongoing)
-- [ ] User Login Pattern (ongoing)
+- [x] Dynamic Column Name
+- [ ] Controllable from database (ongoing)
+- [x] New Route Class
+- [x] Vert-x Service Implementation
+- [x] User Login Pattern
+- [ ] Optimization Message Response and System
 - [ ] Query Builder With Full Features (Join, Having, Group, Distinct, Raw Query, etc)
 - [ ] Database Migration
 

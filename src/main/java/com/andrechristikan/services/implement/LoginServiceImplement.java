@@ -108,5 +108,9 @@ public class LoginServiceImplement extends CoreImplement implements LoginService
         });
     }
 
+    @Override
+    public void logout(Handler<AsyncResult<String>> resultHandler){
+
+    }
 
 }

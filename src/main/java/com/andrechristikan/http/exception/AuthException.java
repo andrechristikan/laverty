@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Syn-User
  */
-public class LoginException extends CoreException implements ExceptionInterface{
+public class AuthException extends CoreException implements ExceptionInterface{
     
-    public LoginException(Vertx vertx){
+    public AuthException(Vertx vertx){
         super(vertx);
-        logger = LoggerFactory.getLogger(LoginException.class);
+        logger = LoggerFactory.getLogger(AuthException.class);
     }
     
     @Override

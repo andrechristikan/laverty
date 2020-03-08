@@ -27,8 +27,10 @@ public interface LoginService {
         return new LoginServiceVertxEBProxy(vertx, address);
     }
 
+    void setDatabaseConnection();
+
     void login(String loginString, String passwordString, Handler<AsyncResult<JsonObject>> resultHandler);
 
-    void setDatabaseConnection();
+    void logout(Handler<AsyncResult<String>> resultHandler);
 
 }

@@ -10,7 +10,7 @@ import io.vertx.pgclient.PgPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CoreImplement {
+public abstract class CoreImplement {
 
     protected static Logger logger = LoggerFactory.getLogger(CoreImplement.class);
     protected static ParserHelper parser = new ParserHelper();
