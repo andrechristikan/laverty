@@ -661,6 +661,7 @@ Still on development. I will finish this project as soon as possible.
 - [x] Basic Query Builder
 - [x] Query builder support raw query
 - [x] Query builder support subquery
+- [x] Query builder support join
 - [x] New Exception Class
 - [x] New Response Class
 - [x] New Middleware Class
@@ -673,7 +674,7 @@ Still on development. I will finish this project as soon as possible.
 - [x] User Login Pattern with jwt token
 - [x] Optimization Message Response and System
 - [ ] Controllable from database (maybe later)
-- [ ] Query Builder With Full Features (Join, Having, Group, Distinct, etc) (Ongoing) will focus on join statement
+- [ ] Query Builder With Full Features (Having, Group, Distinct, etc) (Ongoing) will focus on join statement
 - [ ] Database Migration
 
 

@@ -520,8 +520,6 @@ public abstract class CoreModel {
                             this.primaryKeyValue = this.result(row, column);
                         }
                         
-                        logger.info(column);
-                        logger.info(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column), this.result(row, column));
                         data.put(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column), this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
@@ -869,10 +867,6 @@ public abstract class CoreModel {
 
         StringBuilder query = new StringBuilder();
         String localColumnArrayWithSpaceValidation[] = localColumn.trim().replace("(", "").replace(")", "").split(" ");
-        
-        
-        logger.info(localColumnArrayWithSpaceValidation[0]);
-//        logger.info(localColumnArrayWithSpaceValidation[1]);
         
         if(localColumnArrayWithSpaceValidation.length == 1){
             this.select(localColumnArrayWithSpaceValidation[0]);
