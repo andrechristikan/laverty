@@ -60,6 +60,7 @@ public class UserModel extends CoreModel implements ModelInterface{
         Map<String, String> columnsName = new HashMap<>();
         columnsName.put("id","id");
         columnsName.put("role_id","role_id");
+        columnsName.put("role_name","roleName");
         columnsName.put("username","user_name");
         columnsName.put("password_hash","password_hash");
         columnsName.put("salt","salt");

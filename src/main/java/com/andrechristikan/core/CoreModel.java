@@ -57,7 +57,10 @@ public abstract class CoreModel {
     
     private String limitQuery;
     private String orderQuery;
+    private String offSetQuery;
+    private String joinQuery;
     private String primaryKeyValue;
+    
     
     private JsonObject jsonObjectValue = new JsonObject();
     private JsonArray jsonArrayValue = new JsonArray();
@@ -159,10 +162,6 @@ public abstract class CoreModel {
         columnsNameFromSetter.forEach((key,value) -> {
             this.columnsName.put(key, value);
         });
-    }
-    
-    private void setColumnsArray(ArrayList<String> columns){
-        this.selectQueryArray.addAll(columns);
     }
 
     private void setColumnArray(String columns){
@@ -491,6 +490,8 @@ public abstract class CoreModel {
             .append(" FROM ")
             .append(tableName)
             .append(" ")
+            .append(this.joinQuery == null ? "" : this.joinQuery)
+            .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
             .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++))
@@ -519,6 +520,8 @@ public abstract class CoreModel {
                             this.primaryKeyValue = this.result(row, column);
                         }
                         
+                        logger.info(column);
+                        logger.info(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column), this.result(row, column));
                         data.put(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column), this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
@@ -552,6 +555,8 @@ public abstract class CoreModel {
         query.append(this.selectQuery)
             .append(" FROM ")
             .append(tableName)
+            .append(" ")
+            .append(this.joinQuery == null ? "" : this.joinQuery)
             .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
@@ -606,9 +611,13 @@ public abstract class CoreModel {
             .append(" FROM ")
             .append(tableName)
             .append(" ")
+            .append(this.joinQuery == null ? "" : this.joinQuery)
+            .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
             .append(this.limitQuery == null ? "" : this.limitQuery)
+            .append(" ")
+            .append(this.offSetQuery == null ? "" : this.offSetQuery)
             .append(" ")
             .append(this.orderQuery == null ? "" : this.orderQuery)
             .append(";");
@@ -650,7 +659,13 @@ public abstract class CoreModel {
                 .append(") FROM ")
                 .append(tableName)
                 .append(" ")
+                .append(this.joinQuery == null ? "" : this.joinQuery)
+                .append(" ")
                 .append(this.whereQuery == null ? "" : this.whereQuery)
+                .append(" ")
+                .append(this.limitQuery == null ? "" : this.limitQuery)
+                .append(" ")
+                .append(this.offSetQuery == null ? "" : this.offSetQuery)
                 .append(";");
 
         logger.info("Query : "+query.toString());
@@ -674,6 +689,17 @@ public abstract class CoreModel {
     
     public CoreModel limit(String limit){
         this.limitQuery = String.format(" LIMIT %s ",limit);
+        return this;
+    }
+
+    public CoreModel limit(String limit, String offSet){
+        this.limitQuery = String.format(" LIMIT %s ",limit);
+        this.offSetQuery = String.format(" OFFSET  %s ",offSet);
+        return this;
+    }
+    
+    public CoreModel offSet(String offSet){
+        this.offSetQuery = String.format(" OFFSET  %s ",offSet);
         return this;
     }
     
@@ -819,21 +845,23 @@ public abstract class CoreModel {
         String localColumnArray[] = localColumn.split("\\.");
         
         if(this.selectQuery == null){
-            query.append(" SELECT ")
-                .append(localColumnArray.length == 1 ? tableName : "")
-                .append(localColumnArray.length == 1 ? "." : "")
-                .append(localColumn)
-                .append(" ");
+            query.append(" SELECT ");
         }else{
-            query.append(", ")
-                .append(localColumnArray.length == 1 ? tableName : "")
-                .append(localColumnArray.length == 1 ? "." : "")
-                .append(localColumn)
-                .append(" ");
+            query.append(", ");
         }
+        
+        query.append(localColumnArray.length == 1 ? tableName : "")
+            .append(localColumnArray.length == 1 ? "." : "")
+            .append(localColumn)
+            .append(localColumnArray.length == 1 || localColumnArray[0].equalsIgnoreCase(tableName) ? "" : " as ")
+            .append(localColumnArray.length == 1 || localColumnArray[0].equalsIgnoreCase(tableName) ? "" : localColumnArray[0])
+            .append(localColumnArray.length == 1 || localColumnArray[0].equalsIgnoreCase(tableName) ? "" : "_")
+            .append(localColumnArray.length == 1 || localColumnArray[0].equalsIgnoreCase(tableName) ? "" : localColumnArray[1])
+            .append(" ");
 
         this.selectQuery = this.selectQuery == null ? query.toString() : this.selectQuery+query.toString();
-        this.setColumnArray(localColumnArray.length == 1 ? localColumn : localColumnArray[1]);
+        this.setColumnArray(localColumnArray.length == 1 ? localColumn : localColumnArray[0].equalsIgnoreCase(tableName) ? localColumnArray[1] : localColumnArray[0]+"_"+localColumnArray[1]);
+        
         return this;
     }
 
@@ -841,6 +869,10 @@ public abstract class CoreModel {
 
         StringBuilder query = new StringBuilder();
         String localColumnArrayWithSpaceValidation[] = localColumn.trim().replace("(", "").replace(")", "").split(" ");
+        
+        
+        logger.info(localColumnArrayWithSpaceValidation[0]);
+//        logger.info(localColumnArrayWithSpaceValidation[1]);
         
         if(localColumnArrayWithSpaceValidation.length == 1){
             this.select(localColumnArrayWithSpaceValidation[0]);
@@ -881,6 +913,42 @@ public abstract class CoreModel {
         return this;
     }
 
+    public CoreModel join(String joinType, String tableJoin, String leftCondition, String operator, String rightCondition){
+        
+        String newJoin = String.format(" %s JOIN %s ON %s %s %s ",joinType, tableJoin, leftCondition, operator, rightCondition);
+        this.joinQuery = this.joinQuery == null ? newJoin : this.joinQuery + newJoin;
+        return this;
+    }
+    
+    public CoreModel join(String tableJoin, String leftCondition, String operator, String rightCondition){
+        
+        String newJoin = String.format(" INNER JOIN %s ON %s %s %s ", tableJoin, leftCondition, operator, rightCondition);
+        this.joinQuery = this.joinQuery == null ? newJoin : this.joinQuery + newJoin;
+        return this;
+    }
+    
+        
+    public CoreModel leftJoin(String tableJoin, String leftCondition, String operator, String rightCondition){
+        
+        String newJoin = String.format(" LEFT JOIN %s ON %s %s %s ", tableJoin, leftCondition, operator, rightCondition);
+        this.joinQuery = this.joinQuery == null ? newJoin : this.joinQuery + newJoin;
+        return this;
+    }
+       
+    public CoreModel rightJoin(String tableJoin, String leftCondition, String operator, String rightCondition){
+        
+        String newJoin = String.format(" RIGHT JOIN %s ON %s %s %s ", tableJoin, leftCondition, operator, rightCondition);
+        this.joinQuery = this.joinQuery == null ? newJoin : this.joinQuery + newJoin;
+        return this;
+    }
+    
+    public CoreModel fullJoin(String tableJoin, String leftCondition, String operator, String rightCondition){
+        
+        String newJoin = String.format(" FULL JOIN %s ON %s %s %s ", tableJoin, leftCondition, operator, rightCondition);
+        this.joinQuery = this.joinQuery == null ? newJoin : this.joinQuery + newJoin;
+        return this;
+    }
+    
     public JsonObject first(){
         return this.jsonObjectValue;
     }

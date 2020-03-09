@@ -42,15 +42,18 @@ public class UserServiceImplement extends CoreImplement implements UserService {
                 
                 ArrayList<String> columns = new ArrayList<>();
                 columns.add("password_hash");
-                columns.add("salt");
-                user.select("id")
-                    .select("users.role_id")
+                columns.add("users.salt");
+                user
+                    .select("id")
+                    .select("roles.id")
                     .selectRaw("(users.created_at)")
-                    .selectRaw("(select name from roles where roles.id = users.role_id limit 1) as role_name")
+                    .selectRaw("roles.name as role_name")
+                    .selectRaw("(roles.name) as role_name2")
                     .select("username")
                     .select(columns)
                     .selectRaw("email as user_email")
                     .selectRaw("users.last_login")
+                    .join("roles","users.role_id","=","roles.id")
                 .findOne(id).setHandler(select -> {
                     if(select.succeeded()) {
                         logger.info(trans("system.service.user.success-service")+user.firstAsString());

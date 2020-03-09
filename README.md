@@ -655,10 +655,12 @@ Still on development. I will finish this project as soon as possible.
 - [x] New Http Server Class
 - [x] New Helper Class
 - [x] Friendly Folder Structure
-- [x] Apps settings from File ( Vertx.json )
+- [x] Apps settings from env File ( Vertx.json )
 - [x] Support multi languages
 - [x] New Exception Class
 - [x] Basic Query Builder
+- [x] Query builder support raw query
+- [x] Query builder support subquery
 - [x] New Exception Class
 - [x] New Response Class
 - [x] New Middleware Class
@@ -666,12 +668,12 @@ Still on development. I will finish this project as soon as possible.
 - [x] Auth Class
 - [x] New Controller Class
 - [x] Dynamic Column Name
-- [ ] Controllable from database (ongoing)
 - [x] New Route Class
-- [x] Vert-x Service Implementation
-- [x] User Login Pattern
+- [x] Vert-x Service Implementation with event bus
+- [x] User Login Pattern with jwt token
 - [x] Optimization Message Response and System
-- [ ] Query Builder With Full Features (Join, Having, Group, Distinct, Raw Query, etc)
+- [ ] Controllable from database (maybe later)
+- [ ] Query Builder With Full Features (Join, Having, Group, Distinct, etc) (Ongoing) will focus on join statement
 - [ ] Database Migration
 
 
