@@ -49,7 +49,8 @@ public class UserModel extends CoreModel implements ModelInterface{
     }
 
     /*
-        This is optional
+        This is will be mandatory if you add some column
+        Type of raw column must setted
         This count type must same with count of column
     */
 
@@ -73,6 +74,7 @@ public class UserModel extends CoreModel implements ModelInterface{
 
     /*
         This is mandatory
+        Type of raw column must setted, or they will be string for default
         This count type must same with count of column
         Support for Type
         - UUID

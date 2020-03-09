@@ -65,7 +65,8 @@ public abstract class CoreModel {
     // other
     private static JsonObject messages;
     private static JsonObject configs;
-    private int index = 1;
+    private int indexCore = 1;
+    private int indexSelect = 1;
     
     protected CoreModel(Vertx vertx, Transaction trans){
         this.trans = trans;
@@ -91,16 +92,24 @@ public abstract class CoreModel {
     
 
     /* 
-        This is optional
+        This is will be mandatory if you add some column
+        Type of raw column must setted
         This count type must same with count of column
     */ 
     protected Map<String, String> setColumnsName(){
-        return new HashMap<>();
+        
+        Map<String, String> localColumnsName = new HashMap<>();
+        this.columns.forEach(localColumn -> {
+            localColumnsName.put(localColumn,localColumn);
+        });
+        
+        return localColumnsName;
     }
 
     
     /* 
         This is mandatory
+        Type of raw column must setted, or they will be string for default
         This count type must same with count of column
         Support for Type
         - UUID
@@ -140,15 +149,15 @@ public abstract class CoreModel {
     
     private void setColumnsTypeToMap(){
         Map<String, String> columnsTypeFromSetter = setColumnsType();
-        this.columns.forEach(column -> {
-            this.columnsType.put(column, columnsTypeFromSetter.get(column));
+        columnsTypeFromSetter.forEach((key,value) -> {
+            this.columnsType.put(key,value);
         });
     }
     
     private void setColumnsNameToMap(){
         Map<String, String> columnsNameFromSetter = setColumnsName();
-        this.columns.forEach(column -> {
-            this.columnsName.put(column, columnsNameFromSetter.get(column));
+        columnsNameFromSetter.forEach((key,value) -> {
+            this.columnsName.put(key, value);
         });
     }
     
@@ -179,7 +188,7 @@ public abstract class CoreModel {
                 query.append(" ")
                     .append(this.columns.get(i))
                     .append(" = $")
-                    .append(this.index++)
+                    .append(this.indexCore++)
                     .append(" ");
                 
                 if(i != (this.columnsValue.size()-1) ){
@@ -193,7 +202,7 @@ public abstract class CoreModel {
         }
         
         query.append(" ")
-            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.index) : this.whereQuery)
+            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.indexCore) : this.whereQuery)
             .append(";");
         
         if(this.whereQuery == null){
@@ -236,7 +245,7 @@ public abstract class CoreModel {
                 query.append(" ")
                         .append(this.columns.get(i))
                         .append(" = $")
-                        .append(this.index++)
+                        .append(this.indexCore++)
                         .append(" ");
 
                 if(i != (localColumnsValue.size()-1) ){
@@ -252,7 +261,7 @@ public abstract class CoreModel {
         query.append(" ")
                 .append(this.whereQuery == null ? "" : this.whereQuery)
                 .append(" ")
-                .append(this.whereQuery == null ? String.format(" WHERE %s = $%d ", primaryKeyName, this.index++) : String.format(" AND %s = $%d ", primaryKeyName, this.index++))
+                .append(this.whereQuery == null ? String.format(" WHERE %s = $%d ", primaryKeyName, this.indexCore++) : String.format(" AND %s = $%d ", primaryKeyName, this.indexCore++))
                 .append(";");
 
         this.addArgs(primaryKeyName, id, args);
@@ -301,7 +310,7 @@ public abstract class CoreModel {
                     .append(this.columns.get(i));
                 
                 queryValue.append(" $")
-                    .append(this.index++);
+                    .append(this.indexCore++);
                 
                 if(i != (this.columnsValue.size()-1) ){
                     query.append(", ");
@@ -361,7 +370,7 @@ public abstract class CoreModel {
                         .append(this.columns.get(i));
 
                 queryValue.append(" $")
-                        .append(this.index++);
+                        .append(this.indexCore++);
 
                 if(i != (localColumnsValue.size()-1) ){
                     query.append(", ");
@@ -411,7 +420,7 @@ public abstract class CoreModel {
         query.append("DELETE FROM ")
             .append(tableName)
             .append(" ")
-            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.index++) : this.whereQuery);
+            .append(this.whereQuery == null ? String.format("WHERE %s = $%d ", primaryKeyName, this.indexCore++) : this.whereQuery);
 
         if(this.whereQuery == null){
             this.addArgs(primaryKeyName, this.primaryKeyValue, args);
@@ -446,7 +455,7 @@ public abstract class CoreModel {
         query.append(" ")
                 .append(this.whereQuery == null ? "" : this.whereQuery)
                 .append(" ")
-                .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
+                .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++))
                 .append(";");
 
         this.addArgs(primaryKeyName, id, args);
@@ -474,7 +483,7 @@ public abstract class CoreModel {
         Tuple args = this.whereArgsQuery;
         
         if(this.selectQuery == null){
-            this.selectQuery = this.select();
+            this.select();
         }
         
         query.append(this.selectQuery)
@@ -484,7 +493,7 @@ public abstract class CoreModel {
             .append(" ")
             .append(this.whereQuery == null ? "" : this.whereQuery)
             .append(" ")
-            .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.index++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.index++))
+            .append(this.whereQuery == null ? String.format(" WHERE %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++) : String.format(" AND %s.%s = $%d ", tableName, primaryKeyName, this.indexCore++))
             .append(" ")
             .append(" LIMIT 1 ;");
 
@@ -503,16 +512,17 @@ public abstract class CoreModel {
                 } else {
                     Row row = rs.iterator().next();
                     JsonObject data = new JsonObject();
-
+                    
                     this.selectQueryArray.forEach( column -> {
 
                         if(column.equalsIgnoreCase(primaryKeyName)){
                             this.primaryKeyValue = this.result(row, column);
                         }
-
-                        data.put(this.columnsName.get(column),this.result(row, column));
+                        
+                        data.put(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column), this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
+                    
                     this.jsonObjectValue = data;
 
                     this.stop();
@@ -536,7 +546,7 @@ public abstract class CoreModel {
         }
 
         if(this.selectQuery == null){
-            this.selectQuery = this.select();
+            this.select();
         }
         
         query.append(this.selectQuery)
@@ -560,14 +570,14 @@ public abstract class CoreModel {
                 } else {
                     Row row = rs.iterator().next();
                     JsonObject data = new JsonObject();
-
+                    
                     this.selectQueryArray.forEach( column -> {
 
                         if(column.equalsIgnoreCase(primaryKeyName)){
                             this.primaryKeyValue = this.result(row, column);
                         }
 
-                        data.put(this.columnsName.get(column),this.result(row, column));
+                        data.put(!this.columnsName.containsKey(column) || this.columnsName.get(column) == null ? column : this.columnsName.get(column),this.result(row, column));
                         this.columnsValue.put(column, this.result(row, column));
                     });
                     this.jsonObjectValue = data;
@@ -589,7 +599,7 @@ public abstract class CoreModel {
         StringBuilder query = new StringBuilder();
         
         if(this.selectQuery == null){
-            this.selectQuery = this.select();
+            this.select();
         }
         
         query.append(this.selectQuery)
@@ -613,7 +623,7 @@ public abstract class CoreModel {
                     JsonObject data = new JsonObject();
                     
                     this.selectQueryArray.forEach( i -> {
-                        data.put(this.columnsName.get(i),this.result(row, i));
+                        data.put(!this.columnsName.containsKey(i) || this.columnsName.get(i) == null ? i : this.columnsName.get(i) ,this.result(row, i));
                     });
                     this.jsonArrayValue.add(data);
                 }
@@ -633,39 +643,31 @@ public abstract class CoreModel {
         Promise<String> promise = Promise.promise();
         StringBuilder query = new StringBuilder();
 
-        if(this.jsonObjectValue != null && this.jsonObjectValue.size() > 0 ){
-            this.stop();
-            promise.complete("1");
-        }else if(this.jsonArrayValue != null && this.jsonArrayValue.size() > 0){
-            this.stop();
-            promise.complete(String.valueOf(this.jsonArrayValue.size()));
-        }else{
-            
-            query.append("SELECT count(")
-                    .append(tableName)
-                    .append(".")
-                    .append(primaryKeyName)
-                    .append(") FROM ")
-                    .append(tableName)
-                    .append(" ")
-                    .append(this.whereQuery == null ? "" : this.whereQuery)
-                    .append(";");
+        query.append("SELECT count(")
+                .append(tableName)
+                .append(".")
+                .append(primaryKeyName)
+                .append(") FROM ")
+                .append(tableName)
+                .append(" ")
+                .append(this.whereQuery == null ? "" : this.whereQuery)
+                .append(";");
 
-            logger.info("Query : "+query.toString());
-            logger.info("Parameter : "+this.whereArgsQuery.toString());
+        logger.info("Query : "+query.toString());
+        logger.info("Parameter : "+this.whereArgsQuery.toString());
 
-            this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
-                if (fetch.succeeded()) {
-                    RowSet <Row> rs = fetch.result();
-                    Row row = rs.iterator().next();
+        this.trans.preparedQuery(query.toString(), this.whereArgsQuery, fetch -> {
+            if (fetch.succeeded()) {
+                RowSet <Row> rs = fetch.result();
+                Row row = rs.iterator().next();
 
-                    this.stop();
-                    promise.complete(row.getInteger(0).toString());
-                }else {
-                    promise.fail(fetch.cause().getMessage());
-                }
-            });
-        }
+                this.stop();
+                promise.complete(row.getInteger(0).toString());
+            }else {
+                promise.fail(fetch.cause().getMessage());
+            }
+        });
+        
 
         return promise.future();
     }
@@ -692,7 +694,7 @@ public abstract class CoreModel {
                 .append(" ")
                 .append(operator)
                 .append(" $")
-                .append(this.index++)
+                .append(this.indexCore++)
                 .append(" ");
         }else{
             where
@@ -703,9 +705,10 @@ public abstract class CoreModel {
                 .append(" ")
                 .append(operator)
                 .append(" $")
-                .append(this.index++)
+                .append(this.indexCore++)
                 .append(" ");
         }
+        
         
         this.addArgs(column, value, this.whereArgsQuery);
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
@@ -722,7 +725,7 @@ public abstract class CoreModel {
                     .append(" ")
                     .append(operator)
                     .append(" $")
-                    .append(this.index++)
+                    .append(this.indexCore++)
                     .append(" ");
         }else{
             where
@@ -731,7 +734,7 @@ public abstract class CoreModel {
                     .append(" ")
                     .append(operator)
                     .append(" $")
-                    .append(this.index++)
+                    .append(this.indexCore++)
                     .append(" ");
         }
 
@@ -752,7 +755,7 @@ public abstract class CoreModel {
                 .append(" ")
                 .append(operator)
                 .append(" $")
-                .append(this.index++)
+                .append(this.indexCore++)
                 .append(" ");
         }else{
             where.append(" OR ")
@@ -762,7 +765,7 @@ public abstract class CoreModel {
                 .append(" ")
                 .append(operator)
                 .append(" $")
-                .append(this.index++)
+                .append(this.indexCore++)
                 .append(" ");
         }
         
@@ -781,7 +784,7 @@ public abstract class CoreModel {
                     .append(" ")
                     .append(operator)
                     .append(" $")
-                    .append(this.index++)
+                    .append(this.indexCore++)
                     .append(" ");
         }else{
             where.append(" OR ")
@@ -789,7 +792,7 @@ public abstract class CoreModel {
                     .append(" ")
                     .append(operator)
                     .append(" $")
-                    .append(this.index++)
+                    .append(this.indexCore++)
                     .append(" ");
         }
 
@@ -798,106 +801,127 @@ public abstract class CoreModel {
         return this;
     }
     
-    private String select(){
-        StringBuilder query = new StringBuilder();
-        query.append(" SELECT ");
-        for (int i = 0; i < this.columns.size() ; i++) {
-            query.append(tableName)
-                .append(".")
-                .append(this.columns.get(i));
-            if(i != (this.columns.size()-1) )
-                query.append(", ");
-
-        }
-        this.setColumnsArray(this.columns);
-        return query.toString();
+    public CoreModel select(){
+        this.select(this.columns);
+        return this;
     }
 
     public CoreModel select(ArrayList<String> localColumns){
-        StringBuilder query = new StringBuilder();
-        query.append(" SELECT ");
         for (int i = 0; i < localColumns.size() ; i++) {
-            query.append(tableName);
-            query.append(".");
-            query.append(localColumns.get(i));
-            if(i != (localColumns.size()-1) )
-                query.append(", ");
-
+            this.select(localColumns.get(i));
         }
-        this.setColumnsArray(localColumns);
-        this.selectQuery = query.toString();
         return this;
     }
 
     public CoreModel select(String localColumn){
 
         StringBuilder query = new StringBuilder();
-
+        String localColumnArray[] = localColumn.split("\\.");
+        
         if(this.selectQuery == null){
             query.append(" SELECT ")
-                .append(tableName)
-                .append(".")
+                .append(localColumnArray.length == 1 ? tableName : "")
+                .append(localColumnArray.length == 1 ? "." : "")
                 .append(localColumn)
                 .append(" ");
-            this.selectQuery = query.toString();
         }else{
             query.append(", ")
-                .append(tableName)
-                .append(".")
+                .append(localColumnArray.length == 1 ? tableName : "")
+                .append(localColumnArray.length == 1 ? "." : "")
                 .append(localColumn)
                 .append(" ");
-            this.selectQuery = this.selectQuery+query.toString();
         }
 
-        this.setColumnArray(localColumn);
+        this.selectQuery = this.selectQuery == null ? query.toString() : this.selectQuery+query.toString();
+        this.setColumnArray(localColumnArray.length == 1 ? localColumn : localColumnArray[1]);
         return this;
     }
 
-    public String asString(){
+    public CoreModel selectRaw(String localColumn){
+
+        StringBuilder query = new StringBuilder();
+        String localColumnArrayWithSpaceValidation[] = localColumn.trim().replace("(", "").replace(")", "").split(" ");
         
-        if(this.jsonArrayValue != null && this.jsonArrayValue.size() > 0){
-            return this.jsonArrayValue.toString();
+        if(localColumnArrayWithSpaceValidation.length == 1){
+            this.select(localColumnArrayWithSpaceValidation[0]);
+        }else{
+            String localColumnArrayWithSpace[] = localColumn.trim().split(" ");
+            if(localColumnArrayWithSpace[localColumnArrayWithSpace.length-2].toLowerCase().endsWith("as")){
+                if(this.selectQuery == null){
+                    query.append(" SELECT ")
+                        .append(localColumn)
+                        .append(" ");
+                }else{
+                    query.append(", ")
+                        .append(localColumn)
+                        .append(" ");
+                }
+
+                this.selectQuery = this.selectQuery == null ? query.toString() : this.selectQuery+query.toString();
+                this.setColumnArray(localColumnArrayWithSpace[localColumnArrayWithSpace.length-1].trim());
+            }else{
+                if(this.selectQuery == null){
+                    query.append(" SELECT ")
+                        .append(localColumn)
+                        .append(" as column")
+                        .append(this.indexSelect)
+                        .append(" ");
+                }else{
+                    query.append(", ")
+                        .append(localColumn)
+                        .append(" as column")
+                        .append(this.indexSelect)
+                        .append(" ");
+                }
+
+                this.selectQuery = this.selectQuery == null ? query.toString() : this.selectQuery+query.toString();
+                this.setColumnArray("column"+ this.indexSelect++);
+            }
         }
-        
-        return this.jsonObjectValue.toString();
+        return this;
     }
 
     public JsonObject first(){
         return this.jsonObjectValue;
     }
     
+    public String firstAsString(){
+        return this.jsonObjectValue.toString();
+    }
+    
     public JsonArray get(){
         return this.jsonArrayValue;
     }
+    
+    public String getAsString(){
+        return this.jsonArrayValue.toString();
+    }
 
     private String result(Row row, String column){
-        String result;
-
-        if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
-            result = row.getUUID(column) == null ? "" : row.getUUID(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("timestamptz")){
-            result = row.getOffsetDateTime(column) == null ? "" : row.getOffsetDateTime(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("integer")){
-            result = row.getInteger(column) == null ? "" : row.getInteger(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("date")){
-            result = row.getLocalDate(column) == null ? "" : row.getLocalDate(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("timestamp")){
-            result = row.getLocalDateTime(column) == null ? "" : row.getLocalDateTime(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("datetime")){
-            result = row.getLocalDateTime(column) == null ? "" : row.getLocalDateTime(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("double")){
-            result = row.getDouble(column) == null ? "" : row.getDouble(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("float")){
-            result = row.getFloat(column) == null ? "" : row.getFloat(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("number")){
-            result = row.getValue(column) == null ? "" : row.getValue(column).toString();
-        }else if(this.columnsType.get(column).equalsIgnoreCase("boolean")){
-            result = row.getBoolean(column) == null ? "" : row.getBoolean(column).toString();
-        }else{
-            result = row.getString(column) == null ? "" : row.getString(column);
+        if(this.columnsType.containsKey(column) || this.columnsType.get(column) != null){
+            if(this.columnsType.get(column).equalsIgnoreCase("uuid")){
+                return row.getUUID(column) == null ? "" : row.getUUID(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("timestamptz")){
+                return row.getOffsetDateTime(column) == null ? "" : row.getOffsetDateTime(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("integer")){
+                return row.getInteger(column) == null ? "" : row.getInteger(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("date")){
+                return row.getLocalDate(column) == null ? "" : row.getLocalDate(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("timestamp")){
+                return row.getLocalDateTime(column) == null ? "" : row.getLocalDateTime(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("datetime")){
+                return row.getLocalDateTime(column) == null ? "" : row.getLocalDateTime(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("double")){
+                return row.getDouble(column) == null ? "" : row.getDouble(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("float")){
+                return row.getFloat(column) == null ? "" : row.getFloat(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("number")){
+                return row.getValue(column) == null ? "" : row.getValue(column).toString();
+            }else if(this.columnsType.get(column).equalsIgnoreCase("boolean")){
+                return row.getBoolean(column) == null ? "" : row.getBoolean(column).toString();
+            }
         }
-
-        return result;
+        return row.getString(column) == null ? "" : row.getString(column);
     }
     
     private void addArgs(String column, String value, Tuple args){
@@ -968,7 +992,8 @@ public abstract class CoreModel {
         this.selectQuery = null;
         this.selectQueryArray = new ArrayList<>();
         
-        this.index = 1;
+        this.indexCore = 1;
+        this.indexSelect = 1;
     
     }
 

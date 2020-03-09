@@ -45,4 +45,21 @@ public class UserController extends CoreController implements ControllerInterfac
         logger.info(trans("system.service.user.end-controller"));
     }
 
+    public void list(RoutingContext ctx) {
+
+        logger.info(trans("system.service.user.start-controller"));
+        response.create(ctx.response());
+
+        service.list(funct -> {
+            if(funct.succeeded()){
+                response.dataStructure("0", trans("response.service.user.get.success"), funct.result());
+                response.response(200);
+            }else{
+                response.dataStructure("1", funct.cause().getMessage());
+                response.response(500);
+            }
+        });
+
+        logger.info(trans("system.service.user.end-controller"));
+    }
 }

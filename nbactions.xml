@@ -10,9 +10,9 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.andrechristikan.http.MainVerticle</exec.args>
+                <exec.args>-classpath %classpath io.vertx.core.Launcher run com.andrechristikan.http.MainVerticle</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\private\new</exec.workingdir>
+                <exec.workingdir>D:\private\new\src\main\resources</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -25,10 +25,10 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.andrechristikan.http.MainVerticle</exec.args>
+                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath io.vertx.core.Launcher run com.andrechristikan.http.MainVerticle</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>D:\private\new</exec.workingdir>
+                <exec.workingdir>D:\private\new\src\main\resources</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -41,9 +41,9 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.andrechristikan.http.MainVerticle</exec.args>
+                <exec.args>-classpath %classpath io.vertx.core.Launcher run com.andrechristikan.http.MainVerticle</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\private\new</exec.workingdir>
+                <exec.workingdir>D:\private\new\src\main\resources</exec.workingdir>
             </properties>
         </action>
     </actions>

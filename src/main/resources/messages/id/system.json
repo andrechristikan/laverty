@@ -20,13 +20,13 @@
             "success-service": "[AuthServiceClass] Success.",
             "failed-service": "[AuthServiceClass] Failed : ",
             "start-controller": "[AuthControllerClass] Start",
-            "end-controller": "[AuthControllerClass] Failed : "
+            "end-controller": "[AuthControllerClass] End : "
         },
         "user": {
             "success-service": "[UserServiceClass] Success.",
             "failed-service": "[UserServiceClass] Failed : ",
             "start-controller": "[UserControllerClass] Start",
-            "end-controller": "[UserControllerClass] Failed : "
+            "end-controller": "[UserControllerClass] End : "
         }
     },
     "middleware": {

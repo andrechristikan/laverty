@@ -52,6 +52,7 @@ public class Route {
         router.route("/api/v1/user/*").handler(roleMiddleware::handler);
 
         router.get("/api/v1/user/:id").handler(userController::get);
+        router.get("/api/v1/user").handler(userController::list);
 
     }
 

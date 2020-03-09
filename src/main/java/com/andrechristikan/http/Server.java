@@ -111,7 +111,7 @@ public class Server extends CoreVerticle{
 
         router.route().handler(
             BodyHandler.create()
-                .setUploadsDirectory(conf("main.upload-files.folder.default"))
+                .setUploadsDirectory(conf("main.upload-files.src"))
                 .setDeleteUploadedFilesOnEnd(parser.parseBoolean(conf("main.upload-files.delete-on-end") ,Boolean.TRUE))
         );
         router.route().handler(StaticHandler.create());

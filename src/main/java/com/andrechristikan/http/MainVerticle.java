@@ -32,8 +32,9 @@ import org.slf4j.LoggerFactory;
 public class MainVerticle extends AbstractVerticle{
 
     private final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
-    private JsonObject messages = new JsonObject();
-    private JsonObject configs = new JsonObject();
+    private final JsonObject messages = new JsonObject();
+    private final JsonObject configs = new JsonObject();
+    private final String resources = ".";
 
     @Override
     public void start(Promise<Void> start) throws Exception {
@@ -46,46 +47,34 @@ public class MainVerticle extends AbstractVerticle{
 
                 this.logger.info(trans("system.main.start"));
 
-                // DEPLOY VERTICLE
                 start.future().compose(st -> {
 
                     // -- Login
                     Promise <String> promise = Promise.promise();
                     this.vertx.deployVerticle(
                         new LoginVerticle(),
-                        new DeploymentOptions().setConfig(
-                            this.configs
-                        ),
+                        new DeploymentOptions(),
                         promise
                     );
-//                    promise.complete();
                     return promise.future();
 
                 }).compose(st -> {
 
-                    // -- User
                     Promise <String> promise = Promise.promise();
                     this.vertx.deployVerticle(
                             new UserVerticle(),
-                            new DeploymentOptions().setConfig(
-                                    this.configs
-                            ),
+                            new DeploymentOptions(),
                             promise
                     );
-//                    promise.complete();
                     return promise.future();
                 }).compose(st -> {
 
-                    // -- SERVER
                     Promise <String> promise = Promise.promise();
                     this.vertx.deployVerticle(
                         new Server(),
-                        new DeploymentOptions().setConfig(
-                            this.configs
-                        ),
+                        new DeploymentOptions(),
                         promise
                     );
-//                    promise.complete();
                     return promise.future();
                 }).setHandler(prom -> {
                     if (prom.succeeded()) {
@@ -155,7 +144,7 @@ public class MainVerticle extends AbstractVerticle{
 
         Promise <JsonObject> promise = Promise.promise();
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("messages/"+language+"/response.json", readFile -> {
+        vertxFileSystem.readFile(this.resources+"/messages/"+language+"/response.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -172,7 +161,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
 
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("messages/"+language+"/system.json", readFile -> {
+        vertxFileSystem.readFile(this.resources+"/messages/"+language+"/system.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -189,7 +178,7 @@ public class MainVerticle extends AbstractVerticle{
         Promise <JsonObject> promise = Promise.promise();
 
         FileSystem vertxFileSystem = this.vertx.fileSystem();
-        vertxFileSystem.readFile("configs/services.json", readFile -> {
+        vertxFileSystem.readFile(this.resources+"/configs/services.json", readFile -> {
             if (readFile.succeeded()) {
                 promise.complete(readFile.result().toJsonObject());
             }else{
@@ -206,7 +195,7 @@ public class MainVerticle extends AbstractVerticle{
         ConfigStoreOptions fileStore = new ConfigStoreOptions()
             .setType("file")
             .setConfig(
-                    new JsonObject().put("path", "configs/vertx.json")
+                    new JsonObject().put("path", this.resources+"/configs/vertx.json")
             );
         ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
 
