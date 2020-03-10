@@ -1,6 +1,6 @@
 {
-    "language":"id",
-    "environment":"local",
+    "language":"en",
+    "environment":"production",
     "local":{
         "http-server": {
             "port": "8181",
@@ -39,8 +39,8 @@
     },
     "upload-files":{
         "delete-on-end":"true",
+        "src":"files-uploaded",
         "folder":{
-            "default":"files-uploaded",
             "images":{
                 "default":"files-uploaded/defaults/general.jpg",
                 "vehicle":"vehicles",
