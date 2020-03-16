@@ -767,6 +767,27 @@ public abstract class CoreModel {
         return this;
     }
     
+    public CoreModel whereRaw(String localWhereRaw){
+
+        StringBuilder where = new StringBuilder();
+
+        if(this.whereQuery == null){
+            where.append(" WHERE ")
+                    .append(" (")
+                    .append(localWhereRaw)
+                    .append(") ");
+        }else{
+            where
+                    .append(" AND ")
+                    .append(" (")
+                    .append(localWhereRaw)
+                    .append(") ");
+        }
+
+        this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
+        return this;
+    }
+    
     public CoreModel orWhere(String column, String operator, String value){
         
         StringBuilder where = new StringBuilder();
@@ -821,6 +842,26 @@ public abstract class CoreModel {
         }
 
         this.addArgsRaw(column, value, this.whereArgsQuery);
+        this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
+        return this;
+    }
+    
+    public CoreModel orWhereRaw(String localWhereRaw){
+
+        StringBuilder where = new StringBuilder();
+
+        if(this.whereQuery == null){
+            where.append(" WHERE ")
+                    .append(" (")
+                    .append(localWhereRaw)
+                    .append(") ");
+        }else{
+            where.append(" OR ")
+                    .append(" (")
+                    .append(localWhereRaw)
+                    .append(") ");
+        }
+
         this.whereQuery = this.whereQuery == null ? where.toString() : this.whereQuery + where.toString();
         return this;
     }
